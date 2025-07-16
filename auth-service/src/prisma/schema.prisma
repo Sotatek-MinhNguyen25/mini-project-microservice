@@ -1,0 +1,84 @@
+// services/auth-service/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Định nghĩa Enum cho các vai trò
+enum UserRole {
+  ADMIN
+  EDITOR
+  USER
+}
+
+// Enum cho trạng thái của người dùng
+enum UserStatus {
+  UNVERIFIED // Chưa xác thực email (ví dụ: sau khi đăng ký, cần xác minh email)
+  VERIFIED   // Đã xác thực email
+  BANNED     // Bị cấm (không thể đăng nhập hoặc thực hiện hành động)
+  INACTIVE   // Vô hiệu hóa (ví dụ: cho tài khoản không hoạt động lâu)
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique // Email là duy nhất
+  username  String    @unique // MỚI: Username là duy nhất và bắt buộc
+  password  String?    // password có thể null nếu người dùng đăng nhập qua OAuth
+  roles     UserRole[] @default([USER]) // Sử dụng Enum UserRole
+  status    UserStatus @default(UNVERIFIED) // Trường trạng thái người dùng
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Trường cho Soft Delete
+
+  // Các trường cho OAuth được tích hợp trực tiếp vào User model
+  // Chúng là tùy chọn (nullable) để phù hợp với người dùng đăng ký truyền thống
+  oauthProvider   OAuthProvider? // Nhà cung cấp OAuth (GITHUB, GOOGLE, ...)
+
+  // Mối quan hệ với RefreshToken (đã thêm lại)
+  refreshTokens       RefreshToken[]
+  // Mối quan hệ với OTP
+  otps                OTP[]
+}
+
+// MỚI: RefreshToken đã được thêm lại
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model OTP {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String      // Mã OTP (ví dụ: 6 chữ số)
+  purpose   OTP_Purpose // Mục đích sử dụng OTP (ví dụ: FORGOT_PASSWORD, EMAIL_VERIFICATION)
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, purpose]) // Đảm bảo chỉ có 1 OTP đang hoạt động cho mỗi mục đích của user
+}
+
+enum OTP_Purpose {
+  FORGOT_PASSWORD
+  EMAIL_VERIFICATION
+  TWO_FACTOR_AUTHENTICATION
+  // Thêm các mục đích khác nếu cần
+}
+
+// Enum cho các nhà cung cấp OAuth
+enum OAuthProvider {
+  GITHUB
+  GOOGLE
+  FACEBOOK
+  // Thêm các nhà cung cấp khác khi cần
+}

@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+<<<<<<< HEAD
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -33,3 +34,8 @@ export class PostController {
     return this.postService.remove(id);
   }
 }
+=======
+
+@Controller('post')
+export class PostController {}
+>>>>>>> 6a87468dcd300c18f1a2f3b33defdd3904148630
