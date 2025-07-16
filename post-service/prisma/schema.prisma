@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id           Int            @id @default(autoincrement())
+  name         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt()
+  deletedAt    DateTime
+  PostCategory PostCategory[]
+}
+
+model PostCategory {
+  id         Int      @id @default(autoincrement())
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int
+  category   Category @relation(fields: [categogyId], references: [id])
+  categogyId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+  deletedAt  DateTime
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  deletedAt DateTime
+  PostTag   PostTag[]
+}
+
+model PostTag {
+  id        Int      @id @default(autoincrement())
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  tagId     Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  deletedAt DateTime
+}
+
+model Post {
+  id           Int            @id @default(autoincrement())
+  title        String
+  content      String
+  userId       Int
+  status       String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt()
+  deletedAt    DateTime
+  Comment      Comment[]
+  Reaction     Reaction[]
+  PostCategory PostCategory[]
+  PostTag      PostTag[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  userId    Int
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  deletedAt DateTime
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  content   String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  deletedAt DateTime
+}
