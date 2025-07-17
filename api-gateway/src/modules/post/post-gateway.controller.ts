@@ -11,11 +11,12 @@ import { config } from 'src/configs/config.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CreatePostDto } from './dto/CreatePostDto';
+import { KAFKA_CLIENTS } from 'src/constants/app.constants';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
     constructor(
-        @Inject(config.POST_SERVICE_NAME) private readonly postClient: ClientKafka,
+        @Inject(KAFKA_CLIENTS.POST) private readonly postClient: ClientKafka,
     ) { }
 
     async onModuleInit() {
