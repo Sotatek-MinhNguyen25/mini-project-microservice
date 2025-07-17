@@ -8,23 +8,8 @@ import { Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-interface SearchResultsProps {
-  query: string
-  onClose: () => void
-}
-
-const CATEGORIES = [
-  { value: "all", label: "All Categories" },
-  { value: "programming", label: "💻 Lập trình" },
-  { value: "cooking", label: "🍳 Nấu ăn" },
-  { value: "travel", label: "✈️ Du lịch" },
-  { value: "sports", label: "⚽ Thể thao" },
-  { value: "music", label: "🎵 Âm nhạc" },
-  { value: "movies", label: "🎬 Phim ảnh" },
-  { value: "books", label: "📚 Sách" },
-  { value: "technology", label: "🔧 Công nghệ" },
-]
+import { FILTER_CATEGORIES } from "@/const/category"
+import { SearchResultsProps } from "@/types"
 
 export function SearchResults({ query, onClose }: SearchResultsProps) {
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -78,7 +63,7 @@ export function SearchResults({ query, onClose }: SearchResultsProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((cat) => (
+                  {FILTER_CATEGORIES.map((cat) => (
                     <SelectItem key={cat.value} value={cat.value}>
                       {cat.label}
                     </SelectItem>

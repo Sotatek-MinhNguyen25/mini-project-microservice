@@ -7,18 +7,41 @@ import { ProfileHeader } from "./profile-header"
 import { ProfileTabs } from "./profile-tabs"
 import { EditProfileModal } from "./edit-profile-modal"
 import { Loader2 } from "lucide-react"
+import { User } from "@/types/auth"
 
 export function ProfilePage() {
-  const { user, isLoading } = useAuth()
+  // const { user, isLoading } = useAuth()
+  const user :User =   {
+    id: "user-1",
+    email: "john.doe@example.com",
+    username: "johndoe",
+    roles: "USER",
+    status: "ACTIVE",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    oauthProvider: "GOOGLE",
+    oauthProviderId: "google-12345",
+    profile: {
+      id: "profile-1",
+      firstName: "John",
+      lastName: "Doe",
+      bio: "A software developer based in California.",
+      avatarUrl: "https://example.com/avatar1.jpg",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  }
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen gradient-bg flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen gradient-bg flex items-center justify-center">
+  //       <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  //     </div>
+  //   )
+  // }
 
   if (!user) {
     return null

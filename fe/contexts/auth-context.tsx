@@ -1,9 +1,10 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { createContext, useContext, useEffect, useState } from "react"
-import type { User } from "@/types/auth"
+import { createContext, useContext, useEffect, useState } from 'react'
+import type { User } from '@/types/auth'
+import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
   user: User | null
@@ -26,11 +27,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     // Check for stored auth token
-    const token = localStorage.getItem("auth_token")
-    const userData = localStorage.getItem("user_data")
+    const token = localStorage.getItem('auth_token')
+    const userData = localStorage.getItem('user_data')
 
     if (token && userData) {
       setUser(JSON.parse(userData))
@@ -43,32 +45,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Mock API call - replace with actual API
       const mockUser: User = {
-        id: "1",
+        id: '1',
         email,
-        username: email.split("@")[0],
-        roles: "USER",
-        status: "ACTIVE",
+        username: email.split('@')[0],
+        roles: 'USER',
+        status: 'ACTIVE',
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
         oauthProvider: null,
         oauthProviderId: null,
         profile: {
-          id: "1",
-          firstName: "John",
-          lastName: "Doe",
-          bio: "Software developer",
-          avatarUrl: "/placeholder.svg?height=40&width=40",
+          id: '1',
+          firstName: 'John',
+          lastName: 'Doe',
+          bio: 'Software developer',
+          avatarUrl: '/placeholder.svg?height=40&width=40',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       }
 
-      localStorage.setItem("auth_token", "mock_token")
-      localStorage.setItem("user_data", JSON.stringify(mockUser))
+      localStorage.setItem('auth_token', 'mock_token')
+      localStorage.setItem('user_data', JSON.stringify(mockUser))
       setUser(mockUser)
+      router.push('/dashboard')
     } catch (error) {
-      throw new Error("Login failed")
+      throw new Error('Login failed')
     } finally {
       setIsLoading(false)
     }
@@ -79,40 +82,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Mock API call - replace with actual API
       const mockUser: User = {
-        id: "1",
+        id: '1',
         email: userData.email,
         username: userData.username,
-        roles: "USER",
-        status: "ACTIVE",
+        roles: 'USER',
+        status: 'ACTIVE',
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
         oauthProvider: null,
         oauthProviderId: null,
         profile: {
-          id: "1",
+          id: '1',
           firstName: userData.firstName,
           lastName: userData.lastName,
-          bio: "",
-          avatarUrl: "/placeholder.svg?height=40&width=40",
+          bio: '',
+          avatarUrl: '/placeholder.svg?height=40&width=40',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       }
 
-      localStorage.setItem("auth_token", "mock_token")
-      localStorage.setItem("user_data", JSON.stringify(mockUser))
+      localStorage.setItem('auth_token', 'mock_token')
+      localStorage.setItem('user_data', JSON.stringify(mockUser))
       setUser(mockUser)
     } catch (error) {
-      throw new Error("Registration failed")
+      throw new Error('Registration failed')
     } finally {
       setIsLoading(false)
     }
   }
 
   const logout = () => {
-    localStorage.removeItem("auth_token")
-    localStorage.removeItem("user_data")
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_data')
+    router.push('/auth/login')
     setUser(null)
   }
 
@@ -122,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }
