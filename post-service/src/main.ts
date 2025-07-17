@@ -11,7 +11,7 @@ dotenv.config();
 async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create(AppModule);
-  app.useGlobalInterceptors(new ResponseInterceptor());
+  // app.useGlobalInterceptors(new ResponseInterceptor());
   const prismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
   app.connectMicroservice<MicroserviceOptions>({

@@ -1,8 +1,16 @@
-import { Controller, Get, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  OnModuleInit,
+  Post,
+} from '@nestjs/common';
 import { Public } from '../auth/jwt';
 import { config } from 'src/configs/config.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { CreatePostDto } from './dto/CreatePostDto';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
@@ -12,13 +20,22 @@ export class PostGatewayController implements OnModuleInit {
 
   async onModuleInit() {
     this.postClient.subscribeToResponseOf('findAllPost');
+    this.postClient.subscribeToResponseOf('createPost');
     await this.postClient.connect();
   }
 
   @Public()
   @Get('')
   async getPost() {
-    const data = await firstValueFrom(this.postClient.send('findAllPost', {}));
-    return { data: data };
+    return await firstValueFrom(this.postClient.send('findAllPost', {}));
+  }
+
+  @Public()
+  @Post('')
+  async createPost(@Body() createPostDto: any) {
+    console.log(1, createPostDto);
+    return await firstValueFrom(
+      this.postClient.send('createPost', { ...createPostDto }),
+    );
   }
 }
