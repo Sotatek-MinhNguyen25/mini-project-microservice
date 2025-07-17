@@ -67,3 +67,20 @@ export interface ProfileHeaderProps {
   user: User
   onEditClick: () => void
 }
+
+export interface RegisterData {
+  email: string
+  username: string
+  password: string
+  firstName: string
+  lastName: string
+}
+
+export interface RegisterResponse {
+  id: string
+  email: string
+  username: string
+  firstName: string
+  lastName: string
+  [key: string]: any
+}
