@@ -4,14 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { User } from "@/types/auth"
+import type { ProfileHeaderProps } from "@/types/auth"
 import { Edit, Calendar, Mail, UserIcon, Shield, CheckCircle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-
-interface ProfileHeaderProps {
-  user: User
-  onEditClick: () => void
-}
 
 export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
   const fullName = `${user.profile.firstName} ${user.profile.lastName}`

@@ -5,11 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import type { User } from "@/types/auth"
 import { FileText, Heart, MessageCircle, Settings, Activity } from "lucide-react"
 
-interface ProfileTabsProps {
-  user: User
-}
 
-export function ProfileTabs({ user }: ProfileTabsProps) {
+export function ProfileTabs( user: User ) {
   return (
     <Tabs defaultValue="posts" className="w-full">
       <TabsList className="grid w-full grid-cols-4 bg-muted/50">

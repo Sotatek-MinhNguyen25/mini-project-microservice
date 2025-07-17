@@ -1,33 +1,33 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { useState } from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState } from 'react'
+import { useAuth } from '@/contexts/auth-context'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, Settings, User, Moon, Sun, Sparkles, Search } from "lucide-react"
-import { useTheme } from "next-themes"
-import Link from "next/link"
+} from '@/components/ui/dropdown-menu'
+import { LogOut, Settings, User, Moon, Sun, Sparkles, Search } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import Link from 'next/link'
 
 export function Header() {
   const { user, logout } = useAuth()
   const { theme, setTheme } = useTheme()
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState('')
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       // TODO: Implement search functionality
-      console.log("Searching for:", searchQuery)
+      console.log('Searching for:', searchQuery)
     }
   }
 
@@ -72,7 +72,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="relative overflow-hidden group"
             >
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -87,7 +87,7 @@ export function Header() {
                   className="relative h-10 w-10 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
                 >
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} />
+                    <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={fullName} />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white">
                       {initials}
                     </AvatarFallback>
@@ -97,7 +97,7 @@ export function Header() {
               <DropdownMenuContent className="w-56 glass-effect" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-3 bg-gradient-to-r from-primary/10 to-purple-600/10 rounded-md mx-2 mb-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} />
+                    <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={fullName} />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-xs">
                       {initials}
                     </AvatarFallback>
@@ -108,8 +108,8 @@ export function Header() {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/profile">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="flex items-center cursor-pointer" onClick={() => console.log('Profile clicked')}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>

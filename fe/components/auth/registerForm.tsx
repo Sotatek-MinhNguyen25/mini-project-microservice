@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/useToast"
 import { Loader2 } from "lucide-react"
 
 export function RegisterForm() {
@@ -142,7 +142,7 @@ export function RegisterForm() {
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Create Account
+        Send verify email
       </Button>
     </form>
   )
