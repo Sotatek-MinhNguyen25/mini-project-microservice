@@ -145,7 +145,7 @@ export default function ResetPasswordPage() {
             {renderStep()}
             {step < 4 && (
               <div className="mt-6 text-center">
-                <Link href="/auth" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary">
+                <Link href="/auth/login" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary">
                   <ArrowLeft className="h-4 w-4 mr-1" />
                   Back to Login
                 </Link>
