@@ -1,21 +1,31 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from './configs/config.module';
-import { AuthGatewayController } from './modules/auth/auth-gateway.controller';
 import { AuthGatewayModule } from './modules/auth/auth-gateway.module';
+import { PostGatewayModule } from './modules/post/post-gateway.module';
+import { UploadGatewayModule } from './modules/upload/upload-gateway.module';
+import { NotificationGatewayModule } from './modules/notification/notification-gateway.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/jwt';
+import { KafkaModule } from './common/kafka/kafka.module';
+import { UserGatewayModule } from './modules/user/user-gateway.module';
 
 @Module({
   imports: [
     ConfigModule,
-    AuthGatewayModule],
-  controllers: [],
+
+    AuthGatewayModule,
+    PostGatewayModule,
+    UploadGatewayModule,
+    NotificationGatewayModule,
+    UserGatewayModule,
+
+    KafkaModule,
+  ],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard
-    }
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule { }

@@ -1,9 +1,15 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigService } from './config.service';
+import { ConfigModule as NestConfigModule } from '@nestjs/config';
+import configuration from './configuration';
 
 @Global()
 @Module({
-  providers: [ConfigService],
-  exports: [ConfigService],
+  imports: [
+    NestConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      load: [configuration],
+    }),
+  ],
 })
 export class ConfigModule {}

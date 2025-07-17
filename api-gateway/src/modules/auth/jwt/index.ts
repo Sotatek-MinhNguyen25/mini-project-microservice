@@ -1,4 +1,3 @@
-export * from './jwt.decorator'
-export * from './jwt.stategy'
-export * from './jwt-auth.guard'
-
+export { JwtAuthGuard } from './jwt-auth.guard';
+export { JwtStrategy } from './jwt.strategy';
+export { Public } from './jwt.decorator';
