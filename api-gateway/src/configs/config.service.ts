@@ -41,6 +41,10 @@ export class ConfigService {
 
   // Other shared configs (optional)
   readonly ENV = process.env.NODE_ENV || 'development';
+
+  // Port Service config
+  readonly POST_SERVICE_NAME = process.env.POST_SERVICE_NAME || 'POST_SERVICE';
+  readonly KAFKA_BROKER = process.env.KAFKA_BROKER || 'localhost:29092';
 }
 
 export const config = new ConfigService();

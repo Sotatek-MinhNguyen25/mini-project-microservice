@@ -5,17 +5,16 @@ import { AuthGatewayController } from './modules/auth/auth-gateway.controller';
 import { AuthGatewayModule } from './modules/auth/auth-gateway.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/jwt';
+import { PostGatewayModule } from './modules/post/post-gateway.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    AuthGatewayModule],
+  imports: [ConfigModule, AuthGatewayModule, PostGatewayModule],
   controllers: [],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard
-    }
+      useClass: JwtAuthGuard,
+    },
   ],
 })
-export class AppModule { }
+export class AppModule {}

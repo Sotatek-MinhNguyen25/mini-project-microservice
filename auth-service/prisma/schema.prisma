@@ -1,7 +1,6 @@
 // services/auth-service/prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -19,30 +18,30 @@ enum UserRole {
 // Enum cho trạng thái của người dùng
 enum UserStatus {
   UNVERIFIED // Chưa xác thực email (ví dụ: sau khi đăng ký, cần xác minh email)
-  VERIFIED   // Đã xác thực email
-  BANNED     // Bị cấm (không thể đăng nhập hoặc thực hiện hành động)
-  INACTIVE   // Vô hiệu hóa (ví dụ: cho tài khoản không hoạt động lâu)
+  VERIFIED // Đã xác thực email
+  BANNED // Bị cấm (không thể đăng nhập hoặc thực hiện hành động)
+  INACTIVE // Vô hiệu hóa (ví dụ: cho tài khoản không hoạt động lâu)
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique // Email là duy nhất
-  username  String    @unique // MỚI: Username là duy nhất và bắt buộc
-  password  String?    // password có thể null nếu người dùng đăng nhập qua OAuth
+  id        String     @id @default(uuid())
+  email     String     @unique // Email là duy nhất
+  username  String     @unique // MỚI: Username là duy nhất và bắt buộc
+  password  String? // password có thể null nếu người dùng đăng nhập qua OAuth
   roles     UserRole[] @default([USER]) // Sử dụng Enum UserRole
   status    UserStatus @default(UNVERIFIED) // Trường trạng thái người dùng
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   deletedAt DateTime? // Trường cho Soft Delete
 
   // Các trường cho OAuth được tích hợp trực tiếp vào User model
   // Chúng là tùy chọn (nullable) để phù hợp với người dùng đăng ký truyền thống
-  oauthProvider   OAuthProvider? // Nhà cung cấp OAuth (GITHUB, GOOGLE, ...)
+  oauthProvider OAuthProvider? // Nhà cung cấp OAuth (GITHUB, GOOGLE, ...)
 
   // Mối quan hệ với RefreshToken (đã thêm lại)
-  refreshTokens       RefreshToken[]
+  refreshTokens RefreshToken[]
   // Mối quan hệ với OTP
-  otps                OTP[]
+  otps          OTP[]
 }
 
 // MỚI: RefreshToken đã được thêm lại
@@ -60,7 +59,7 @@ model OTP {
   id        String      @id @default(uuid())
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  code      String      // Mã OTP (ví dụ: 6 chữ số)
+  code      String // Mã OTP (ví dụ: 6 chữ số)
   purpose   OTP_Purpose // Mục đích sử dụng OTP (ví dụ: FORGOT_PASSWORD, EMAIL_VERIFICATION)
   expiresAt DateTime
   createdAt DateTime    @default(now())
