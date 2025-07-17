@@ -10,38 +10,17 @@ datasource db {
 }
 
 model Post {
-  id              String         @id @default(uuid())
-  title           String
-  content         String         @db.Text
-  authorId        String
-  status          PostStatus     @default(DRAFT)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  deletedAt       DateTime?
-
-  // Mối quan hệ Many-to-Many với Tag
-  tags            PostTag[]
-  // Mối quan hệ Many-to-Many với Category
-  categories      PostCategory[]
-
-  // Mối quan hệ One-to-Many với Comment
-  comments        Comment[]
-  // Mối quan hệ One-to-Many với Like/Reaction
-  reactions       Reaction[]
-
-  // MỚI: Liên kết với một ảnh đại diện (featured image)
-  featuredImageId String?
-  featuredImage   Image?         @relation("PostFeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
-
-  // MỚI: Mối quan hệ Many-to-Many với Image cho gallery
-  galleryImages   PostImage[] // Bảng trung gian cho gallery
-}
-
-enum PostStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-  PENDING
+  id        String     @id @default(uuid())
+  title     String
+  content   String     @db.Text
+  userId    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  tags      PostTag[]
+  comments  Comment[]
+  reactions Reaction[]
+  image     Image[]
 }
 
 model Tag {
@@ -50,38 +29,17 @@ model Tag {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-
   posts     PostTag[]
 }
 
 model PostTag {
   postId    String
   tagId     String
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@id([postId, tagId])
-}
-
-model Category {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  posts     PostCategory[]
-}
-
-model PostCategory {
-  postId    String
-  categoryId String
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  category  Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
-
-  @@id([postId, categoryId])
 }
 
 model Comment {
@@ -89,35 +47,23 @@ model Comment {
   content   String    @db.Text
   postId    String
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId  String
-  parentId  String?
-  parent    Comment?  @relation("ParentChildComments", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  replies   Comment[] @relation("ParentChildComments")
+  userId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-
-  reactions Reaction[]
 }
 
 model Reaction {
   id        String       @id @default(uuid())
   userId    String
   postId    String?
-  commentId String?
   type      ReactionType
-
   post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
-  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
-
   createdAt DateTime     @default(now())
   deletedAt DateTime?
 
   @@unique([userId, postId, type])
-  @@unique([userId, commentId, type])
-
   @@index([postId])
-  @@index([commentId])
   @@index([userId])
 }
 
@@ -130,36 +76,13 @@ enum ReactionType {
   ANGRY
 }
 
-// MỚI: Model Image để lưu thông tin ảnh
 model Image {
   id        String    @id @default(uuid())
-  url       String    @unique // URL của ảnh từ UploadService
-  altText   String?   // Văn bản thay thế cho ảnh
-  caption   String?   // Chú thích ảnh
-  width     Int?      // Chiều rộng ảnh
-  height    Int?      // Chiều cao ảnh
-  fileSize  Int?      // Kích thước file (bytes)
-  mimeType  String?   // Loại MIME của file (e.g., "image/jpeg")
-  uploadedBy String?  // ID của người dùng tải lên (từ Auth Service)
+  url       String    @unique
+  altText   String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Cho phép soft delete ảnh
-
-  // Mối quan hệ ngược cho featuredImage
-  featuredPosts Post[] @relation("PostFeaturedImage")
-
-  // Mối quan hệ Many-to-Many với Post cho gallery
-  posts         PostImage[]
-}
-
-// MỚI: Bảng trung gian cho Post và Image (gallery)
-model PostImage {
+  deletedAt DateTime?
   postId    String
-  imageId   String
-  order     Int?      // Thứ tự ảnh trong gallery (tùy chọn)
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  image     Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
-
-  @@id([postId, imageId]) // Khóa chính kết hợp
+  post      Post      @relation(fields: [postId], references: [id])
 }
