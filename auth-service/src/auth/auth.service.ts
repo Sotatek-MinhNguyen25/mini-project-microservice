@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -36,16 +32,13 @@ export class AuthService {
   }
 
   private checkOtpOrThrow(otpObj: any, otp: string) {
-    if (!otpObj || otpObj.code !== otp)
-      throw new BadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    if (otpObj.expiresAt < new Date())
-      throw new BadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
+    if (!otpObj || otpObj.code !== otp) throw new BadRequestException(ERROR_MESSAGE.INVALID_OTP);
+    if (otpObj.expiresAt < new Date()) throw new BadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
   }
 
   async sendRegisterOtp(dto: RegisterDto) {
     const existed = await this.authRepository.findUserByEmail(dto.email);
-    if (existed)
-      throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
+    if (existed) throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
     await this.authRepository.createOTP({
       userId: null,
       email: dto.email,
@@ -55,14 +48,10 @@ export class AuthService {
   }
 
   async completeRegister(dto: CompleteRegisterDto) {
-    const otp = await this.authRepository.findOTPByEmail(
-      dto.email,
-      OTP_PURPOSE.EMAIL_VERIFICATION,
-    );
+    const otp = await this.authRepository.findOTPByEmail(dto.email, OTP_PURPOSE.EMAIL_VERIFICATION);
     this.checkOtpOrThrow(otp!, dto.otp);
     const existed = await this.authRepository.findUserByEmail(dto.email);
-    if (existed)
-      throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
+    if (existed) throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
     const user = await this.authRepository.createUser({
       email: dto.email,
       username: dto.username,
@@ -76,29 +65,13 @@ export class AuthService {
       roles: user.roles,
       username: user.username,
     };
-    const {
-      accessToken,
-      expiresIn: accessTokenExpiresIn,
-      jti: atJti,
-    } = this.jwtService.createAT(payload);
-    const {
-      refreshToken,
-      expiresIn: refreshTokenExpiresIn,
-      jti: rtJti,
-    } = this.jwtService.createRT(payload);
+    const { accessToken, expiresIn: accessTokenExpiresIn, jti: atJti } = this.jwtService.createAT(payload);
+    const { refreshToken, expiresIn: refreshTokenExpiresIn, jti: rtJti } = this.jwtService.createRT(payload);
     // Lưu jti vào Redis
     await this.redisService.setJti(atJti, this.parseTTL(accessTokenExpiresIn));
     await this.redisService.setJti(rtJti, this.parseTTL(refreshTokenExpiresIn));
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      atJti,
-      this.parseTTL(accessTokenExpiresIn),
-    );
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      rtJti,
-      this.parseTTL(refreshTokenExpiresIn),
-    );
+    await this.redisService.addJtiToUserSet(user.id, atJti, this.parseTTL(accessTokenExpiresIn));
+    await this.redisService.addJtiToUserSet(user.id, rtJti, this.parseTTL(refreshTokenExpiresIn));
     return {
       accessToken,
       refreshToken,
@@ -113,37 +86,20 @@ export class AuthService {
     if (!user.password || dto.password !== user.password) {
       throw new UnauthorizedException(ERROR_MESSAGE.INVALID_PASSWORD);
     }
-    if (user.status !== USER_STATUS.VERIFIED)
-      throw new UnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
+    if (user.status !== USER_STATUS.VERIFIED) throw new UnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       roles: user.roles,
       username: user.username,
     };
-    const {
-      accessToken,
-      expiresIn: accessTokenExpiresIn,
-      jti: atJti,
-    } = this.jwtService.createAT(payload);
-    const {
-      refreshToken,
-      expiresIn: refreshTokenExpiresIn,
-      jti: rtJti,
-    } = this.jwtService.createRT(payload);
+    const { accessToken, expiresIn: accessTokenExpiresIn, jti: atJti } = this.jwtService.createAT(payload);
+    const { refreshToken, expiresIn: refreshTokenExpiresIn, jti: rtJti } = this.jwtService.createRT(payload);
     // Lưu jti vào Redis
     await this.redisService.setJti(atJti, this.parseTTL(accessTokenExpiresIn));
     await this.redisService.setJti(rtJti, this.parseTTL(refreshTokenExpiresIn));
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      atJti,
-      this.parseTTL(accessTokenExpiresIn),
-    );
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      rtJti,
-      this.parseTTL(refreshTokenExpiresIn),
-    );
+    await this.redisService.addJtiToUserSet(user.id, atJti, this.parseTTL(accessTokenExpiresIn));
+    await this.redisService.addJtiToUserSet(user.id, rtJti, this.parseTTL(refreshTokenExpiresIn));
     return {
       accessToken,
       refreshToken,
@@ -164,10 +120,8 @@ export class AuthService {
         username: user.username,
         jti: payload.jti,
       };
-      const { accessToken, expiresIn: accessTokenExpiresIn } =
-        this.jwtService.createAT(newPayload);
-      const { refreshToken, expiresIn: refreshTokenExpiresIn } =
-        this.jwtService.createRT(newPayload);
+      const { accessToken, expiresIn: accessTokenExpiresIn } = this.jwtService.createAT(newPayload);
+      const { refreshToken, expiresIn: refreshTokenExpiresIn } = this.jwtService.createRT(newPayload);
       return {
         accessToken,
         refreshToken,
@@ -208,10 +162,7 @@ export class AuthService {
 
   async verifyRegister(dto: VerifyRegisterDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.findOTP(
-      user.id,
-      OTP_PURPOSE.EMAIL_VERIFICATION,
-    );
+    const otp = await this.authRepository.findOTP(user.id, OTP_PURPOSE.EMAIL_VERIFICATION);
     this.checkOtpOrThrow(otp!, dto.otp);
     await this.authRepository.updateUser(user.id, {
       status: USER_STATUS.VERIFIED,
@@ -221,20 +172,14 @@ export class AuthService {
 
   async verifyForgotPassword(dto: VerifyForgotPasswordDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.findOTP(
-      user.id,
-      OTP_PURPOSE.FORGOT_PASSWORD,
-    );
+    const otp = await this.authRepository.findOTP(user.id, OTP_PURPOSE.FORGOT_PASSWORD);
     this.checkOtpOrThrow(otp!, dto.otp);
     return {};
   }
 
   async updatePassword(dto: UpdatePasswordDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.findOTP(
-      user.id,
-      OTP_PURPOSE.FORGOT_PASSWORD,
-    );
+    const otp = await this.authRepository.findOTP(user.id, OTP_PURPOSE.FORGOT_PASSWORD);
     this.checkOtpOrThrow(otp!, dto.otp);
     await this.authRepository.updateUser(user.id, {
       password: dto.newPassword,

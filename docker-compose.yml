@@ -84,56 +84,56 @@ services:
       - postgres
     restart: unless-stopped
 
-  post-service:
-    build:
-      context: ./post-service
-    ports:
-      - "3002:3002"
-    environment:
-      - NODE_ENV=development
-      - KAFKA_BROKER=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/microservice
-    depends_on:
-      - kafka
-      - redis
-      - postgres
-    restart: unless-stopped
+#   post-service:
+#     build:
+#       context: ./post-service
+#     ports:
+#       - "3002:3002"
+#     environment:
+#       - NODE_ENV=development
+#       - KAFKA_BROKER=kafka:9092
+#       - REDIS_HOST=redis
+#       - REDIS_PORT=6379
+#       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/microservice
+#     depends_on:
+#       - kafka
+#       - redis
+#       - postgres
+#     restart: unless-stopped
 
-  notification-service:
-    build:
-      context: ./notification-service
-    ports:
-      - "3003:3003"
-    environment:
-      - NODE_ENV=development
-      - KAFKA_BROKER=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - kafka
-      - redis
-    restart: unless-stopped
+#   notification-service:
+#     build:
+#       context: ./notification-service
+#     ports:
+#       - "3003:3003"
+#     environment:
+#       - NODE_ENV=development
+#       - KAFKA_BROKER=kafka:9092
+#       - REDIS_HOST=redis
+#       - REDIS_PORT=6379
+#     depends_on:
+#       - kafka
+#       - redis
+#     restart: unless-stopped
 
-  upload-service:
-    build:
-      context: ./upload-service
-    ports:
-      - "3004:3004"
-    environment:
-      - NODE_ENV=development
-      - KAFKA_BROKER=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - kafka
-      - redis
-    restart: unless-stopped
+#   upload-service:
+#     build:
+#       context: ./upload-service
+#     ports:
+#       - "3004:3004"
+#     environment:
+#       - NODE_ENV=development
+#       - KAFKA_BROKER=kafka:9092
+#       - REDIS_HOST=redis
+#       - REDIS_PORT=6379
+#     depends_on:
+#       - kafka
+#       - redis
+#     restart: unless-stopped
 
-volumes:
-  pgdata:
-  redis-data:
-  kafka-data:
-  zookeeper-data:
-  zookeeper-logs:
+# volumes:
+#   pgdata:
+#   redis-data:
+#   kafka-data:
+#   zookeeper-data:
+#   zookeeper-logs:

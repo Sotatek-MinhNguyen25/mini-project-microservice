@@ -14,11 +14,7 @@ export const ApiResponse = (options: ResponseOptions = {}) => {
   });
 };
 
-export const ApiResponseOk = (message?: string | object) =>
-  ApiResponse({ status: HttpStatus.OK, message });
-export const ApiResponseCreated = (message?: string | object) =>
-  ApiResponse({ status: HttpStatus.CREATED, message });
-export const ApiResponseAccepted = (message?: string | object) =>
-  ApiResponse({ status: HttpStatus.ACCEPTED, message });
-export const ApiResponseNoContent = () =>
-  ApiResponse({ status: HttpStatus.NO_CONTENT });
+export const ApiResponseOk = (message?: string | object) => ApiResponse({ status: HttpStatus.OK, message });
+export const ApiResponseCreated = (message?: string | object) => ApiResponse({ status: HttpStatus.CREATED, message });
+export const ApiResponseAccepted = (message?: string | object) => ApiResponse({ status: HttpStatus.ACCEPTED, message });
+export const ApiResponseNoContent = () => ApiResponse({ status: HttpStatus.NO_CONTENT });

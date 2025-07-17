@@ -1,10 +1,6 @@
 // kafka-config.helper.ts
 import { Injectable } from '@nestjs/common';
-import {
-  Transport,
-  ClientOptions,
-  MicroserviceOptions,
-} from '@nestjs/microservices';
+import { Transport, ClientOptions, MicroserviceOptions } from '@nestjs/microservices';
 
 @Injectable()
 export class KafkaConfigHelper {
@@ -27,10 +23,7 @@ export class KafkaConfigHelper {
 }
 
 // Utility function để tạo cấu hình cho app.connectMicroservice()
-export function createKafkaConnectConfig(
-  serviceName: string,
-  brokers: string[],
-): MicroserviceOptions {
+export function createKafkaConnectConfig(serviceName: string, brokers: string[]): MicroserviceOptions {
   return {
     transport: Transport.KAFKA,
     options: {

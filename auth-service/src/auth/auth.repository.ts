@@ -37,8 +37,7 @@ export class AuthRepository {
       if (user) userId = user.id;
     }
     if (!userId) throw new Error('UserId is required to create OTP');
-    const code =
-      data.code || Math.floor(100000 + Math.random() * 900000).toString();
+    const code = data.code || Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = data.expiresAt || new Date(Date.now() + 10 * 60 * 1000);
     return await this.prisma.oTP.upsert({
       where: {
@@ -72,10 +71,7 @@ export class AuthRepository {
     return await this.prisma.oTP.update({ where: { id }, data });
   }
 
-  async findOTPByEmail(
-    email: string,
-    purpose: OTP_Purpose,
-  ): Promise<OTP | null> {
+  async findOTPByEmail(email: string, purpose: OTP_Purpose): Promise<OTP | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return null;
     return await this.findOTP(user.id, purpose);
