@@ -3,17 +3,18 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { CONSTANTS } from 'constants/app.constants';
 
 @Controller()
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @MessagePattern('createPost')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.CREATE)
   create(@Payload() createPostDto: CreatePostDto) {
     return this.postService.create(createPostDto);
   }
 
-  @MessagePattern('findAllPost')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.GET)
   findAll() {
     return this.postService.findAll();
   }

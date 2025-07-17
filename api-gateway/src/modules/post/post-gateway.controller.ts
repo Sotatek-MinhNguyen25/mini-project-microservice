@@ -1,42 +1,44 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Inject,
-    OnModuleInit,
-    Post,
+  Body,
+  Controller,
+  Get,
+  Inject,
+  OnModuleInit,
+  Post,
 } from '@nestjs/common';
 import { Public } from '../auth/jwt';
 import { config } from 'src/configs/config.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CreatePostDto } from './dto/CreatePostDto';
-import { KAFKA_CLIENTS } from 'src/constants/app.constants';
+import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
-    constructor(
-        @Inject(KAFKA_CLIENTS.POST) private readonly postClient: ClientKafka,
-    ) { }
+  constructor(
+    @Inject(KAFKA_CLIENTS.POST) private readonly postClient: ClientKafka,
+  ) {}
 
-    async onModuleInit() {
-        this.postClient.subscribeToResponseOf('findAllPost');
-        this.postClient.subscribeToResponseOf('createPost');
-        await this.postClient.connect();
-    }
+  async onModuleInit() {
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.CREATE);
+    await this.postClient.connect();
+  }
 
-    @Public()
-    @Get('')
-    async getPost() {
-        return await firstValueFrom(this.postClient.send('findAllPost', {}));
-    }
+  @Public()
+  @Get('')
+  async getPost() {
+    return await firstValueFrom(
+      this.postClient.send(KAFKA_PATTERNS.POST.GET, {}),
+    );
+  }
 
-    @Public()
-    @Post('')
-    async createPost(@Body() createPostDto: any) {
-        console.log(1, createPostDto);
-        return await firstValueFrom(
-            this.postClient.send('createPost', { ...createPostDto }),
-        );
-    }
+  @Public()
+  @Post('')
+  async createPost(@Body() createPostDto: any) {
+    console.log(1, createPostDto);
+    return await firstValueFrom(
+      this.postClient.send(KAFKA_PATTERNS.POST.CREATE, { ...createPostDto }),
+    );
+  }
 }
