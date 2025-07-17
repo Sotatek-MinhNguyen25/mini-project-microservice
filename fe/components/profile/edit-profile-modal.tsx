@@ -16,15 +16,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useToast } from "@/hooks/use-toast"
-import type { User } from "@/types/auth"
+import { useToast } from "@/hooks/useToast"
+import type { EditProfileModalProps } from "@/types/auth"
 import { Camera, Loader2 } from "lucide-react"
-
-interface EditProfileModalProps {
-  user: User
-  isOpen: boolean
-  onClose: () => void
-}
 
 export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProps) {
   const [formData, setFormData] = useState({

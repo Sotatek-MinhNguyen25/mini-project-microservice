@@ -1,27 +1,22 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/contexts/auth-context"
-import type { Comment } from "@/types/post"
-import { formatDistanceToNow } from "date-fns"
-import { Heart, Reply, Loader2 } from "lucide-react"
-
-interface CommentSectionProps {
-  postId: string
-  comments: Comment[]
-}
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useToast } from '@/hooks/useToast'
+import { useAuth } from '@/contexts/auth-context'
+import type { CommentSectionProps } from '@/types/post'
+import { formatDistanceToNow } from 'date-fns'
+import { Heart, Reply, Loader2 } from 'lucide-react'
 
 export function CommentSection({ postId, comments }: CommentSectionProps) {
-  const [newComment, setNewComment] = useState("")
+  const [newComment, setNewComment] = useState('')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyContent, setReplyContent] = useState("")
+  const [replyContent, setReplyContent] = useState('')
   const { user } = useAuth()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -33,13 +28,13 @@ export function CommentSection({ postId, comments }: CommentSectionProps) {
       return { id: Date.now().toString(), content, parentId }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] })
-      setNewComment("")
-      setReplyContent("")
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      setNewComment('')
+      setReplyContent('')
       setReplyingTo(null)
       toast({
-        title: "Success",
-        description: "Comment added!",
+        title: 'Success',
+        description: 'Comment added!',
       })
     },
   })
@@ -67,7 +62,7 @@ export function CommentSection({ postId, comments }: CommentSectionProps) {
       <form onSubmit={handleSubmitComment} className="space-y-3">
         <div className="flex space-x-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={userFullName} />
+            <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={userFullName} />
             <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
@@ -97,7 +92,7 @@ export function CommentSection({ postId, comments }: CommentSectionProps) {
             <div key={comment.id} className="space-y-2">
               <div className="flex space-x-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={comment.author.profile.avatarUrl || "/placeholder.svg"} alt={commentFullName} />
+                  <AvatarImage src={comment.author.profile.avatarUrl || '/placeholder.svg'} alt={commentFullName} />
                   <AvatarFallback>{commentInitials}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
@@ -161,7 +156,7 @@ export function CommentSection({ postId, comments }: CommentSectionProps) {
                     return (
                       <div key={reply.id} className="flex space-x-3">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={reply.author.profile.avatarUrl || "/placeholder.svg"} alt={replyFullName} />
+                          <AvatarImage src={reply.author.profile.avatarUrl || '/placeholder.svg'} alt={replyFullName} />
                           <AvatarFallback className="text-xs">{replyInitials}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">

@@ -1,9 +1,10 @@
-"use client"
-import { LoginForm } from "./login-form"
-import { RegisterForm } from "./register-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles } from "lucide-react"
+'use client'
+import { LoginForm } from './loginForm'
+import { RegisterForm } from './registerForm'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Sparkles } from 'lucide-react'
+import Link from 'next/link'
 
 export function AuthPage() {
   return (
@@ -24,15 +25,29 @@ export function AuthPage() {
           <CardContent className="p-6">
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-                <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="login"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-black "
+                >
                   Login
                 </TabsTrigger>
-                <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="register"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-black "
+                >
                   Register
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="login" className="mt-6">
                 <LoginForm />
+                <div>
+                  <p className="text-sm text-muted-foreground text-center mt-4">
+                    Forgot your password?{' '}
+                    <Link href="/auth/forgot-password" className="text-primary hover:underline">
+                      Reset it here
+                    </Link>
+                  </p>
+                </div>
               </TabsContent>
               <TabsContent value="register" className="mt-6">
                 <RegisterForm />
