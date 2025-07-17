@@ -1,13 +1,13 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator'
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
 export class UpdatePasswordDto {
   @IsEmail()
-  email: string
+  email: string;
 
   @IsNotEmpty()
-  otp: string
+  otp: string;
 
   @IsNotEmpty()
   @MinLength(6)
-  newPassword: string
+  newPassword: string;
 }
