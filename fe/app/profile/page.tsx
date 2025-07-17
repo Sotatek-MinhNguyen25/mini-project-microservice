@@ -1,7 +1,12 @@
 "use client"
 
 import { ProfilePage } from "@/components/profile/profile-page"
+import ProtectedRoute from "@/components/ProtectedRoute"
 
 export default function Profile() {
-  return <ProfilePage />
+  return (
+    <ProtectedRoute>
+      <ProfilePage />
+    </ProtectedRoute>
+  )
 }

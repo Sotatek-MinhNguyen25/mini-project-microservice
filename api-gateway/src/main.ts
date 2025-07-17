@@ -1,19 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ResponseMessageInterceptor } from './common/interceptor/response.interceptor';
-
-dotenv.config();
+import { config } from './configs/configuration';
 
 const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT ?? 3000;
+
+  const port = config.port || 8000;
   app.use(morgan('dev'));
 
   app.useGlobalPipes(
@@ -24,18 +23,6 @@ async function bootstrap() {
     }),
   );
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: ['localhost:9092'],
-      },
-      run: {
-        autoCommit: false
-      }
-    }
-  });
-
   app.enableCors({
     origin: '*',
     methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -43,14 +30,15 @@ async function bootstrap() {
   });
 
   const configSwagger = new DocumentBuilder()
-    .setTitle('Order Service')
-    .setDescription('Order Service API description')
+    .setTitle('API Gateway')
+    .setDescription('API Gateway for Microservices')
     .setVersion('1.0')
-    .addTag('orders')
+    .addTag('gateway')
+    .addBearerAuth()
     .build();
 
   SwaggerModule.setup(
-    'api',
+    config.apiPrefix || 'api',
     app,
     SwaggerModule.createDocument(app, configSwagger),
   );

@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { KafkaModule } from './kafka/kafka.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { CommentModule } from './comment/comment.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     KafkaModule.register(['post']),
     PrismaModule,
+    CommentModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

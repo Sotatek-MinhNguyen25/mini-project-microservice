@@ -1,14 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import type React from "react";
+import { useState } from "react";
+import { useRegister } from "@/hooks/useRegister";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/useToast";
+import { Loader2 } from "lucide-react";
 
 export function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -18,54 +17,45 @@ export function RegisterForm() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const { register } = useAuth()
-  const { toast } = useToast()
+  });
+  const { mutate: register, isPending } = useRegister();
+  const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
         description: "Passwords do not match",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
-
-    try {
-      await register({
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-      })
-      toast({
-        title: "Success",
-        description: "Account created successfully!",
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create account",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+    //mock data passing real data to register function
+    if (formData.email === "mock@email.com"){
+      return toast({
+        title: "Info",
+        description: "Please check your email for verification.",
+      });
     }
-  }
+
+    register({
+      email: formData.email,
+      username: formData.username,
+      password: formData.password,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -117,7 +107,7 @@ export function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Password 12131223</Label>
         <Input
           id="password"
           name="password"
@@ -129,7 +119,7 @@ export function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Label htmlFor="confirmPassword">Confirm Password 12312</Label>
         <Input
           id="confirmPassword"
           name="confirmPassword"
@@ -140,10 +130,14 @@ export function RegisterForm() {
           required
         />
       </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Create Account
+      <Button
+        type="submit"
+        className="w-full bg-gradient-to-r from-primary to-purple-600 text-white"
+        disabled={isPending}
+      >
+        {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Send verify email
       </Button>
     </form>
-  )
+  );
 }

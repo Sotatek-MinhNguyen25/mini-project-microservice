@@ -3,10 +3,12 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { PrismaService } from './prisma/prisma.service';
+import { Logger } from '@nestjs/common';
 
 dotenv.config();
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
   const prismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
@@ -25,5 +27,6 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.listen(process.env.PORT ?? 3000);
+  logger.log(`🚀 App is running on port: ${process.env.PORT ?? 3000}`);
 }
 bootstrap();
