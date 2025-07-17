@@ -9,7 +9,5 @@ import { Public } from '../auth/jwt';
 @Controller('notifications')
 @Public()
 export class NotificationGatewayController {
-    constructor(
-        @Inject(KAFKA_CLIENTS.NOTIFICATION) private notificationClient: ClientProxy,
-    ) { }
+  constructor(@Inject(KAFKA_CLIENTS.NOTIFICATION) private notificationClient: ClientProxy) {}
 }

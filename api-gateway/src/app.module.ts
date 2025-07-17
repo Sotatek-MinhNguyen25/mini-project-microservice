@@ -28,4 +28,4 @@ import { UserGatewayModule } from './modules/user/user-gateway.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

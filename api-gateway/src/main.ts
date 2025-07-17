@@ -37,11 +37,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  SwaggerModule.setup(
-    config.apiPrefix || 'api',
-    app,
-    SwaggerModule.createDocument(app, configSwagger),
-  );
+  SwaggerModule.setup(config.apiPrefix || 'api', app, SwaggerModule.createDocument(app, configSwagger));
   const { Reflector } = await import('@nestjs/core');
   app.useGlobalInterceptors(new ResponseMessageInterceptor(new Reflector()));
   await app.listen(port);
