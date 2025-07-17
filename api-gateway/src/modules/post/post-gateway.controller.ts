@@ -3,43 +3,39 @@ import {
     Controller,
     Get,
     Inject,
+    OnModuleInit,
     Post,
-    Query,
-    Param,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { AuthUser } from '../../common/decorator/auth-user.decorator';
-import { IUser } from '../user/interface/user.interface';
-import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { Public } from '../auth/jwt';
+import { config } from 'src/configs/config.service';
+import { ClientKafka } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { CreatePostDto } from './dto/CreatePostDto';
 
 @Controller('post')
-@Public()
-export class PostGatewayController {
-    constructor(@Inject(KAFKA_CLIENTS.POST) private postClient: ClientProxy) { }
+export class PostGatewayController implements OnModuleInit {
+    constructor(
+        @Inject(config.POST_SERVICE_NAME) private readonly postClient: ClientKafka,
+    ) { }
 
-    @Post()
-    async createPost(@Body() body: any, @AuthUser() user: IUser) {
-        return firstValueFrom(
-            this.postClient.send(KAFKA_PATTERNS.POST.CREATE, {
-                ...body,
-                userId: user.userId,
-            }),
-        );
+    async onModuleInit() {
+        this.postClient.subscribeToResponseOf('findAllPost');
+        this.postClient.subscribeToResponseOf('createPost');
+        await this.postClient.connect();
     }
 
-    @Get()
-    async getPosts(@Query() query: any) {
-        return firstValueFrom(
-            this.postClient.send(KAFKA_PATTERNS.POST.LIST, query),
-        );
+    @Public()
+    @Get('')
+    async getPost() {
+        return await firstValueFrom(this.postClient.send('findAllPost', {}));
     }
 
-    @Get(':id')
-    async getPost(@Param('id') id: string) {
-        return firstValueFrom(
-            this.postClient.send(KAFKA_PATTERNS.POST.GET, { id }),
+    @Public()
+    @Post('')
+    async createPost(@Body() createPostDto: any) {
+        console.log(1, createPostDto);
+        return await firstValueFrom(
+            this.postClient.send('createPost', { ...createPostDto }),
         );
     }
 }
