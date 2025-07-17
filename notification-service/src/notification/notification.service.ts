@@ -19,9 +19,10 @@ export class NotificationService {
         pass: this.configService.get<string>('mail.pass'),
       },
     });
-    // Determine template directory: check dist first, fall back to src
     const distTemplateDir = path.join(process.cwd(), 'dist', 'notification', 'templates');
-    this.templateDir = fs.existsSync(distTemplateDir) ? distTemplateDir : path.join(process.cwd(), 'src', 'notification', 'templates');
+    this.templateDir = fs.existsSync(distTemplateDir)
+      ? distTemplateDir
+      : path.join(process.cwd(), 'src', 'notification', 'templates');
   }
 
   private loadTemplate(templateName: string, variables: Record<string, string>): string {
