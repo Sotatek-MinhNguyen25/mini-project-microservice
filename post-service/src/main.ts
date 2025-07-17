@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { PrismaService } from './prisma/prisma.service';
-import { ResponseInterceptor } from './common/interceptor/response.interceptor';
+// import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 import { Logger } from '@nestjs/common';
 
 dotenv.config();
