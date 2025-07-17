@@ -9,14 +9,14 @@ import { CONSTANTS } from 'constants/app.constants';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.CREATE)
-  create(@Payload() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.CREATE)
+  async create(@Payload() createPostDto: CreatePostDto) {
+    return await this.postService.create(createPostDto);
   }
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.GET)
-  findAll() {
-    return this.postService.findAll();
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.GET)
+  async findAll() {
+    return await this.postService.findAll();
   }
 
   @MessagePattern('findOnePost')

@@ -22,6 +22,7 @@ export class PostGatewayController implements OnModuleInit {
   async onModuleInit() {
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.CREATE);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.COMMENT);
     await this.postClient.connect();
   }
 
@@ -36,9 +37,18 @@ export class PostGatewayController implements OnModuleInit {
   @Public()
   @Post('')
   async createPost(@Body() createPostDto: any) {
-    console.log(1, createPostDto);
     return await firstValueFrom(
       this.postClient.send(KAFKA_PATTERNS.POST.CREATE, { ...createPostDto }),
+    );
+  }
+
+  @Public()
+  @Post('comment')
+  async createComment(@Body() createCommentDto: any) {
+    return await firstValueFrom(
+      this.postClient.send(KAFKA_PATTERNS.POST.COMMENT, {
+        ...createCommentDto,
+      }),
     );
   }
 }

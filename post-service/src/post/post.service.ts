@@ -2,25 +2,37 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaClient } from '@prisma/client';
-import { ClientKafka } from '@nestjs/microservices';
+import { CommentService } from 'src/comment/comment.service';
 
 @Injectable()
 export class PostService {
-  constructor(private readonly prisma: PrismaClient) {}
-  create(createPostDto: CreatePostDto) {
-    console.log('Hello');
-    const post = this.prisma.post.create({
+  constructor(
+    private readonly prisma: PrismaClient,
+    private commentService: CommentService,
+  ) {}
+  async create(createPostDto: CreatePostDto) {
+    const post = await this.prisma.post.create({
       data: {
         title: createPostDto.title,
         content: createPostDto.content,
         userId: createPostDto.userId,
       },
     });
-    return { data: post, meta: '123' };
+    return { data: post, meta: {} };
   }
 
-  findAll() {
-    return `This action returns all post`;
+  async findAll() {
+    const posts = await this.prisma.post.findMany();
+    const result = await Promise.all(
+      posts.map(async (post) => ({
+        ...post,
+        totalComment: await this.commentService.countAll(post.id),
+      })),
+    );
+    return {
+      data: result,
+      meta: {},
+    };
   }
 
   findOne(id: number) {

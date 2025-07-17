@@ -26,6 +26,7 @@ export const KAFKA_PATTERNS = {
     LIST: 'post.list',
     LIKE: 'post.like',
     UNLIKE: 'post.unlike',
+    COMMENT: 'comment.create',
   },
 
   // Upload Service Events

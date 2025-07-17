@@ -3,12 +3,13 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CONSTANTS } from 'constants/app.constants';
 
 @Controller()
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
-  @MessagePattern('createComment')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.COMMENT.CREATE)
   create(@Payload() createCommentDto: CreateCommentDto) {
     return this.commentService.create(createCommentDto);
   }

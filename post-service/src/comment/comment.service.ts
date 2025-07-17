@@ -4,12 +4,14 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { CONSTANTS } from 'constants/app.constants';
 
 @Injectable()
 export class CommentService {
   constructor(
     private prisma: PrismaService,
-    @Inject('KAFKA_AUTH_SERVICE') private readonly authClient: ClientKafka,
+    @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
+    private readonly authClient: ClientKafka,
   ) {}
   async create(createCommentDto: CreateCommentDto) {
     const comment = await this.prisma.comment.create({
@@ -19,7 +21,15 @@ export class CommentService {
         postId: createCommentDto.postId,
       },
     });
-    return comment;
+    return { data: comment, meta: {} };
+  }
+
+  async countAll(postId: string) {
+    return await this.prisma.comment.count({
+      where: {
+        postId: postId,
+      },
+    });
   }
 
   async findAll(postId: string) {

@@ -3,10 +3,12 @@ import { PostService } from './post.service';
 import { PostController } from './post.controller';
 import { KafkaModule } from 'src/kafka/kafka.module';
 import { PrismaClient } from '@prisma/client';
+import { CommentModule } from 'src/comment/comment.module';
+import { CommentService } from 'src/comment/comment.service';
 
 @Module({
-  imports: [],
+  imports: [KafkaModule.register(['comment'])],
   controllers: [PostController],
-  providers: [PostService, PrismaClient],
+  providers: [PostService, PrismaClient, CommentService],
 })
 export class PostModule {}
