@@ -8,4 +8,4 @@ export const ERROR_MESSAGE = {
   INVALID_REFRESH_TOKEN: 'Refresh token không hợp lệ',
   TOKEN_MISSING_JTI: 'Token không hợp lệ: thiếu jti. Vui lòng đăng nhập lại!',
   // Thêm các lỗi khác nếu cần
-};
+}

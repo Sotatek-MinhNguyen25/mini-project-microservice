@@ -1,16 +1,16 @@
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator'
 
 export class CompleteRegisterDto {
   @IsEmail()
-  email: string;
+  email: string
 
   @IsNotEmpty()
-  otp: string;
+  otp: string
 
   @IsNotEmpty()
-  username: string;
+  username: string
 
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password: string
 }

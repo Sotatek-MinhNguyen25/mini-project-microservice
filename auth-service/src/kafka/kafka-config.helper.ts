@@ -1,6 +1,6 @@
 // kafka-config.helper.ts
-import { Injectable } from '@nestjs/common';
-import { Transport, ClientOptions, MicroserviceOptions } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common'
+import { Transport, ClientOptions, MicroserviceOptions } from '@nestjs/microservices'
 
 @Injectable()
 export class KafkaConfigHelper {
@@ -18,7 +18,7 @@ export class KafkaConfigHelper {
           heartbeatInterval: 2000,
         },
       },
-    };
+    }
   }
 }
 
@@ -37,5 +37,5 @@ export function createKafkaConnectConfig(serviceName: string, brokers: string[])
         heartbeatInterval: 2000,
       },
     },
-  };
+  }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, ValidationPipe as NestValidationPipe } from '@nestjs/common';
+import { BadRequestException, Injectable, ValidationPipe as NestValidationPipe } from '@nestjs/common'
 
 @Injectable()
 export class ValidationPipe extends NestValidationPipe {
@@ -12,8 +12,8 @@ export class ValidationPipe extends NestValidationPipe {
           statusCode: 400,
           data: null,
           message: errors.map((e) => Object.values(e.constraints || {})).flat(),
-        });
+        })
       },
-    });
+    })
   }
 }

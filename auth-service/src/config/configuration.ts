@@ -1,4 +1,4 @@
-import { ENV } from './constants';
+import { ENV } from './constants'
 
 export default () => ({
   [ENV.JWT_SECRET]: process.env.JWT_SECRET || '',
@@ -11,4 +11,4 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT || '6379', 10),
     password: process.env.REDIS_PASSWORD || '',
   },
-});
+})

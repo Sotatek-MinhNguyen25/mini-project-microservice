@@ -1,9 +1,9 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator'
 
 export class VerifyRegisterDto {
   @IsEmail()
-  email: string;
+  email: string
 
   @IsNotEmpty()
-  otp: string;
+  otp: string
 }
