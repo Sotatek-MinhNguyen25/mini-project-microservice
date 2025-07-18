@@ -10,6 +10,7 @@ export const CONSTANTS = {
     },
     REACTION: {
       GET_BY_POST: 'reaction.get_by_post',
+      GET_SUMMARY_BY_POST: 'reaction.get_summary_by_post',
       CREATE: 'reaction.create',
       UPDATE: 'reaction.update',
       DELETE: 'reaction.delete',

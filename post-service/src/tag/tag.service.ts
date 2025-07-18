@@ -1,11 +1,8 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PostTag, Tag } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostTagDto, CreateTagDto, UpdateTagDto } from './tag.dto';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class TagService {
@@ -27,7 +24,7 @@ export class TagService {
       },
     });
     if (tag) {
-      throw new ConflictException('Tag already exists');
+      throw new RpcException({ status: 409, message: 'Tag already exists' });
     }
     return await this.prismaService.tag.create({
       data: createTagDto,
@@ -41,7 +38,7 @@ export class TagService {
       },
     });
     if (!tag) {
-      throw new NotFoundException('Tag not found');
+      throw new RpcException({ status: 404, message: 'Tag not found' });
     }
     return await this.prismaService.tag.update({
       where: {
@@ -58,7 +55,7 @@ export class TagService {
       },
     });
     if (!tag) {
-      throw new NotFoundException('Tag not found');
+      throw new RpcException({ status: 404, message: 'Tag not found' });
     }
 
     return await this.prismaService.tag.update({
@@ -102,7 +99,7 @@ export class TagService {
       },
     });
     if (!tag || !post) {
-      throw new NotFoundException('Tag or post not found');
+      throw new RpcException({ status: 404, message: 'Tag or post not found' });
     }
 
     const postTag = await this.prismaService.postTag.findFirst({
@@ -112,7 +109,10 @@ export class TagService {
       },
     });
     if (postTag) {
-      throw new ConflictException('Tag already exists');
+      throw new RpcException({
+        status: 409,
+        message: 'Post tag already exists',
+      });
     }
 
     return await this.prismaService.postTag.create({
@@ -134,7 +134,7 @@ export class TagService {
       },
     });
     if (!tag || !post) {
-      throw new NotFoundException('Tag or post not found');
+      throw new RpcException({ status: 404, message: 'Tag or post not found' });
     }
 
     const postTag = await this.prismaService.postTag.findFirst({
@@ -144,7 +144,7 @@ export class TagService {
       },
     });
     if (!postTag) {
-      throw new NotFoundException('Post tag not found');
+      throw new RpcException({ status: 404, message: 'Post tag not found' });
     }
 
     // dont have soft delete yet

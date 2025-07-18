@@ -13,14 +13,19 @@ export class ReactionController {
     return this.reactionService.getReactionsByPostId(postId);
   }
 
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.REACTION.GET_SUMMARY_BY_POST)
+  getReactionsSummaryByPostId(@Payload() postId: string) {
+    return this.reactionService.getReactionsSummaryByPostId(postId);
+  }
+
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.REACTION.CREATE)
-  createReaction(@Payload() reaction: CreateReactionDto) {
-    return this.reactionService.createReaction(reaction);
+  createReaction(@Payload() createReactionDto: CreateReactionDto) {
+    return this.reactionService.createReaction(createReactionDto);
   }
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.REACTION.UPDATE)
-  updateReaction(@Payload() reaction: UpdateReactionDto) {
-    return this.reactionService.updateReaction(reaction);
+  updateReaction(@Payload() updateReactionDto: UpdateReactionDto) {
+    return this.reactionService.updateReaction(updateReactionDto);
   }
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.REACTION.DELETE)
