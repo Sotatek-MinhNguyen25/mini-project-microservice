@@ -6,6 +6,9 @@ import { firstValueFrom } from 'rxjs';
 import { CreatePostDto } from './dto/create-post.dto';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
 import { ApiBody } from '@nestjs/swagger';
+import { CreateTagDto } from './dto/create-tag.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateReactionDto } from './dto/create-reaction.dto';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
@@ -16,6 +19,12 @@ export class PostGatewayController implements OnModuleInit {
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.CREATE);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.COMMENT);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET_DETAIL);
+
+    // Tag
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.CREATE);
+
+    // Reaction
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.REACTION.CREATE);
     await this.postClient.connect();
   }
 
@@ -34,7 +43,8 @@ export class PostGatewayController implements OnModuleInit {
 
   @Public()
   @Post('comment')
-  async createComment(@Body() createCommentDto: any) {
+  @ApiBody({ type: CreateCommentDto })
+  async createComment(@Body() createCommentDto: CreateCommentDto) {
     return await firstValueFrom(
       this.postClient.send(KAFKA_PATTERNS.POST.COMMENT, {
         ...createCommentDto,
@@ -45,5 +55,21 @@ export class PostGatewayController implements OnModuleInit {
   @Get(':id')
   async getDetailPost(@Param('id') id: string) {
     return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, id));
+  }
+
+  // Tag
+  @Public()
+  @Post('tag')
+  @ApiBody({ type: CreateTagDto })
+  async createTag(@Body() createTagDto: CreateTagDto) {
+    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.TAG.CREATE, { ...createTagDto }));
+  }
+
+  // Reaction
+  @Public()
+  @Post('reaction')
+  @ApiBody({ type: CreateReactionDto })
+  async createReaction(@Body() createReactionDto: CreateReactionDto) {
+    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.REACTION.CREATE, { ...createReactionDto }));
   }
 }

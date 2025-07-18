@@ -45,25 +45,76 @@ export class PostService {
   }
 
   async findAll() {
-    const posts = await this.prisma.post.findMany({});
-    const result = await Promise.all(
-      posts.map(async (post) => ({
-        ...post,
-        totalComment: await this.commentService.countAll(post.id),
-      })),
-    );
+    const posts = await this.prisma.post.findMany({
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        image: {
+          select: {
+            id: true,
+            url: true,
+            altText: true,
+          },
+        },
+        comments: {
+          take: 5,
+          select: {
+            id: true,
+            content: true,
+            userId: true,
+            createdAt: true,
+          },
+        },
+        createdAt: true,
+      },
+    });
     return {
-      data: result,
+      data: posts,
       meta: {},
     };
   }
 
   async findOne(id: string) {
-    console.log(id);
     const post = await this.prisma.post.findFirst({
       where: { id },
-      include: {
-        comments: true,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        image: {
+          select: {
+            id: true,
+            altText: true,
+            url: true,
+          },
+        },
+        tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+            content: true,
+            userId: true,
+            createdAt: true,
+          },
+        },
+        reactions: {
+          select: {
+            id: true,
+            userId: true,
+            type: true,
+          },
+        },
+        createdAt: true,
       },
     });
     if (!post) {
