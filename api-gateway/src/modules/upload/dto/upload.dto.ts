@@ -22,7 +22,6 @@ export class UploadFilesDto {
   userId: string;
 }
 
-
 export class UploadSingleFileRequestDto {
   @ApiProperty({ type: UploadFileDto })
   file: UploadFileDto;

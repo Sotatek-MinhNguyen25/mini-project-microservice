@@ -1,41 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome Email</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <tr>
-      <td style="background-color: #4a90e2; padding: 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Welcome to Our Platform!</h1>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding: 30px; text-align: center;">
-        <h2 style="color: #333333; font-size: 20px; margin: 0 0 20px;">Hello, {{username}}!</h2>
-        <p style="color: #666666; font-size: 16px; line-height: 1.5; margin: 0 0 20px;">
-          We're thrilled to have you on board! Thank you for joining our platform. Get ready to explore amazing features and connect with our community.
-        </p>
-        <p style="color: #666666; font-size: 16px; line-height: 1.5; margin: 0 0 20px;">
-          Start your journey by visiting our platform:
-        </p>
-        <a href="{{frontendUrl}}" style="display: inline-block; padding: 12px 24px; background-color: #4a90e2; color: #ffffff; text-decoration: none; border-radius: 4px; font-size: 16px;">
-          Explore Now
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td style="background-color: #f8f8f8; padding: 20px; text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
-        <p style="color: #999999; font-size: 14px; margin: 0;">
-          Need help? Contact us at <a href="mailto:support@yourapp.com" style="color: #4a90e2; text-decoration: none;">support@yourapp.com</a>
-        </p>
-        <p style="color: #999999; font-size: 14px; margin: 10px 0 0;">
-          &copy; 2025 Your App. All rights reserved.
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome Email</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4">
+    <table
+      role="presentation"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      style="
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <tr>
+        <td
+          style="
+            background-color: #4a90e2;
+            padding: 20px;
+            text-align: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+          "
+        >
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px">Welcome to Our Platform!</h1>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 30px; text-align: center">
+          <h2 style="color: #333333; font-size: 20px; margin: 0 0 20px">Hello, {{username}}!</h2>
+          <p style="color: #666666; font-size: 16px; line-height: 1.5; margin: 0 0 20px">
+            We're thrilled to have you on board! Thank you for joining our platform. Get ready to explore amazing
+            features and connect with our community.
+          </p>
+          <p style="color: #666666; font-size: 16px; line-height: 1.5; margin: 0 0 20px">
+            Start your journey by visiting our platform:
+          </p>
+          <a
+            href="{{frontendUrl}}"
+            style="
+              display: inline-block;
+              padding: 12px 24px;
+              background-color: #4a90e2;
+              color: #ffffff;
+              text-decoration: none;
+              border-radius: 4px;
+              font-size: 16px;
+            "
+          >
+            Explore Now
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+          "
+        >
+          <p style="color: #999999; font-size: 14px; margin: 0">
+            Need help? Contact us at
+            <a href="mailto:support@yourapp.com" style="color: #4a90e2; text-decoration: none">support@yourapp.com</a>
+          </p>
+          <p style="color: #999999; font-size: 14px; margin: 10px 0 0">&copy; 2025 Your App. All rights reserved.</p>
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>

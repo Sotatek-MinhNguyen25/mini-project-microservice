@@ -1,5 +1,5 @@
 import { Controller, Inject, Post, UploadedFile, UseInterceptors, OnModuleInit, UploadedFiles } from '@nestjs/common';
-import { FileInterceptor,FilesInterceptor  } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';

@@ -27,10 +27,7 @@ export class UploadGatewayHTTPController {
     private readonly httpService: HttpService,
     @Inject(ConfigService) private readonly configService: ConfigService,
   ) {
-    this.uploadServiceUrl = this.configService.get<string>(
-      'UPLOAD_SERVICE_URL',
-      'http://127.0.0.1:3004/resources',
-    );
+    this.uploadServiceUrl = this.configService.get<string>('UPLOAD_SERVICE_URL', 'http://127.0.0.1:3004/resources');
   }
 
   @Post('file')
@@ -179,7 +176,10 @@ export class UploadGatewayHTTPController {
     }
   }
 
-  private parseFormData(form: InstanceType<typeof formidable.IncomingForm>, req: Request): Promise<{ fields: any; files: any }> {
+  private parseFormData(
+    form: InstanceType<typeof formidable.IncomingForm>,
+    req: Request,
+  ): Promise<{ fields: any; files: any }> {
     return new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) {
