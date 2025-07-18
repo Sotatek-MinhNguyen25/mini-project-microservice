@@ -4,11 +4,12 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaClient } from '@prisma/client';
 import { CommentService } from 'src/comment/comment.service';
 import { RpcException } from '@nestjs/microservices';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PostService {
   constructor(
-    private readonly prisma: PrismaClient,
+    private prisma: PrismaService,
     private commentService: CommentService,
   ) {}
 
