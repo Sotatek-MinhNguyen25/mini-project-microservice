@@ -6,10 +6,7 @@ import { JWT_CONSTANTS } from '../../../constants/app.constants';
 import { config } from '../../../configs/configuration';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(
-  Strategy,
-  JWT_CONSTANTS.STRATEGY_NAME,
-) {
+export class JwtStrategy extends PassportStrategy(Strategy, JWT_CONSTANTS.STRATEGY_NAME) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

@@ -1,6 +1,10 @@
 // kafka-config.helper.ts
 import { Injectable } from '@nestjs/common';
-import { Transport, ClientOptions, MicroserviceOptions } from '@nestjs/microservices';
+import {
+  Transport,
+  ClientOptions,
+  MicroserviceOptions,
+} from '@nestjs/microservices';
 
 @Injectable()
 export class KafkaConfigHelper {

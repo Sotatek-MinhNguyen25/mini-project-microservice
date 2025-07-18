@@ -22,14 +22,9 @@ export class ConfigService {
   readonly PAYMENT_PORT = parseInt(process.env.PAYMENT_PORT || '8002', 10);
 
   // NOTIFICATION
-  readonly NOTIFICATION_SERVICE =
-    process.env.NOTIFICATION_SERVICE || 'NOTIFICATION_SERVICE';
-  readonly NOTIFICATION_HOST =
-    process.env.NOTIFICATION_HOST || this.DEFAULT_HOST;
-  readonly NOTIFICATION_PORT = parseInt(
-    process.env.NOTIFICATION_PORT || '8003',
-    10,
-  );
+  readonly NOTIFICATION_SERVICE = process.env.NOTIFICATION_SERVICE || 'NOTIFICATION_SERVICE';
+  readonly NOTIFICATION_HOST = process.env.NOTIFICATION_HOST || this.DEFAULT_HOST;
+  readonly NOTIFICATION_PORT = parseInt(process.env.NOTIFICATION_PORT || '8003', 10);
 
   readonly AUTH_SERVICE = process.env.AUTH_SERVICE || 'AUTH_SERVICE';
   readonly AUTH_HOST = process.env.AUTH_HOST || this.DEFAULT_HOST;

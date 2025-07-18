@@ -4,12 +4,16 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import * as dotenv from 'dotenv';
 import { PrismaService } from './prisma/prisma.service';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ENV } from './config/constants';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 dotenv.config();
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
   const prismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
   app.connectMicroservice<MicroserviceOptions>({
@@ -25,8 +29,20 @@ async function bootstrap() {
     },
   });
 
+  // Swagger setup
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Auth Service API')
+    .setDescription('API documentation for Auth Service')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api-docs', app, document);
+
   await app.startAllMicroservices();
-  await app.listen(process.env.PORT ?? 3000);
-  logger.log(`🚀 App is running on port: ${process.env.PORT ?? 3000}`);
+  const port = configService.get(ENV.PORT);
+  await app.listen(port);
+  logger.log(`🚀 App is running on port: ${port}`);
 }
+
 bootstrap();

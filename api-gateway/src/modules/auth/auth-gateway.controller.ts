@@ -15,22 +15,16 @@ export class AuthGatewayController {
 
   @Post('register')
   async register(@Body() body: RegisterDto) {
-    return firstValueFrom(
-      this.authClient.send(KAFKA_PATTERNS.AUTH.REGISTER, body),
-    );
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REGISTER, body));
   }
 
   @Post('login')
   async login(@Body() body: LoginDto) {
-    return firstValueFrom(
-      this.authClient.send(KAFKA_PATTERNS.AUTH.LOGIN, body),
-    );
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGIN, body));
   }
 
   @Post('refresh-token')
   async refreshToken(@Body() body: RefreshTokenDto) {
-    return firstValueFrom(
-      this.authClient.send(KAFKA_PATTERNS.AUTH.REFRESH_TOKEN, body),
-    );
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REFRESH_TOKEN, body));
   }
 }

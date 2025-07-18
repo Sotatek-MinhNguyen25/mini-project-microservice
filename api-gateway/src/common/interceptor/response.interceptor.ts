@@ -1,9 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 
@@ -11,14 +6,8 @@ import { Reflector } from '@nestjs/core';
 export class ResponseMessageInterceptor implements NestInterceptor {
   constructor(private reflect: Reflector) {}
 
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Observable<any> | Promise<Observable<any>> {
-    const responseMessage = this.reflect.get<string>(
-      'response_message',
-      context.getHandler(),
-    );
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> | Promise<Observable<any>> {
+    const responseMessage = this.reflect.get<string>('response_message', context.getHandler());
     const statusCode = context.switchToHttp().getResponse().statusCode;
 
     return next.handle().pipe(

@@ -9,7 +9,7 @@ datasource db {
 }
 
 // Định nghĩa Enum cho các vai trò
-enum UserRole {
+enum Role {
   ADMIN
   EDITOR
   USER
@@ -24,11 +24,11 @@ enum UserStatus {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique // Email là duy nhất
-  username  String     @unique // MỚI: Username là duy nhất và bắt buộc
-  password  String? // password có thể null nếu người dùng đăng nhập qua OAuth
-  roles     UserRole[] @default([USER]) // Sử dụng Enum UserRole
+  id        String    @id @default(uuid())
+  email     String    @unique // Email là duy nhất
+  username  String    @unique // MỚI: Username là duy nhất và bắt buộc
+  password  String?    // password có thể null nếu người dùng đăng nhập qua OAuth
+  roles     Role[] @default([USER]) // Sử dụng Enum Role
   status    UserStatus @default(UNVERIFIED) // Trường trạng thái người dùng
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -38,22 +38,11 @@ model User {
   // Chúng là tùy chọn (nullable) để phù hợp với người dùng đăng ký truyền thống
   oauthProvider OAuthProvider? // Nhà cung cấp OAuth (GITHUB, GOOGLE, ...)
 
-  // Mối quan hệ với RefreshToken (đã thêm lại)
-  refreshTokens RefreshToken[]
   // Mối quan hệ với OTP
   otps          OTP[]
 }
 
-// MỚI: RefreshToken đã được thêm lại
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  isRevoked Boolean  @default(false)
-  createdAt DateTime @default(now())
-}
+// Đã loại bỏ model RefreshToken
 
 model OTP {
   id        String      @id @default(uuid())

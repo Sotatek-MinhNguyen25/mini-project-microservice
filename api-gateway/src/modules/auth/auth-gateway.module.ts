@@ -8,4 +8,4 @@ import { KafkaModule } from 'src/common/kafka/kafka.module';
   controllers: [AuthGatewayController],
   providers: [JwtStrategy],
 })
-export class AuthGatewayModule { }
+export class AuthGatewayModule {}

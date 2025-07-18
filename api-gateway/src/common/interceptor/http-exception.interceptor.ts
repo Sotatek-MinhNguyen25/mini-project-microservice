@@ -1,11 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpException, HttpStatus } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AxiosError } from 'axios';
@@ -23,10 +16,7 @@ export class HttpExceptionInterceptor implements NestInterceptor {
           const message = response?.data?.message || 'Internal service error';
           const error = response?.data?.error || HttpStatus[status] || 'Error';
 
-          return throwError(
-            () =>
-              new HttpException({ message, error, statusCode: status }, status),
-          );
+          return throwError(() => new HttpException({ message, error, statusCode: status }, status));
         }
 
         if (err instanceof HttpException) {
