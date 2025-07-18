@@ -1,5 +1,5 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Body, Controller, Inject, OnModuleInit, Post } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -9,8 +9,12 @@ import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 
 @Controller('auth')
 @Public()
-export class AuthGatewayController {
-  constructor(@Inject(KAFKA_CLIENTS.AUTH) private authClient: ClientProxy) {}
+export class AuthGatewayController implements OnModuleInit {
+  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly authClient: ClientKafka) {}
+
+  onModuleInit() {
+    this.authClient.subscribeToResponseOf(KAFKA_PATTERNS.AUTH.REGISTER);
+  }
 
   @Post('register')
   async register(@Body() body: RegisterDto) {

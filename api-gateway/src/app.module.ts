@@ -10,6 +10,7 @@ import { KafkaModule } from './common/kafka/kafka.module';
 import { UserGatewayModule } from './modules/user/user-gateway.module';
 import { JwtModule } from './modules/auth/jwt/jwt.module';
 import { RedisModule } from './common/redis/redis.module';
+import { TagGatewayModule } from './modules/tag/tag-gateway.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RedisModule } from './common/redis/redis.module';
 
     AuthGatewayModule,
     PostGatewayModule,
+    TagGatewayModule,
     UploadGatewayModule,
     NotificationGatewayModule,
     UserGatewayModule,

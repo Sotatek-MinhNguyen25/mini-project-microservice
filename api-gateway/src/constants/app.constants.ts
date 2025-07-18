@@ -30,6 +30,7 @@ export const KAFKA_PATTERNS = {
     COMMENT: 'comment.create',
     TAG: {
       CREATE: 'tag.create',
+      GET: 'tag.get',
     },
     REACTION: {
       CREATE: 'reaction.create',

@@ -22,6 +22,7 @@ export class PostGatewayController implements OnModuleInit {
 
     // Tag
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.CREATE);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.GET);
 
     // Reaction
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.REACTION.CREATE);
@@ -55,14 +56,6 @@ export class PostGatewayController implements OnModuleInit {
   @Get(':id')
   async getDetailPost(@Param('id') id: string) {
     return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, id));
-  }
-
-  // Tag
-  @Public()
-  @Post('tag')
-  @ApiBody({ type: CreateTagDto })
-  async createTag(@Body() createTagDto: CreateTagDto) {
-    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.TAG.CREATE, { ...createTagDto }));
   }
 
   // Reaction

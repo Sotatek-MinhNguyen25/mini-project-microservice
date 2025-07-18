@@ -4,7 +4,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateTagDto, PostTagDto, UpdateTagDto } from './tag.dto';
 import { CONSTANTS } from 'constants/app.constants';
 
-@Controller('tag')
+@Controller()
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 

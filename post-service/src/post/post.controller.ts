@@ -21,7 +21,6 @@ export class PostController {
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.GET_DETAIL)
   async findOne(@Payload() id: string) {
-    console.log(id);
     return await this.postService.findOne(id);
   }
 

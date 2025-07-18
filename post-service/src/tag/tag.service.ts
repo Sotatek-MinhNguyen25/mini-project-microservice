@@ -8,13 +8,16 @@ import { RpcException } from '@nestjs/microservices';
 export class TagService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getTags(): Promise<Tag[]> {
+  async getTags(): Promise<{ data: Tag[]; meta: any }> {
     const tags = await this.prismaService.tag.findMany({
       where: {
         deletedAt: null,
       },
     });
-    return tags;
+    return {
+      data: tags,
+      meta: {},
+    };
   }
 
   async createTag(createTagDto: CreateTagDto): Promise<Tag> {
