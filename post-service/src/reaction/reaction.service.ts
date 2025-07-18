@@ -5,6 +5,7 @@ import { Reaction } from '@prisma/client';
 import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { CONSTANTS } from 'constants/app.constants';
 import { ReactionSummary } from './reaction.interface';
+import { ConsumerResult } from 'src/common/type/consumer-result';
 // import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -18,7 +19,7 @@ export class ReactionService {
   //get all reactions of a post
   async getReactionsByPostId(
     postId: string,
-  ): Promise<{ data: Reaction[]; meta: any }> {
+  ): Promise<ConsumerResult<Reaction[]>> {
     const reactions = await this.prismaService.reaction.findMany({
       where: {
         postId: postId,
@@ -32,10 +33,9 @@ export class ReactionService {
     return { data: reactions, meta: {} };
   }
 
-  async getReactionsSummaryByPostId(postId: string): Promise<{
-    data: { count: number; summary: ReactionSummary[] };
-    meta: any;
-  }> {
+  async getReactionsSummaryByPostId(
+    postId: string,
+  ): Promise<ConsumerResult<{ count: number; summary: ReactionSummary[] }>> {
     const count = await this.prismaService.reaction.count({
       where: {
         postId: postId,
@@ -59,7 +59,7 @@ export class ReactionService {
 
   async createReaction(
     createReactionDto: CreateReactionDto,
-  ): Promise<{ data: Reaction; meta: any }> {
+  ): Promise<ConsumerResult<Reaction>> {
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         postId: createReactionDto.postId,
@@ -81,7 +81,7 @@ export class ReactionService {
 
   async updateReaction(
     updateReactionDto: UpdateReactionDto,
-  ): Promise<{ data: Reaction; meta: any }> {
+  ): Promise<ConsumerResult<Reaction>> {
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         id: updateReactionDto.id,
@@ -105,7 +105,7 @@ export class ReactionService {
     return { data: updatedReaction, meta: {} };
   }
 
-  async deleteReaction(id: string): Promise<{ data: Reaction; meta: any }> {
+  async deleteReaction(id: string): Promise<ConsumerResult<Reaction>> {
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         id,

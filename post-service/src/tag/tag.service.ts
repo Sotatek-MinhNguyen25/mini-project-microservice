@@ -158,7 +158,6 @@ export class TagService {
       throw new RpcException({ status: 404, message: 'Post tag not found' });
     }
 
-    // dont have soft delete yet
     const deletedPostTag = await this.prismaService.postTag.update({
       where: {
         postId_tagId: {

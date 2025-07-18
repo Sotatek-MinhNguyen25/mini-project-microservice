@@ -1,10 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CONSTANTS } from 'constants/app.constants';
+import { ConsumerResult } from '../common/type/consumer-result';
+import { Comment } from '@prisma/client';
 
 @Injectable()
 export class CommentService {
@@ -14,7 +16,9 @@ export class CommentService {
     private readonly authClient: ClientKafka,
   ) {}
 
-  async create(createCommentDto: CreateCommentDto) {
+  async create(
+    createCommentDto: CreateCommentDto,
+  ): Promise<ConsumerResult<Comment>> {
     const comment = await this.prismaService.comment.findFirst({
       where: {
         userId: createCommentDto.userId,
@@ -27,21 +31,25 @@ export class CommentService {
         message: 'Comment already excisted',
       });
     }
-    const newComment = await this.prismaService.comment.create({
+    const createdComment = await this.prismaService.comment.create({
       data: createCommentDto,
     });
-    return { data: newComment, meta: {} };
+    return { data: createdComment, meta: {} };
   }
 
-  async countCommentsByPostId(postId: string) {
-    return await this.prismaService.comment.count({
+  async countCommentsByPostId(postId: string): Promise<ConsumerResult<number>> {
+    const count = await this.prismaService.comment.count({
       where: {
         postId: postId,
+        deletedAt: null,
       },
     });
+    return { data: count, meta: {} };
   }
 
-  async getCommentsByPostId(postId: string) {
+  async getCommentsByPostId(
+    postId: string,
+  ): Promise<ConsumerResult<Comment[]>> {
     const comments = await this.prismaService.comment.findMany({
       where: {
         postId: postId,
@@ -58,10 +66,12 @@ export class CommentService {
       ...comment,
       user: userInfo.find((u) => u.id === comment.userId),
     }));
-    return result;
+    return { data: result, meta: {} };
   }
 
-  async update(updateCommentDto: UpdateCommentDto) {
+  async update(
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<ConsumerResult<Comment>> {
     const comment = await this.prismaService.comment.findFirst({
       where: {
         id: updateCommentDto.id,
@@ -73,15 +83,16 @@ export class CommentService {
         message: 'Comment not found',
       });
     }
-    return await this.prismaService.comment.update({
+    const updatedComment = await this.prismaService.comment.update({
       where: {
         id: updateCommentDto.id,
       },
       data: updateCommentDto,
     });
+    return { data: updatedComment, meta: {} };
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<ConsumerResult<Comment>> {
     const comment = await this.prismaService.comment.findFirst({
       where: {
         id: id,
@@ -92,7 +103,7 @@ export class CommentService {
     }
 
     // soft delete
-    return await this.prismaService.comment.update({
+    const deletedComment = await this.prismaService.comment.update({
       where: {
         id: id,
       },
@@ -100,5 +111,6 @@ export class CommentService {
         deletedAt: new Date(),
       },
     });
+    return { data: deletedComment, meta: {} };
   }
 }
