@@ -14,7 +14,6 @@ import { RedisModule } from './common/redis/redis.module';
 @Module({
   imports: [
     ConfigModule,
-
     AuthGatewayModule,
     PostGatewayModule,
     UploadGatewayModule,

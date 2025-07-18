@@ -7,7 +7,6 @@ import { UploadGatewayHTTPController } from './upload-gateway-http.controller';
 @Module({
   // imports: [KafkaModule],
   imports: [HttpModule],
-  // controllers: [UploadGatewayController],
   controllers: [UploadGatewayHTTPController],
 })
 export class UploadGatewayModule {}
