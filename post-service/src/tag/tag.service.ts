@@ -3,21 +3,22 @@ import { PostTag, Tag } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostTagDto, CreateTagDto, UpdateTagDto } from './tag.dto';
 import { RpcException } from '@nestjs/microservices';
+import { ConsumerResult } from 'src/common/type/consumer-result';
 
 @Injectable()
 export class TagService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getTags(): Promise<Tag[]> {
+  async getTags(): Promise<ConsumerResult<Tag[]>> {
     const tags = await this.prismaService.tag.findMany({
       where: {
         deletedAt: null,
       },
     });
-    return tags;
+    return { data: tags, meta: {} };
   }
 
-  async createTag(createTagDto: CreateTagDto): Promise<Tag> {
+  async createTag(createTagDto: CreateTagDto): Promise<ConsumerResult<Tag>> {
     const tag = await this.prismaService.tag.findFirst({
       where: {
         name: createTagDto.name,
@@ -26,12 +27,13 @@ export class TagService {
     if (tag) {
       throw new RpcException({ status: 409, message: 'Tag already exists' });
     }
-    return await this.prismaService.tag.create({
+    const createdTag = await this.prismaService.tag.create({
       data: createTagDto,
     });
+    return { data: createdTag, meta: {} };
   }
 
-  async updateTag(updateTagDto: UpdateTagDto): Promise<Tag> {
+  async updateTag(updateTagDto: UpdateTagDto): Promise<ConsumerResult<Tag>> {
     const tag = await this.prismaService.tag.findFirst({
       where: {
         id: updateTagDto.id,
@@ -40,15 +42,16 @@ export class TagService {
     if (!tag) {
       throw new RpcException({ status: 404, message: 'Tag not found' });
     }
-    return await this.prismaService.tag.update({
+    const updatedTag = await this.prismaService.tag.update({
       where: {
         id: updateTagDto.id,
       },
       data: updateTagDto,
     });
+    return { data: updatedTag, meta: {} };
   }
 
-  async deleteTag(id: string): Promise<Tag> {
+  async deleteTag(id: string): Promise<ConsumerResult<Tag>> {
     const tag = await this.prismaService.tag.findFirst({
       where: {
         id: id,
@@ -58,7 +61,7 @@ export class TagService {
       throw new RpcException({ status: 404, message: 'Tag not found' });
     }
 
-    return await this.prismaService.tag.update({
+    const deletedTag = await this.prismaService.tag.update({
       where: {
         id: id,
       },
@@ -66,9 +69,11 @@ export class TagService {
         deletedAt: new Date(),
       },
     });
+
+    return { data: deletedTag, meta: {} };
   }
 
-  async getTagsByPostId(postId: string): Promise<Tag[]> {
+  async getTagsByPostId(postId: string): Promise<ConsumerResult<Tag[]>> {
     const tagIds = await this.prismaService.postTag.findMany({
       where: {
         postId: postId,
@@ -82,10 +87,12 @@ export class TagService {
         deletedAt: null,
       },
     });
-    return tags;
+    return { data: tags, meta: {} };
   }
 
-  async createPostTag(PostTagDto: PostTagDto): Promise<PostTag> {
+  async createPostTag(
+    PostTagDto: PostTagDto,
+  ): Promise<ConsumerResult<PostTag>> {
     const tag = await this.prismaService.tag.findFirst({
       where: {
         id: PostTagDto.tagId,
@@ -114,6 +121,10 @@ export class TagService {
         message: 'Post tag already exists',
       });
     }
+
+    const createdPostTag = await this.prismaService.postTag.create({
+      data: PostTagDto,
+    });
 
     return await this.prismaService.postTag.create({
       data: PostTagDto,
