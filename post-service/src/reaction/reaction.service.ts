@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
-import { Reaction } from 'src/generated/prisma/client';
+// import { Reaction } from 'src/generated/prisma/client';
 import { ClientKafka } from '@nestjs/microservices';
+import { Reaction } from '@prisma/client';
 
 @Injectable()
 export class ReactionService {

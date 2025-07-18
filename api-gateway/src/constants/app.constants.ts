@@ -23,6 +23,7 @@ export const KAFKA_PATTERNS = {
     UPDATE: 'post.update',
     DELETE: 'post.delete',
     GET: 'post.get',
+    GET_DETAIL: 'post.get-detail',
     LIST: 'post.list',
     LIKE: 'post.like',
     UNLIKE: 'post.unlike',

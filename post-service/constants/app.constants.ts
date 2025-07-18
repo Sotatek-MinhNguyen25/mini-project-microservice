@@ -3,6 +3,7 @@ export const CONSTANTS = {
     POST: {
       GET: 'post.get',
       CREATE: 'post.create',
+      GET_DETAIL: 'post.get-detail',
     },
     COMMENT: {
       CREATE: 'comment.create',

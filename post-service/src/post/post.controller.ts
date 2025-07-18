@@ -19,9 +19,10 @@ export class PostController {
     return await this.postService.findAll();
   }
 
-  @MessagePattern('findOnePost')
-  findOne(@Payload() id: number) {
-    return this.postService.findOne(id);
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.GET_DETAIL)
+  async findOne(@Payload() id: string) {
+    console.log(id);
+    return await this.postService.findOne(id);
   }
 
   @MessagePattern('updatePost')

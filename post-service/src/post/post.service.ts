@@ -3,6 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaClient } from '@prisma/client';
 import { CommentService } from 'src/comment/comment.service';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class PostService {
@@ -22,7 +23,7 @@ export class PostService {
   }
 
   async findAll() {
-    const posts = await this.prisma.post.findMany();
+    const posts = await this.prisma.post.findMany({});
     const result = await Promise.all(
       posts.map(async (post) => ({
         ...post,
@@ -35,8 +36,24 @@ export class PostService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(id: string) {
+    console.log(id);
+    const post = await this.prisma.post.findFirst({
+      where: { id },
+      include: {
+        comments: true,
+      },
+    });
+    if (!post) {
+      throw new RpcException({ status: 400, message: 'Post không tồn tại' });
+    }
+
+    return {
+      data: {
+        post: post,
+      },
+      meta: {},
+    };
   }
 
   update(id: number, updatePostDto: UpdatePostDto) {

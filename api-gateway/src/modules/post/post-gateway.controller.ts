@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   OnModuleInit,
+  Param,
   Post,
 } from '@nestjs/common';
 import { Public } from '../auth/jwt';
@@ -23,6 +24,7 @@ export class PostGatewayController implements OnModuleInit {
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.CREATE);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.COMMENT);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET_DETAIL);
     await this.postClient.connect();
   }
 
@@ -49,6 +51,13 @@ export class PostGatewayController implements OnModuleInit {
       this.postClient.send(KAFKA_PATTERNS.POST.COMMENT, {
         ...createCommentDto,
       }),
+    );
+  }
+  @Public()
+  @Get(':id')
+  async getDetailPost(@Param('id') id: string) {
+    return await firstValueFrom(
+      this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, id),
     );
   }
 }
