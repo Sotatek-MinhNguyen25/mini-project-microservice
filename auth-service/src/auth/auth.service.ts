@@ -12,7 +12,7 @@ import { VerifyForgotPasswordDto } from './dto/verify-forgot-password.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
 import { ERROR_MESSAGE } from '../shared/message/error.message';
-import { JwtService } from '../jwt/jwt.service';
+import { CustomJwtService } from '../jwt/custom-jwt.service';
 import { JwtPayload } from '../shared/type/jwt.type';
 import { CompleteRegisterDto } from './dto/complete-register.dto';
 import { OTP_PURPOSE, USER_STATUS } from './auth.constant';
@@ -23,7 +23,7 @@ import { AuthRepository } from 'src/auth/auth.repository';
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
-    private readonly jwtService: JwtService,
+    private readonly customJwtService: CustomJwtService,
     private readonly redisService: RedisService,
   ) {}
 
@@ -80,12 +80,12 @@ export class AuthService {
       accessToken,
       expiresIn: accessTokenExpiresIn,
       jti: atJti,
-    } = this.jwtService.createAT(payload);
+    } = this.customJwtService.createAT(payload);
     const {
       refreshToken,
       expiresIn: refreshTokenExpiresIn,
       jti: rtJti,
-    } = this.jwtService.createRT(payload);
+    } = this.customJwtService.createRT(payload);
     // Lưu jti vào Redis
     await this.redisService.setJti(atJti, this.parseTTL(accessTokenExpiresIn));
     await this.redisService.setJti(rtJti, this.parseTTL(refreshTokenExpiresIn));
@@ -125,12 +125,12 @@ export class AuthService {
       accessToken,
       expiresIn: accessTokenExpiresIn,
       jti: atJti,
-    } = this.jwtService.createAT(payload);
+    } = this.customJwtService.createAT(payload);
     const {
       refreshToken,
       expiresIn: refreshTokenExpiresIn,
       jti: rtJti,
-    } = this.jwtService.createRT(payload);
+    } = this.customJwtService.createRT(payload);
     // Lưu jti vào Redis
     await this.redisService.setJti(atJti, this.parseTTL(accessTokenExpiresIn));
     await this.redisService.setJti(rtJti, this.parseTTL(refreshTokenExpiresIn));
@@ -154,7 +154,9 @@ export class AuthService {
 
   async refreshToken(dto: RefreshTokenDto) {
     try {
-      const payload = this.jwtService.verify<JwtPayload>(dto.refreshToken);
+      const payload = this.customJwtService.verify<JwtPayload>(
+        dto.refreshToken,
+      );
       const user = await this.authRepository.findUserById(payload.sub);
       if (!user) throw new UnauthorizedException(ERROR_MESSAGE.USER_NOT_FOUND);
       const newPayload: JwtPayload = {
@@ -165,9 +167,9 @@ export class AuthService {
         jti: payload.jti,
       };
       const { accessToken, expiresIn: accessTokenExpiresIn } =
-        this.jwtService.createAT(newPayload);
+        this.customJwtService.createAT(newPayload);
       const { refreshToken, expiresIn: refreshTokenExpiresIn } =
-        this.jwtService.createRT(newPayload);
+        this.customJwtService.createRT(newPayload);
       return {
         accessToken,
         refreshToken,
@@ -184,7 +186,7 @@ export class AuthService {
    */
   async logout(accessToken: string) {
     try {
-      const payload = this.jwtService.verify<JwtPayload>(accessToken);
+      const payload = this.customJwtService.verify<JwtPayload>(accessToken);
       //Đoạn này để debug
       if (!payload.jti) {
         throw new UnauthorizedException(ERROR_MESSAGE.TOKEN_MISSING_JTI);
