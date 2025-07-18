@@ -126,12 +126,12 @@ export class TagService {
       data: PostTagDto,
     });
 
-    return await this.prismaService.postTag.create({
-      data: PostTagDto,
-    });
+    return { data: createdPostTag, meta: {} };
   }
 
-  async deletePostTag(postTagDto: PostTagDto): Promise<PostTag> {
+  async deletePostTag(
+    postTagDto: PostTagDto,
+  ): Promise<ConsumerResult<PostTag>> {
     const tag = await this.prismaService.tag.findFirst({
       where: {
         id: postTagDto.tagId,
@@ -159,13 +159,18 @@ export class TagService {
     }
 
     // dont have soft delete yet
-    return await this.prismaService.postTag.delete({
+    const deletedPostTag = await this.prismaService.postTag.update({
       where: {
         postId_tagId: {
           postId: postTagDto.postId,
           tagId: postTagDto.tagId,
         },
       },
+      data: {
+        deletedAt: new Date(),
+      },
     });
+
+    return { data: deletedPostTag, meta: {} };
   }
 }

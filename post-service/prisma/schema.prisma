@@ -37,6 +37,8 @@ model PostTag {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@id([postId, tagId])
 }
@@ -59,6 +61,7 @@ model Reaction {
   type      ReactionType
   post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   deletedAt DateTime?
 
   @@unique([userId, postId, type])
