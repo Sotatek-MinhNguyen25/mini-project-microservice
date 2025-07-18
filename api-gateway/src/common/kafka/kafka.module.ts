@@ -35,6 +35,9 @@ import { KAFKA_CLIENTS } from 'src/constants/app.constants';
             brokers: [config.kafka.brokers],
             clientId: config.kafka.clientId + '-upload',
           },
+          consumer: {
+            groupId: config.kafka.clientId + '-upload-group',
+          },
         },
       },
       {

@@ -3,10 +3,17 @@ import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const logger = new Logger();
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
-  await app.listen(process.env.PORT ?? 3008);
-  logger.log(`🚀 App is running on port: ${process.env.PORT ?? 3000}`);
+  const logger = new Logger('Bootstrap');
+
+  try {
+    const app = await NestFactory.create(AppModule);
+    const port = process.env.PORT || 3008;
+
+    await app.listen(port);
+    logger.log(`HTTP server is running on port ${port}`);
+  } catch (error) {
+    logger.error(`Failed to start HTTP server: ${error.message}`, error.stack);
+    process.exit(1);
+  }
 }
 bootstrap();
