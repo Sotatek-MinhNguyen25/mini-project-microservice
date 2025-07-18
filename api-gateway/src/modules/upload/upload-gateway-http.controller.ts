@@ -11,7 +11,7 @@ import { Public } from '../auth/jwt';
 @Public()
 @ApiTags('Upload')
 @Controller('upload')
-export class UploadGatewayController implements OnModuleInit {
+export class UploadGatewayHTTPController implements OnModuleInit {
   constructor(
     @Inject(KAFKA_CLIENTS.UPLOAD)
     private uploadClient: ClientKafka,

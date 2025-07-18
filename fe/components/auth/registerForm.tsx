@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useRegister } from "@/hooks/useRegister";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ export function RegisterForm() {
   });
   const { mutate: register, isPending } = useRegister();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -40,21 +42,29 @@ export function RegisterForm() {
       return;
     }
 
-    //mock data passing real data to register function
-    if (formData.email === "mock@email.com"){
-      return toast({
+    if (formData.email === "mock@email.com") {
+      toast({
         title: "Info",
         description: "Please check your email for verification.",
       });
+      router.push(`/auth/register/verify?email=${encodeURIComponent(formData.email)}`);
+      return;
     }
 
-    register({
-      email: formData.email,
-      username: formData.username,
-      password: formData.password,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-    });
+    register(
+      {
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      },
+      {
+        onSuccess: () => {
+          router.push(`/auth/register/verify?email=${encodeURIComponent(formData.email)}`);
+        },
+      }
+    );
   };
 
   return (
@@ -107,7 +117,7 @@ export function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password 12131223</Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           name="password"
@@ -119,7 +129,7 @@ export function RegisterForm() {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password 12312</Label>
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
         <Input
           id="confirmPassword"
           name="confirmPassword"

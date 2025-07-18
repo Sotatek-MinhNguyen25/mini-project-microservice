@@ -23,17 +23,10 @@ export const KAFKA_PATTERNS = {
     UPDATE: 'post.update',
     DELETE: 'post.delete',
     GET: 'post.get',
-    GET_DETAIL: 'post.get-detail',
     LIST: 'post.list',
     LIKE: 'post.like',
     UNLIKE: 'post.unlike',
     COMMENT: 'comment.create',
-    TAG: {
-      CREATE: 'tag.create',
-    },
-    REACTION: {
-      CREATE: 'reaction.create',
-    },
   },
 
   // Upload Service Events

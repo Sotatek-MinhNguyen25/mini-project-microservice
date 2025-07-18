@@ -3,6 +3,7 @@ import { CloudinaryController } from './cloudinary/cloudinary.controller';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
 import { ConfigModule } from '@nestjs/config';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -10,8 +11,8 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
       isGlobal: true,
     }),
+    CloudinaryModule,
   ],
-  controllers: [CloudinaryController],
   providers: [CloudinaryService, CloudinaryProvider],
 })
 export class AppModule {}
