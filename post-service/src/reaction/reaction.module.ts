@@ -5,5 +5,6 @@ import { ReactionService } from './reaction.service';
 @Module({
   controllers: [ReactionController],
   providers: [ReactionService],
+  exports: [ReactionService],
 })
 export class ReactionModule {}
