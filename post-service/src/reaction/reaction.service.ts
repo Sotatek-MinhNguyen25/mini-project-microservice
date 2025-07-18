@@ -6,16 +6,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
-<<<<<<< HEAD
-// import { Reaction } from 'src/generated/prisma/client';
-import { ClientKafka } from '@nestjs/microservices';
-import { Reaction } from '@prisma/client';
-=======
+
 import { Reaction } from '@prisma/client';
 import { ClientKafka } from '@nestjs/microservices';
 import { CONSTANTS } from 'constants/app.constants';
 // import { firstValueFrom } from 'rxjs';
->>>>>>> be280ab561ab9174fd3be05ce639f8d4ac0eb141
 
 @Injectable()
 export class ReactionService {
