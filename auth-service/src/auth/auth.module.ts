@@ -5,10 +5,11 @@ import { AuthRepository } from './auth.repository';
 import { ConfigModule } from '@nestjs/config';
 import { CustomJwtModule } from '../jwt/custom-jwt.module';
 import { RedisModule } from '../redis/redis.module';
+import { AuthKafkaController } from './auth-kafka.controller';
 
 @Module({
   imports: [ConfigModule, CustomJwtModule, RedisModule],
-  controllers: [AuthController],
+  controllers: [AuthController, AuthKafkaController],
   providers: [AuthService, AuthRepository],
   exports: [AuthService, AuthRepository],
 })

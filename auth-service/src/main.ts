@@ -6,7 +6,9 @@ import { PrismaService } from './prisma/prisma.service';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from './config/constants';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+// Xóa import DocumentBuilder, SwaggerModule
+// import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 dotenv.config();
 
@@ -29,15 +31,7 @@ async function bootstrap() {
     },
   });
 
-  // Swagger setup
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Auth Service API')
-    .setDescription('API documentation for Auth Service')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api-docs', app, document);
+  // Xóa toàn bộ phần Swagger setup
 
   await app.startAllMicroservices();
   const port = configService.get(ENV.PORT);
