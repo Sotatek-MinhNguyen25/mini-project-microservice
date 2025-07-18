@@ -1,7 +1,13 @@
-'use client'
+'use client';
 
-import { AuthPage } from '@/components/auth/authPage'
+import { AuthPage } from '@/components/auth/authPage';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function Login() {
-  return <AuthPage />
+  return (
+    <div>
+      <AuthPage />
+      <Toaster />
+    </div>
+  );
 }

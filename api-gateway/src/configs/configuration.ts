@@ -8,7 +8,7 @@ const configuration = () => ({
   apiPrefix: process.env.API_PREFIX || 'api/v1',
 
   kafka: {
-    brokers: process.env.KAFKA_BROKERS || 'localhost:9092',
+    brokers: process.env.KAFKA_BROKERS || 'localhost:29092',
     clientId: process.env.KAFKA_CLIENT_ID || 'api-gateway',
     groupId: process.env.KAFKA_GROUP_ID || 'api-gateway-group',
   },
