@@ -8,9 +8,8 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ResponseInterceptor } from './shared/interceptors/response.interceptor';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { ValidationPipe } from './shared/pipes/validation.pipe';
-import { JwtService } from './jwt/jwt.service';
 import configuration from './config/configuration';
-import { RedisService } from './redis/redis.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,12 +19,11 @@ import { RedisService } from './redis/redis.service';
     }),
     KafkaModule.register(['auth']),
     PrismaModule,
+    AuthModule, // Import AuthModule here
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    JwtService,
-    RedisService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
