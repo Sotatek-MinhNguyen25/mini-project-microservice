@@ -1,15 +1,10 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
-
 import { Reaction } from '@prisma/client';
-import { ClientKafka } from '@nestjs/microservices';
+import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { CONSTANTS } from 'constants/app.constants';
+import { ReactionSummary } from './reaction.interface';
 // import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -20,22 +15,46 @@ export class ReactionService {
     private readonly authClient: ClientKafka,
   ) {}
 
+  //get all reactions of a post
   async getReactionsByPostId(
-    id: string,
+    postId: string,
   ): Promise<{ reaction: Reaction[]; count: number }> {
     const reactions = await this.prismaService.reaction.findMany({
       where: {
-        postId: id,
+        postId: postId,
       },
     });
+    // should we show the name of user who reacted?
     // const userIds = [...new Set(reactions.map((reaction) => reaction.userId))];
     // const userInfo = await firstValueFrom(
     //   this.authClient.send('findAllUser', { userIds: userIds }),
     // );
-    // count the number of total reactions
-    // should we count the number of unique reactions and unique users?
-    // should we show the name of user who reacted?
     return { reaction: reactions, count: reactions.length };
+  }
+
+  async getReactionsSummaryByPostId(postId: string): Promise<{
+    count: number;
+    summary: ReactionSummary[];
+  }> {
+    const count = await this.prismaService.reaction.count({
+      where: {
+        postId: postId,
+      },
+    });
+    const summary = await this.prismaService.reaction.groupBy({
+      where: {
+        postId: postId,
+      },
+      by: ['type'],
+      _count: {
+        _all: true,
+      },
+    });
+    const formattedSummary: ReactionSummary[] = summary.map((item) => ({
+      type: item.type,
+      count: item._count._all,
+    }));
+    return { count: count, summary: formattedSummary };
   }
 
   async createReaction(
@@ -49,7 +68,10 @@ export class ReactionService {
     });
     if (reaction) {
       // redirect to update reaction?
-      throw new ConflictException('User has already reacted to this post');
+      throw new RpcException({
+        status: 409,
+        message: 'User has already reacted to this post',
+      });
     }
     return await this.prismaService.reaction.create({
       data: createReactionDto,
@@ -65,7 +87,10 @@ export class ReactionService {
       },
     });
     if (!reaction) {
-      throw new NotFoundException('User has not reacted to this post');
+      throw new RpcException({
+        status: 404,
+        message: 'User has not reacted to this post',
+      });
     }
     return await this.prismaService.reaction.update({
       where: {
@@ -82,8 +107,10 @@ export class ReactionService {
       },
     });
     if (!reaction) {
-      throw new NotFoundException('Reaction not found');
+      throw new RpcException({ status: 404, message: 'Reaction not found' });
     }
+
+    // soft delete
     return await this.prismaService.reaction.update({
       where: {
         id,
