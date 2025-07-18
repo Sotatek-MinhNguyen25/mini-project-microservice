@@ -1,33 +1,38 @@
-import { Controller, Inject, Post, UploadedFile, UseInterceptors, OnModuleInit, UploadedFiles } from '@nestjs/common';
-import { FileInterceptor,FilesInterceptor  } from '@nestjs/platform-express';
-import { ClientKafka } from '@nestjs/microservices';
+import { Controller, Post, Req, Inject, BadRequestException, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorator/auth-user.decorator';
-import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { IUser } from '../user/interface/user.interface';
 import { Public } from '../auth/jwt';
+import { AxiosResponse } from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
+import * as formidable from 'formidable';
+import * as fs from 'fs/promises';
 
-@Public()
+interface FileUpload {
+  field: string;
+  file: formidable.File & { buffer?: Buffer };
+}
+
 @ApiTags('Upload')
+@Public()
 @Controller('upload')
-export class UploadGatewayHTTPController implements OnModuleInit {
-  constructor(
-    @Inject(KAFKA_CLIENTS.UPLOAD)
-    private uploadClient: ClientKafka,
-  ) {}
+export class UploadGatewayHTTPController {
+  private readonly uploadServiceUrl: string;
+  private readonly logger = new Logger(UploadGatewayHTTPController.name);
 
-  async onModuleInit() {
-    this.uploadClient.subscribeToResponseOf(`${KAFKA_PATTERNS.UPLOAD.FILE}`);
-    this.uploadClient.subscribeToResponseOf(`${KAFKA_PATTERNS.UPLOAD.IMAGE}`);
-    this.uploadClient.subscribeToResponseOf(`${KAFKA_PATTERNS.UPLOAD.IMAGES}`);
-    console.log();
-    await this.uploadClient.connect();
+  constructor(
+    private readonly httpService: HttpService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
+  ) {
+    this.uploadServiceUrl = this.configService.get<string>(
+      'UPLOAD_SERVICE_URL',
+      'http://127.0.0.1:3004/resources',
+    );
   }
 
-  /**
-   * Upload a single file
-   */
   @Post('file')
   @ApiOperation({ summary: 'Upload a single file' })
   @ApiConsumes('multipart/form-data')
@@ -39,21 +44,13 @@ export class UploadGatewayHTTPController implements OnModuleInit {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: any, @AuthUser() user: IUser) {
-    const userId = this.getUserId(user);
-
-    const response = await this.sendToKafka(KAFKA_PATTERNS.UPLOAD.FILE, {
-      file: this.formatFile(file),
-      userId,
-    });
-
-    return this.formatSingleFileResponse(response, 'File uploaded successfully');
+  @ApiResponse({ status: 200, description: 'File uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'No file uploaded or invalid file' })
+  async uploadFile(@Req() req: Request, @AuthUser() user: IUser) {
+    const file = await this.parseSingleFile(req, 'file');
+    return this.uploadSingleFile(file, user, 'file');
   }
 
-  /**
-   * Upload a single image
-   */
   @Post('image')
   @ApiOperation({ summary: 'Upload a single image' })
   @ApiConsumes('multipart/form-data')
@@ -65,23 +62,13 @@ export class UploadGatewayHTTPController implements OnModuleInit {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('image'))
-  async uploadImage(@UploadedFile() file: any, @AuthUser() user: IUser) {
-    const userId = this.getUserId(user);
-
-    const response = await this.sendToKafka(KAFKA_PATTERNS.UPLOAD.IMAGE, {
-      file: this.formatFile(file),
-      userId,
-    });
-
-    console.log('Response from Kafka:', response);
-
-    return this.formatSingleFileResponse(response, 'Image uploaded successfully');
+  @ApiResponse({ status: 200, description: 'Image uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'No image uploaded or invalid image' })
+  async uploadImage(@Req() req: Request, @AuthUser() user: IUser) {
+    const file = await this.parseSingleFile(req, 'image');
+    return this.uploadSingleFile(file, user, 'file');
   }
 
-  /**
-   * Upload multiple files
-   */
   @Post('files')
   @ApiOperation({ summary: 'Upload multiple files' })
   @ApiConsumes('multipart/form-data')
@@ -89,30 +76,17 @@ export class UploadGatewayHTTPController implements OnModuleInit {
     schema: {
       type: 'object',
       properties: {
-        files: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-        },
+        files: { type: 'array', items: { type: 'string', format: 'binary' } },
       },
     },
   })
-  @UseInterceptors(FilesInterceptor('files'))
-  async uploadFiles(@UploadedFiles() files: any, @AuthUser() user: IUser) {
-    const userId = this.getUserId(user);
-
-    const response = await this.sendToKafka(KAFKA_PATTERNS.UPLOAD.IMAGES, {
-      files: files.map(this.formatFile),
-      userId,
-    });
-
-    console.log('Response from Kafka:', response);
-
-    return this.formatMultipleFilesResponse(response, 'Files uploaded successfully');
+  @ApiResponse({ status: 200, description: 'Files uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'No files uploaded or invalid files' })
+  async uploadFiles(@Req() req: Request, @AuthUser() user: IUser) {
+    const files = await this.parseMultipleFiles(req, 'files');
+    return this.uploadMultipleFiles(files, user, 'files');
   }
 
-  /**
-   * Upload multiple images
-   */
   @Post('images')
   @ApiOperation({ summary: 'Upload multiple images' })
   @ApiConsumes('multipart/form-data')
@@ -120,86 +94,155 @@ export class UploadGatewayHTTPController implements OnModuleInit {
     schema: {
       type: 'object',
       properties: {
-        images: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-        },
+        images: { type: 'array', items: { type: 'string', format: 'binary' } },
       },
     },
   })
-  @UseInterceptors(FilesInterceptor('images'))
-  async uploadImages(@UploadedFiles() files: any, @AuthUser() user: IUser) {
-    const userId = this.getUserId(user);
+  @ApiResponse({ status: 200, description: 'Images uploaded successfully' })
+  @ApiResponse({ status: 400, description: 'No images uploaded or invalid images' })
+  async uploadImages(@Req() req: Request, @AuthUser() user: IUser) {
+    const files = await this.parseMultipleFiles(req, 'images');
+    return this.uploadMultipleFiles(files, user, 'files');
+  }
 
-    const response = await this.sendToKafka(KAFKA_PATTERNS.UPLOAD.IMAGES, {
-      files: files.map(this.formatFile),
-      userId,
+  private async parseSingleFile(req: Request, fieldName: string): Promise<formidable.File & { buffer: Buffer }> {
+    const form = new formidable.IncomingForm({
+      multiples: false,
+      keepExtensions: true,
+      maxFileSize: 100 * 1024 * 1024, // 100MB limit
+      allowEmptyFiles: false,
+      minFileSize: 1,
+      maxTotalFileSize: 100 * 1024 * 1024,
     });
-
-    return this.formatMultipleFilesResponse(response, 'Images uploaded successfully');
-  }
-
-  private formatFile(file: any) {
-    return {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      buffer: file.buffer,
-    };
-  }
-
-  private formatMultipleFilesResponse(response: any[], successMessage: string) {
-    if (!Array.isArray(response)) {
-      return {
-        status: 'error',
-        message: 'Upload failed or invalid response from service',
-      };
+    const { files } = await this.parseFormData(form, req);
+    this.logger.debug(
+      `Parsed files for ${fieldName}: ${JSON.stringify(files, (key, value) => (key === 'buffer' ? '[Buffer]' : value))}`,
+    );
+    const file = files[fieldName]?.[0];
+    if (!file) {
+      throw new BadRequestException(`No file uploaded for field: ${fieldName}`);
     }
-
-    return {
-      status: 'success',
-      message: successMessage,
-      data: response.map((file) => ({
-        url: file?.url,
-        publicId: file?.publicId,
-        resourceType: file?.resourceType,
-        fileType: file?.fileType,
-        fileName: file?.fileName,
-      })),
-    };
-  }
-
-  private sendToKafka(pattern: string, payload: any) {
-    return firstValueFrom(this.uploadClient.send(pattern, payload));
-  }
-
-  private formatSingleFileResponse(response: any, successMessage: string) {
-    if (response?.status !== 'success') {
-      return {
-        status: 'error',
-        message: response?.message || 'Upload failed',
-      };
+    try {
+      // Ensure file has a buffer
+      if (!file.buffer && file.filepath) {
+        file.buffer = await fs.readFile(file.filepath);
+        this.logger.debug(`Read file buffer for ${fieldName}: ${file.originalname}, size: ${file.buffer.length}`);
+        // Clean up temporary file
+        await fs
+          .unlink(file.filepath)
+          .catch((err) => this.logger.warn(`Failed to delete temp file ${file.filepath}: ${err.message}`));
+      }
+      if (!file.buffer) {
+        throw new Error('File buffer could not be loaded');
+      }
+      return file as formidable.File & { buffer: Buffer };
+    } catch (err) {
+      this.logger.error(`Failed to read file for ${fieldName}: ${err.message}`);
+      throw new BadRequestException(`Invalid file provided for field: ${fieldName}`);
     }
+  }
 
+  private async parseMultipleFiles(req: Request, fieldName: string): Promise<(formidable.File & { buffer: Buffer })[]> {
+    const form = new formidable.IncomingForm({
+      multiples: true,
+      keepExtensions: true,
+      maxFileSize: 100 * 1024 * 1024, // 100MB limit
+      allowEmptyFiles: false,
+      minFileSize: 1,
+      maxTotalFileSize: 100 * 1024 * 1024,
+    });
+    const { files } = await this.parseFormData(form, req);
+    this.logger.debug(
+      `Parsed files for ${fieldName}: ${JSON.stringify(files, (key, value) => (key === 'buffer' ? '[Buffer]' : value))}`,
+    );
+    const fileArray = files[fieldName];
+    if (!fileArray || fileArray.length === 0) {
+      throw new BadRequestException(`No files uploaded for field: ${fieldName}`);
+    }
+    try {
+      for (const file of fileArray) {
+        if (!file.buffer && file.filepath) {
+          file.buffer = await fs.readFile(file.filepath);
+          this.logger.debug(`Read file buffer for ${fieldName}: ${file.originalname}, size: ${file.buffer.length}`);
+          await fs
+            .unlink(file.filepath)
+            .catch((err) => this.logger.warn(`Failed to delete temp file ${file.filepath}: ${err.message}`));
+        }
+        if (!file.buffer) {
+          throw new Error(`File buffer could not be loaded for ${file.originalname}`);
+        }
+      }
+      return fileArray as (formidable.File & { buffer: Buffer })[];
+    } catch (err) {
+      this.logger.error(`Failed to read files for ${fieldName}: ${err.message}`);
+      throw new BadRequestException(`Invalid files provided for field: ${fieldName}`);
+    }
+  }
+
+  private parseFormData(form: InstanceType<typeof formidable.IncomingForm>, req: Request): Promise<{ fields: any; files: any }> {
+    return new Promise((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          this.logger.error(`Form parsing error: ${err.message}`);
+          reject(new BadRequestException('Failed to parse form data'));
+        } else {
+          resolve({ fields, files });
+        }
+      });
+    });
+  }
+
+  private async uploadSingleFile(file: formidable.File & { buffer: Buffer }, user: IUser, field: string) {
+    const userId = this.getUserId(user);
+    const formData = this.buildFormData([{ field, file }]);
+    const response = await this.httpPost(`${this.uploadServiceUrl}/upload?userId=${userId}`, formData);
+    console.log('Upload Service Raw Response:', response?.data);
     return {
-      status: 'success',
-      message: successMessage,
-      data: {
-        url: response?.url,
-        publicId: response?.publicId,
-        resourceType: response?.resourceType,
-        fileType: response?.fileType,
-        fileName: response?.fileName,
-      },
+      data: response.data,
+      message: `File uploaded successfully`,
     };
+  }
+
+  private async uploadMultipleFiles(files: (formidable.File & { buffer: Buffer })[], user: IUser, field: string) {
+    const userId = this.getUserId(user);
+    const formData = this.buildFormData(files.map((file) => ({ field, file })));
+    const response = await this.httpPost(`${this.uploadServiceUrl}/uploads?userId=${userId}`, formData);
+    return {
+      data: response.data,
+      message: `Files uploaded successfully`,
+    };
+  }
+
+  private async httpPost(url: string, formData: any): Promise<AxiosResponse<any>> {
+    return firstValueFrom(
+      this.httpService.post(url, formData, {
+        headers: {
+          ...formData.getHeaders(),
+          'Content-Type': 'multipart/form-data',
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      }),
+    );
+  }
+
+  private buildFormData(files: { field: string; file: formidable.File & { buffer: Buffer } }[]): any {
+    const FormData = require('form-data');
+    const formData = new FormData();
+    files.forEach(({ field, file }) => {
+      if (!file || !file.buffer) {
+        this.logger.error(`Invalid file for field: ${field}`);
+        throw new BadRequestException(`Invalid file provided for field: ${field}`);
+      }
+      formData.append(field, file.buffer, {
+        filename: file.originalFilename,
+        contentType: file.mimetype,
+      });
+    });
+    return formData;
   }
 
   private getUserId(user: IUser): string {
-    if (!user) {
-      // Dummy user for Swagger / local test
-      return 'dummy-user-id';
-    }
-
-    return user.userId;
+    return user?.userId ?? 'dummy-user-id';
   }
 }
