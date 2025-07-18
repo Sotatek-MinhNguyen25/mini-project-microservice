@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 COPY . .
 
@@ -12,4 +12,4 @@ RUN npm run build
 
 EXPOSE 8082
 
-CMD ["npm", run", "start:prod"] 
+CMD ["npm", "run", "start:prod"] 

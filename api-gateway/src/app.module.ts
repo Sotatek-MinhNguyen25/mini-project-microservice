@@ -8,6 +8,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/jwt';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { UserGatewayModule } from './modules/user/user-gateway.module';
+import { JwtModule } from './modules/auth/jwt/jwt.module';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -18,8 +20,9 @@ import { UserGatewayModule } from './modules/user/user-gateway.module';
     UploadGatewayModule,
     NotificationGatewayModule,
     UserGatewayModule,
-
     KafkaModule,
+    JwtModule,
+    RedisModule,
   ],
   providers: [
     {
