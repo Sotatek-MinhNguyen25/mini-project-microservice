@@ -77,7 +77,7 @@ enum ReactionType {
 
 model Image {
   id        String    @id @default(uuid())
-  url       String    @unique
+  url       String
   altText   String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

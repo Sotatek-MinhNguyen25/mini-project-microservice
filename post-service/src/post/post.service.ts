@@ -11,14 +11,36 @@ export class PostService {
     private readonly prisma: PrismaClient,
     private commentService: CommentService,
   ) {}
+
   async create(createPostDto: CreatePostDto) {
     const post = await this.prisma.post.create({
       data: {
         title: createPostDto.title,
         content: createPostDto.content,
         userId: createPostDto.userId,
+
+        tags: {
+          create: createPostDto.tagIds.map((tag) => ({
+            tagId: tag.tagId,
+          })),
+        },
+
+        ...(createPostDto.postImages
+          ? {
+              image: {
+                create: createPostDto.postImages.map((postImage) => ({
+                  url: postImage.url,
+                  altText: postImage.altText,
+                })),
+              },
+            }
+          : {}),
+      },
+      include: {
+        image: true,
       },
     });
+
     return { data: post, meta: {} };
   }
 

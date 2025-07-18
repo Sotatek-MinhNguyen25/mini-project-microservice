@@ -1,22 +1,11 @@
-<<<<<<< HEAD
-import {
-  Body,
-  Controller,
-  Get,
-  Inject,
-  OnModuleInit,
-  Param,
-  Post,
-} from '@nestjs/common';
-=======
-import { Body, Controller, Get, Inject, OnModuleInit, Post } from '@nestjs/common';
->>>>>>> f83938fd35d62d17735828a71b8d4965c470a703
+import { Body, Controller, Get, Inject, OnModuleInit, Param, Post } from '@nestjs/common';
 import { Public } from '../auth/jwt';
 import { config } from 'src/configs/config.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CreatePostDto } from './dto/CreatePostDto';
+import { CreatePostDto } from './dto/create-post.dto';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
@@ -38,7 +27,8 @@ export class PostGatewayController implements OnModuleInit {
 
   @Public()
   @Post('')
-  async createPost(@Body() createPostDto: any) {
+  @ApiBody({ type: CreatePostDto })
+  async createPost(@Body() createPostDto: CreatePostDto) {
     return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.CREATE, { ...createPostDto }));
   }
 
@@ -54,8 +44,6 @@ export class PostGatewayController implements OnModuleInit {
   @Public()
   @Get(':id')
   async getDetailPost(@Param('id') id: string) {
-    return await firstValueFrom(
-      this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, id),
-    );
+    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, id));
   }
 }

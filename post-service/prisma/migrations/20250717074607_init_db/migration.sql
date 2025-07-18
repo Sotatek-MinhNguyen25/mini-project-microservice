@@ -84,9 +84,6 @@ CREATE INDEX "Reaction_userId_idx" ON "Reaction"("userId");
 -- CreateIndex
 CREATE UNIQUE INDEX "Reaction_userId_postId_type_key" ON "Reaction"("userId", "postId", "type");
 
--- CreateIndex
-CREATE UNIQUE INDEX "Image_url_key" ON "Image"("url");
-
 -- AddForeignKey
 ALTER TABLE "PostTag" ADD CONSTRAINT "PostTag_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
