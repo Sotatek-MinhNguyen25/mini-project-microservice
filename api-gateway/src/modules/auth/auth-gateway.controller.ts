@@ -6,7 +6,6 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from './jwt/jwt.decorator';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 @Public()

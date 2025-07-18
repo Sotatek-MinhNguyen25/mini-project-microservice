@@ -131,9 +131,9 @@ services:
 #       - redis
 #     restart: unless-stopped
 
-# volumes:
-#   pgdata:
-#   redis-data:
-#   kafka-data:
-#   zookeeper-data:
-#   zookeeper-logs:
+volumes:
+  pgdata:
+  redis-data:
+  kafka-data:
+  zookeeper-data:
+  zookeeper-logs:

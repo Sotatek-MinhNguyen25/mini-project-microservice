@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as morgan from 'morgan';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ResponseMessageInterceptor } from './common/interceptor/response.interceptor';
 import { config } from './configs/configuration';
 
@@ -30,14 +29,14 @@ async function bootstrap() {
   });
 
   const configSwagger = new DocumentBuilder()
-    .setTitle('API Gateway')
-    .setDescription('API Gateway for Microservices')
+    .setTitle('Auth Service')
+    .setDescription('The Auth Service API')
     .setVersion('1.0')
-    .addTag('gateway')
     .addBearerAuth()
     .build();
 
-  SwaggerModule.setup(config.apiPrefix || 'api', app, SwaggerModule.createDocument(app, configSwagger));
+  const document = SwaggerModule.createDocument(app, configSwagger); // CHỈ truyền 2 tham số
+  SwaggerModule.setup('api', app, document);
   const { Reflector } = await import('@nestjs/core');
   app.useGlobalInterceptors(new ResponseMessageInterceptor(new Reflector()));
   await app.listen(port);
