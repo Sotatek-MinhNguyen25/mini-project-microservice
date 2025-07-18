@@ -24,11 +24,11 @@ import { RedisModule } from './common/redis/redis.module';
     JwtModule,
     RedisModule,
   ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_GUARD,
+  //     useClass: JwtAuthGuard,
+  //   },
+  // ],
 })
 export class AppModule {}
