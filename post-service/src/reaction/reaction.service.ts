@@ -18,7 +18,7 @@ export class ReactionService {
   //get all reactions of a post
   async getReactionsByPostId(
     postId: string,
-  ): Promise<{ reaction: Reaction[]; count: number }> {
+  ): Promise<{ data: Reaction[]; meta: any }> {
     const reactions = await this.prismaService.reaction.findMany({
       where: {
         postId: postId,
@@ -29,12 +29,12 @@ export class ReactionService {
     // const userInfo = await firstValueFrom(
     //   this.authClient.send('findAllUser', { userIds: userIds }),
     // );
-    return { reaction: reactions, count: reactions.length };
+    return { data: reactions, meta: {} };
   }
 
   async getReactionsSummaryByPostId(postId: string): Promise<{
-    count: number;
-    summary: ReactionSummary[];
+    data: { count: number; summary: ReactionSummary[] };
+    meta: any;
   }> {
     const count = await this.prismaService.reaction.count({
       where: {
@@ -54,12 +54,12 @@ export class ReactionService {
       type: item.type,
       count: item._count._all,
     }));
-    return { count: count, summary: formattedSummary };
+    return { data: { count: count, summary: formattedSummary }, meta: {} };
   }
 
   async createReaction(
     createReactionDto: CreateReactionDto,
-  ): Promise<Reaction> {
+  ): Promise<{ data: Reaction; meta: any }> {
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         postId: createReactionDto.postId,
@@ -73,34 +73,39 @@ export class ReactionService {
         message: 'User has already reacted to this post',
       });
     }
-    return await this.prismaService.reaction.create({
+    const createdReaction = await this.prismaService.reaction.create({
       data: createReactionDto,
     });
+    return { data: createdReaction, meta: {} };
   }
 
   async updateReaction(
     updateReactionDto: UpdateReactionDto,
-  ): Promise<Reaction> {
+  ): Promise<{ data: Reaction; meta: any }> {
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         id: updateReactionDto.id,
+        deletedAt: null,
       },
     });
     if (!reaction) {
       throw new RpcException({
         status: 404,
-        message: 'User has not reacted to this post',
+        message: 'User has not reacted to this post or has has been deleted',
       });
     }
-    return await this.prismaService.reaction.update({
+    // check for permission?
+
+    const updatedReaction = await this.prismaService.reaction.update({
       where: {
         id: updateReactionDto.id,
       },
       data: updateReactionDto,
     });
+    return { data: updatedReaction, meta: {} };
   }
 
-  async deleteReaction(id: string): Promise<Reaction> {
+  async deleteReaction(id: string): Promise<{ data: Reaction; meta: any }> {
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         id,
@@ -111,7 +116,7 @@ export class ReactionService {
     }
 
     // soft delete
-    return await this.prismaService.reaction.update({
+    const deletedReaction = await this.prismaService.reaction.update({
       where: {
         id,
       },
@@ -119,5 +124,6 @@ export class ReactionService {
         deletedAt: new Date(),
       },
     });
+    return { data: deletedReaction, meta: {} };
   }
 }

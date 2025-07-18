@@ -30,4 +30,24 @@ export class AuthGatewayController implements OnModuleInit {
   async refreshToken(@Body() body: RefreshTokenDto) {
     return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REFRESH_TOKEN, body));
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: any) {
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.FORGOT_PASSWORD, body));
+  }
+
+  @Post('verify-forgot-password')
+  async verifyForgotPassword(@Body() body: any) {
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.VERIFY_FORGOT_PASSWORD, body));
+  }
+
+  @Post('update-password')
+  async updatePassword(@Body() body: any) {
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.UPDATE_PASSWORD, body));
+  }
+
+  @Post('logout')
+  async logout(@Body() body: { accessToken: string }) {
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGOUT, body));
+  }
 }

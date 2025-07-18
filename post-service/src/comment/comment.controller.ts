@@ -16,21 +16,16 @@ export class CommentController {
 
   @MessagePattern('findAllComment')
   findAll(@Payload() postId: string) {
-    return this.commentService.findAll(postId);
-  }
-
-  @MessagePattern('findOneComment')
-  findOne(@Payload() id: number) {
-    return this.commentService.findOne(id);
+    return this.commentService.getCommentsByPostId(postId);
   }
 
   @MessagePattern('updateComment')
   update(@Payload() updateCommentDto: UpdateCommentDto) {
-    return this.commentService.update(updateCommentDto.id, updateCommentDto);
+    return this.commentService.update(updateCommentDto);
   }
 
-  @MessagePattern('removeComment')
-  remove(@Payload() id: number) {
-    return this.commentService.remove(id);
+  @MessagePattern('deleteComment')
+  remove(@Payload() id: string) {
+    return this.commentService.delete(id);
   }
 }

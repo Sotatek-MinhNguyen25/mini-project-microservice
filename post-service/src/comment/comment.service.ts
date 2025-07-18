@@ -2,40 +2,50 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ClientKafka } from '@nestjs/microservices';
+import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CONSTANTS } from 'constants/app.constants';
 
 @Injectable()
 export class CommentService {
   constructor(
-    private prisma: PrismaService,
+    private prismaService: PrismaService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
   ) {}
+
   async create(createCommentDto: CreateCommentDto) {
-    const comment = await this.prisma.comment.create({
-      data: {
-        content: createCommentDto.content,
+    const comment = await this.prismaService.comment.findFirst({
+      where: {
         userId: createCommentDto.userId,
         postId: createCommentDto.postId,
       },
     });
-    return { data: comment, meta: {} };
+    if (comment) {
+      throw new RpcException({
+        status: 409,
+        message: 'Comment already excisted',
+      });
+    }
+    const newComment = await this.prismaService.comment.create({
+      data: createCommentDto,
+    });
+    return { data: newComment, meta: {} };
   }
 
-  async countAll(postId: string) {
-    return await this.prisma.comment.count({
+  async countCommentsByPostId(postId: string) {
+    return await this.prismaService.comment.count({
       where: {
         postId: postId,
       },
     });
   }
 
-  async findAll(postId: string) {
-    const comments = await this.prisma.comment.findMany({
+  async getCommentsByPostId(postId: string) {
+    const comments = await this.prismaService.comment.findMany({
       where: {
         postId: postId,
+        deletedAt: null,
       },
     });
     const userIdList = [...new Set(comments.map((comment) => comment.userId))];
@@ -51,15 +61,44 @@ export class CommentService {
     return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
+  async update(updateCommentDto: UpdateCommentDto) {
+    const comment = await this.prismaService.comment.findFirst({
+      where: {
+        id: updateCommentDto.id,
+      },
+    });
+    if (!comment) {
+      throw new RpcException({
+        status: 404,
+        message: 'Comment not found',
+      });
+    }
+    return await this.prismaService.comment.update({
+      where: {
+        id: updateCommentDto.id,
+      },
+      data: updateCommentDto,
+    });
   }
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
-  }
+  async delete(id: string) {
+    const comment = await this.prismaService.comment.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    if (!comment) {
+      throw new RpcException({ status: 404, message: 'Comment not found' });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+    // soft delete
+    return await this.prismaService.comment.update({
+      where: {
+        id: id,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
   }
 }

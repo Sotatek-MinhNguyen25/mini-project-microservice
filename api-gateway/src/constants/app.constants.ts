@@ -15,6 +15,9 @@ export const KAFKA_PATTERNS = {
     REFRESH_TOKEN: 'auth.refresh-token',
     CHECK_USER: 'auth.check-user',
     LOGOUT: 'auth.logout',
+    FORGOT_PASSWORD: 'auth.forgot-password',
+    VERIFY_FORGOT_PASSWORD: 'auth.verify-forgot-password',
+    UPDATE_PASSWORD: 'auth.update-password',
   },
 
   // Post Service Events

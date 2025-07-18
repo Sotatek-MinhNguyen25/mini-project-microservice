@@ -4,8 +4,8 @@ import { AuthGatewayModule } from './modules/auth/auth-gateway.module';
 import { PostGatewayModule } from './modules/post/post-gateway.module';
 import { UploadGatewayModule } from './modules/upload/upload-gateway.module';
 import { NotificationGatewayModule } from './modules/notification/notification-gateway.module';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './modules/auth/jwt';
+// import { APP_GUARD } from '@nestjs/core';
+// import { JwtAuthGuard } from './modules/auth/jwt';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { UserGatewayModule } from './modules/user/user-gateway.module';
 import { JwtModule } from './modules/auth/jwt/jwt.module';
@@ -15,7 +15,6 @@ import { TagGatewayModule } from './modules/tag/tag-gateway.module';
 @Module({
   imports: [
     ConfigModule,
-
     AuthGatewayModule,
     PostGatewayModule,
     TagGatewayModule,
