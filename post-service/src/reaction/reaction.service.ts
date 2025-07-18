@@ -6,15 +6,23 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
+<<<<<<< HEAD
 // import { Reaction } from 'src/generated/prisma/client';
 import { ClientKafka } from '@nestjs/microservices';
 import { Reaction } from '@prisma/client';
+=======
+import { Reaction } from '@prisma/client';
+import { ClientKafka } from '@nestjs/microservices';
+import { CONSTANTS } from 'constants/app.constants';
+// import { firstValueFrom } from 'rxjs';
+>>>>>>> be280ab561ab9174fd3be05ce639f8d4ac0eb141
 
 @Injectable()
 export class ReactionService {
   constructor(
     private readonly prismaService: PrismaService,
-    @Inject('KAFKA_AUTH_SERVICE') private readonly authClient: ClientKafka,
+    @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
+    private readonly authClient: ClientKafka,
   ) {}
 
   async getReactionsByPostId(
@@ -25,6 +33,10 @@ export class ReactionService {
         postId: id,
       },
     });
+    // const userIds = [...new Set(reactions.map((reaction) => reaction.userId))];
+    // const userInfo = await firstValueFrom(
+    //   this.authClient.send('findAllUser', { userIds: userIds }),
+    // );
     // count the number of total reactions
     // should we count the number of unique reactions and unique users?
     // should we show the name of user who reacted?
@@ -77,9 +89,12 @@ export class ReactionService {
     if (!reaction) {
       throw new NotFoundException('Reaction not found');
     }
-    return await this.prismaService.reaction.delete({
+    return await this.prismaService.reaction.update({
       where: {
         id,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     });
   }

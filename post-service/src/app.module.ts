@@ -6,6 +6,8 @@ import { KafkaModule } from './kafka/kafka.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommentModule } from './comment/comment.module';
 import { PostModule } from './post/post.module';
+import { ReactionModule } from './reaction/reaction.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { PostModule } from './post/post.module';
     PrismaModule,
     CommentModule,
     PostModule,
+    ReactionModule,
+    TagModule,
   ],
   controllers: [AppController],
   providers: [AppService],
