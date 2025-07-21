@@ -6,6 +6,7 @@ import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { CONSTANTS } from 'constants/app.constants';
 import { ReactionSummary } from './reaction.interface';
 import { ConsumerResult } from 'src/common/type/consumer-result';
+import { firstValueFrom } from 'rxjs';
 // import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -26,10 +27,10 @@ export class ReactionService {
       },
     });
     // should we show the name of user who reacted?
-    // const userIds = [...new Set(reactions.map((reaction) => reaction.userId))];
-    // const userInfo = await firstValueFrom(
-    //   this.authClient.send('findAllUser', { userIds: userIds }),
-    // );
+    const userIds = [...new Set(reactions.map((reaction) => reaction.userId))];
+    const userInfo = await firstValueFrom(
+      this.authClient.send('findAllUser', { userIds: userIds }),
+    );
     return { data: reactions, meta: {} };
   }
 

@@ -24,9 +24,12 @@ export const CONSTANTS = {
       CREATE_POST_TAG: 'posttag.create',
       DELETE_POST_TAG: 'posttag.delete',
     },
+    AUTH: {
+      GET_USER: 'user.find-one',
+    },
   },
 
   KAFKA_SERVICE: {
     AUTH: 'KAFKA_AUTH_SERVICE',
   },
-};
+} as const;
