@@ -26,6 +26,7 @@ export const CONSTANTS = {
     },
     AUTH: {
       GET_USER: 'user.find-one',
+      GET_USERS: 'user.find-ids',
     },
   },
 

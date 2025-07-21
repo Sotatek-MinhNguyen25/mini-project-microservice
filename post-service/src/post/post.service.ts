@@ -10,6 +10,7 @@ import { Post, Prisma, PrismaClient } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { ReactionService } from 'src/reaction/reaction.service';
 import { CONSTANTS } from 'constants/app.constants';
+import { User } from 'src/common/type/user';
 
 @Injectable()
 export class PostService implements OnModuleInit {
@@ -24,6 +25,9 @@ export class PostService implements OnModuleInit {
   onModuleInit() {
     this.authClient.subscribeToResponseOf(
       CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+    );
+    this.authClient.subscribeToResponseOf(
+      CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS,
     );
   }
 
@@ -122,17 +126,25 @@ export class PostService implements OnModuleInit {
       ...prismaConditon,
     });
 
+    // Lay danh sach userIds tu cac post
     const userIds = [...new Set(posts.map((post) => post.userId))];
 
-    // const users = await firstValueFrom(this.authClient.send())
+    // Thay thong tin user tu service auth
+    const users: User[] = (
+      await firstValueFrom(
+        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, userIds),
+      )
+    ).data;
 
     const totalItem = await this.prisma.post.count({
       where: prismaConditon.where,
     });
 
+    // Anh xa lai response
     const result = await Promise.all(
       posts.map(async (post) => ({
         ...post,
+        user: users.find((value) => value.id === post.userId),
         totalComment: (await this.commentService.countCommentsByPostId(post.id))
           .data,
         reaction: (
@@ -193,7 +205,7 @@ export class PostService implements OnModuleInit {
       ),
     );
 
-    // const comments = await this.commentService.getCommentsByPostId(post.id);
+    const comments = await this.commentService.getCommentsByPostId(post.id);
 
     const reaction = await this.reactionService.getReactionsSummaryByPostId(
       post.id,
@@ -206,6 +218,7 @@ export class PostService implements OnModuleInit {
       data: {
         ...result,
         user: author,
+        comments: comments.data,
         reactionSummary: reaction.data,
         totalComment: commentCount.data,
       },

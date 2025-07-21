@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,14 +7,21 @@ import { firstValueFrom } from 'rxjs';
 import { CONSTANTS } from 'constants/app.constants';
 import { ConsumerResult } from '../common/type/consumer-result';
 import { Comment } from '@prisma/client';
+import { User } from 'src/common/type/user';
 
 @Injectable()
-export class CommentService {
+export class CommentService implements OnModuleInit {
   constructor(
     private prismaService: PrismaService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
   ) {}
+
+  onModuleInit() {
+    this.authClient.subscribeToResponseOf(
+      CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS,
+    );
+  }
 
   async create(
     createCommentDto: CreateCommentDto,
@@ -58,9 +65,14 @@ export class CommentService {
     });
     const userIdList = [...new Set(comments.map((comment) => comment.userId))];
 
-    const userInfo = await firstValueFrom(
-      this.authClient.send('findAllUser', { userIds: userIdList }),
-    );
+    const userInfo: User[] = (
+      await firstValueFrom(
+        this.authClient.send(
+          CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS,
+          userIdList,
+        ),
+      )
+    ).data;
 
     const result = comments.map((comment) => ({
       ...comment,
