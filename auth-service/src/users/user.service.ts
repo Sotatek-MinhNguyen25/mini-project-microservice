@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
-import { AuthRepository } from "src/auth/auth.repository";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { RpcException } from "@nestjs/microservices";
-import { ERROR_MESSAGE } from "src/shared/message/error.message";
+import { Injectable } from '@nestjs/common';
+import { AuthRepository } from 'src/auth/auth.repository';
+import { CreateUserDto } from './dto/create-user.dto';
+import { RpcException } from '@nestjs/microservices';
+import { ERROR_MESSAGE } from 'src/shared/message/error.message';
 import * as bcrypt from 'bcryptjs';
-import { OAuthProvider, Role, User, UserStatus } from "@prisma/client";
-import { GetListUserDto } from "./dto/get-list.dto";
+import { OAuthProvider, Role, User, UserStatus } from '@prisma/client';
+import { GetListUserDto } from './dto/get-list.dto';
 import * as _ from 'lodash';
 import { FindUserByIdsDto } from "./dto/find-user-ids.dto";
 import { paginate } from "src/shared/utils/paginate.util";
@@ -81,6 +81,3 @@ export class UserService {
 
         return { data: updatedUser };
     }
-
-
-}

@@ -40,95 +40,88 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
 
-  postgres:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: microservice
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+  # postgres:
+  #   image: postgres:15
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: microservice
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
 
-  api-gateway:
-    build:
-      context: ./api-gateway
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - KAFKA_BROKER=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - kafka
-      - redis
-    restart: unless-stopped
+  # api-gateway:
+  #   build:
+  #     context: ./api-gateway
+  #   ports:
+  #     - "3000:3000"
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - kafka
+  #     - redis
+  #   restart: unless-stopped
 
-  auth-service:
-    build:
-      context: ./auth-service
-    ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=development
-      - KAFKA_BROKER=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/microservice
-    depends_on:
-      - kafka
-      - redis
-      - postgres
-    restart: unless-stopped
+  # auth-service:
+  #   build:
+  #     context: ./auth-service
+  #   ports:
+  #     - "3001:3001"
+  #   env_file:
+  #     - ./auth-service/.env
+  #   depends_on:
+  #     - kafka
+  #     - redis
+  #     # - postgres
+  #   restart: unless-stopped
 
-#   post-service:
-#     build:
-#       context: ./post-service
-#     ports:
-#       - "3002:3002"
-#     environment:
-#       - NODE_ENV=development
-#       - KAFKA_BROKER=kafka:9092
-#       - REDIS_HOST=redis
-#       - REDIS_PORT=6379
-#       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/microservice
-#     depends_on:
-#       - kafka
-#       - redis
-#       - postgres
-#     restart: unless-stopped
+  #   post-service:
+  #     build:
+  #       context: ./post-service
+  #     ports:
+  #       - "3002:3002"
+  #     environment:
+  #       - NODE_ENV=development
+  #       - KAFKA_BROKER=kafka:9092
+  #       - REDIS_HOST=redis
+  #       - REDIS_PORT=6379
+  #       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/microservice
+  #     depends_on:
+  #       - kafka
+  #       - redis
+  #       - postgres
+  #     restart: unless-stopped
 
-#   notification-service:
-#     build:
-#       context: ./notification-service
-#     ports:
-#       - "3003:3003"
-#     environment:
-#       - NODE_ENV=development
-#       - KAFKA_BROKER=kafka:9092
-#       - REDIS_HOST=redis
-#       - REDIS_PORT=6379
-#     depends_on:
-#       - kafka
-#       - redis
-#     restart: unless-stopped
+  #   notification-service:
+  #     build:
+  #       context: ./notification-service
+  #     ports:
+  #       - "3003:3003"
+  #     environment:
+  #       - NODE_ENV=development
+  #       - KAFKA_BROKER=kafka:9092
+  #       - REDIS_HOST=redis
+  #       - REDIS_PORT=6379
+  #     depends_on:
+  #       - kafka
+  #       - redis
+  #     restart: unless-stopped
 
-  upload-service:
-    build:
-      context: ./upload-service
-    ports:
-      - "3004:3004"
-    environment:
-      - NODE_ENV=development
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PORT=3004
-    depends_on:
-      - redis
-    restart: unless-stopped
+  # upload-service:
+  #   build:
+  #     context: ./upload-service
+  #   ports:
+  #     - "3004:3004"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - PORT=3004
+  #   depends_on:
+  #     - redis
+  #   restart: unless-stopped
 
 volumes:
   pgdata:

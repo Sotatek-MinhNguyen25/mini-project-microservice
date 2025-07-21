@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 import { ResponseMessageInterceptor } from './common/interceptor/response.interceptor';
 import { config } from './configs/configuration';
+import { HttpExceptionInterceptor } from 'src/common/interceptor/http-exception.interceptor';
 
 const logger = new Logger('Bootstrap');
 
@@ -41,5 +42,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseMessageInterceptor(new Reflector()));
   await app.listen(port);
   logger.log(`🚀 App is running on port: ${port}`);
+  logger.log(`KAFKA_BROKER: ${process.env.KAFKA_BROKER}`);
+  logger.log(`REDIS_HOST: ${process.env.REDIS_HOST}`);
+  logger.log(`REDIS_PORT: ${process.env.REDIS_PORT}`);
+  logger.log('Kafka client initialized (check logs for errors if any)');
+  logger.log('Redis client initialized (check logs for errors if any)');
 }
 bootstrap();

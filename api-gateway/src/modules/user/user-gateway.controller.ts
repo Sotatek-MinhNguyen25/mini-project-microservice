@@ -33,9 +33,9 @@ export class UserGatewayController {
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_ONE, id));
   }
 
-  @Post("find-by-ids")
+  @Post('find-by-ids')
   async findUsersByIds(@Body() body: FindUsersByIdsDto) {
-    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_IDS, instanceToPlain(body)))
+    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_IDS, instanceToPlain(body)));
   }
 
   @Post()

@@ -1,22 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentService } from 'src/comment/comment.service';
-import { RpcException } from '@nestjs/microservices';
+import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostQueryDto } from './dto/post-query.dto';
 import { paginate } from 'src/common/pagination';
 import { Post, Prisma, PrismaClient } from '@prisma/client';
-import { PrismaClientOptions } from '@prisma/client/runtime/library';
+import { firstValueFrom } from 'rxjs';
 import { ReactionService } from 'src/reaction/reaction.service';
+import { CONSTANTS } from 'constants/app.constants';
+import { User } from 'src/common/type/user';
 
 @Injectable()
-export class PostService {
+export class PostService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private commentService: CommentService,
     private reactionService: ReactionService,
+    @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
+    private readonly authClient: ClientKafka,
   ) {}
+
+  onModuleInit() {
+    this.authClient.subscribeToResponseOf(
+      CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+    );
+    this.authClient.subscribeToResponseOf(
+      CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS,
+    );
+  }
 
   async create(createPostDto: CreatePostDto) {
     const post = await this.prisma.post.create({
@@ -53,11 +66,24 @@ export class PostService {
   async findAll(postQueryDto: PostQueryDto) {
     const paginateCondition = paginate(postQueryDto.page, postQueryDto.limit);
 
+    const searchConditon = postQueryDto.search
+      ? {
+          OR: [
+            {
+              content: {
+                contains: postQueryDto.search,
+              },
+            },
+          ],
+        }
+      : {};
+
     const prismaConditon: Prisma.PostFindManyArgs = {
       select: {
         id: true,
         title: true,
         content: true,
+        userId: true,
         image: {
           select: {
             id: true,
@@ -73,18 +99,25 @@ export class PostService {
             userId: true,
             createdAt: true,
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         },
         createdAt: true,
       },
-
-      where: {
-        OR: [
-          {
-            content: {
-              contains: postQueryDto.search,
-            },
-          },
-        ],
+      where: searchConditon,
+      orderBy: {
+        createdAt: 'desc',
       },
     };
 
@@ -93,13 +126,25 @@ export class PostService {
       ...prismaConditon,
     });
 
+    // Lay danh sach userIds tu cac post
+    const userIds = [...new Set(posts.map((post) => post.userId))];
+
+    // Thay thong tin user tu service auth
+    const users: User[] = (
+      await firstValueFrom(
+        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, userIds),
+      )
+    ).data;
+
     const totalItem = await this.prisma.post.count({
       where: prismaConditon.where,
     });
 
+    // Anh xa lai response
     const result = await Promise.all(
       posts.map(async (post) => ({
         ...post,
+        user: users.find((value) => value.id === post.userId),
         totalComment: (await this.commentService.countCommentsByPostId(post.id))
           .data,
         reaction: (
@@ -126,6 +171,7 @@ export class PostService {
         id: true,
         title: true,
         content: true,
+        userId: true,
         image: {
           select: {
             id: true,
@@ -143,33 +189,39 @@ export class PostService {
             },
           },
         },
-        comments: {
-          select: {
-            id: true,
-            content: true,
-            userId: true,
-            createdAt: true,
-          },
-        },
-        reactions: {
-          select: {
-            id: true,
-            userId: true,
-            type: true,
-          },
-        },
         createdAt: true,
       },
     });
+
     if (!post) {
       throw new RpcException({ status: 400, message: 'Post không tồn tại' });
     }
 
+    // User dang bai
+    const author = await firstValueFrom(
+      this.authClient.send(
+        CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+        post.userId,
+      ),
+    );
+
+    const comments = await this.commentService.getCommentsByPostId(post.id);
+
+    const reaction = await this.reactionService.getReactionsSummaryByPostId(
+      post.id,
+    );
+    const commentCount = await this.commentService.countCommentsByPostId(
+      post.id,
+    );
+    const { userId, ...result } = post;
     return {
       data: {
-        post: post,
+        ...result,
+        user: author,
+        comments: comments.data,
+        reactionSummary: reaction.data,
+        totalComment: commentCount.data,
       },
-      meta: {},
     };
   }
 

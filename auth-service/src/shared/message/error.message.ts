@@ -1,11 +1,13 @@
 export const ERROR_MESSAGE = {
-  EMAIL_ALREADY_EXISTS: 'Email đã tồn tại',
-  USER_NOT_FOUND: 'Không tìm thấy người dùng',
-  INVALID_PASSWORD: 'Mật khẩu không đúng',
-  INVALID_OTP: 'OTP không hợp lệ hoặc đã hết hạn',
-  USER_NOT_VERIFIED: 'Tài khoản chưa xác thực',
-  OTP_EXPIRED: 'OTP đã hết hạn',
+  EMAIL_ALREADY_EXISTS: 'Email already exists',
+  USER_NOT_FOUND: 'User not found',
+  USER_NOT_FOUND_OR_NOT_UNVERIFIED:
+    'User not found or status is not unverified',
+  USER_NOT_VERIFIED: 'User not verified',
+  INVALID_PASSWORD: 'The password is not correct',
+  INVALID_OTP: 'The OTP is not correct',
   INVALID_REFRESH_TOKEN: 'Refresh token không hợp lệ',
   TOKEN_MISSING_JTI: 'Token không hợp lệ: thiếu jti. Vui lòng đăng nhập lại!',
+  OTP_EXPIRED: 'OTP đã hết hạn',
   // Thêm các lỗi khác nếu cần
 };

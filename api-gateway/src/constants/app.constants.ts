@@ -18,6 +18,7 @@ export const KAFKA_PATTERNS = {
     FORGOT_PASSWORD: 'auth.forgot-password',
     VERIFY_FORGOT_PASSWORD: 'auth.verify-forgot-password',
     UPDATE_PASSWORD: 'auth.update-password',
+    COMPLETE_REGISTER: 'auth.complete-register',
   },
 
   USER: {

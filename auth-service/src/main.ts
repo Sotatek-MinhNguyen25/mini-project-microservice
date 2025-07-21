@@ -37,6 +37,13 @@ async function bootstrap() {
   const port = configService.get(ENV.PORT);
   await app.listen(port);
   logger.log(`🚀 App is running on port: ${port}`);
+  logger.log(`KAFKA_BROKER: ${process.env.KAFKA_BROKER}`);
+  logger.log(`REDIS_HOST: ${process.env.REDIS_HOST}`);
+  logger.log(`REDIS_PORT: ${process.env.REDIS_PORT}`);
+  // Sau khi kết nối Kafka thành công
+  logger.log('Kafka client initialized (check logs for errors if any)');
+  // Sau khi kết nối Redis thành công (nếu có logic custom, thêm log ở đó)
+  logger.log('Redis client initialized (check logs for errors if any)');
 }
 
 bootstrap();

@@ -3,18 +3,86 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleDestroy {
-  private client: Redis;
+  private readonly redisClient: Redis;
 
   constructor() {
-    this.client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    const redisHost = process.env.REDIS_HOST || 'localhost';
+    const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
+    const redisPassword = process.env.REDIS_PASSWORD || undefined;
+    const redisUsername = process.env.REDIS_USERNAME || 'default'; // Thêm username, mặc định là 'default'
+    const redisUrl = process.env.REDIS_URL;
+
+    // Log thông tin kết nối
+    console.log('==== REDIS DEBUG INFO ====');
+    console.log('REDIS_URL:', redisUrl ? '********' : undefined);
+    console.log('REDIS_HOST:', redisHost);
+    console.log('REDIS_PORT:', redisPort);
+    console.log('REDIS_USERNAME:', redisUsername);
+    console.log('REDIS_PASSWORD:', redisPassword ? '*******' : undefined);
+    console.log('==========================');
+
+    if (redisUrl) {
+      this.redisClient = new Redis(redisUrl);
+    } else {
+      this.redisClient = new Redis({
+        host: redisHost,
+        port: redisPort,
+        username: redisUsername,
+        password: redisPassword,
+        tls: {}, // Bật TLS để kết nối đến Redis Cloud
+      });
+    }
   }
 
-  async isJtiValid(jti: string): Promise<boolean> {
-    const exists = await this.client.exists(jti);
-    return !!exists;
+  async setJti(jti: string, ttlSeconds: number): Promise<'OK' | null> {
+    return this.redisClient.set(jti, '1', 'EX', ttlSeconds);
+  }
+
+  async checkJti(jti: string): Promise<boolean> {
+    const exists = await this.redisClient.exists(jti);
+    return exists === 1;
+  }
+
+  async delJti(jti: string): Promise<number> {
+    return this.redisClient.del(jti);
+  }
+
+  // --- Quản lý set jti theo user ---
+  private getUserJtiSetKey(userId: string) {
+    return `user_jtis:${userId}`;
+  }
+
+  async addJtiToUserSet(userId: string, jti: string, ttlSeconds: number) {
+    const setKey = this.getUserJtiSetKey(userId);
+    await this.redisClient.sadd(setKey, jti);
+    await this.redisClient.expire(setKey, ttlSeconds);
+  }
+
+  async getUserJtis(userId: string): Promise<string[]> {
+    const setKey = this.getUserJtiSetKey(userId);
+    return this.redisClient.smembers(setKey);
+  }
+
+  async removeJtiFromUserSet(userId: string, jti: string) {
+    const setKey = this.getUserJtiSetKey(userId);
+    await this.redisClient.srem(setKey, jti);
+  }
+
+  async revokeAllUserJtis(userId: string) {
+    const setKey = this.getUserJtiSetKey(userId);
+    const jtis = await this.redisClient.smembers(setKey);
+    if (jtis.length > 0) {
+      await this.redisClient.del(...jtis);
+    }
+    await this.redisClient.del(setKey);
   }
 
   async onModuleDestroy() {
-    await this.client.quit();
+    await this.redisClient.quit();
+  }
+
+  async isJtiValid(jti: string): Promise<boolean> {
+    const exists = await this.redisClient.exists(jti);
+    return !!exists;
   }
 }

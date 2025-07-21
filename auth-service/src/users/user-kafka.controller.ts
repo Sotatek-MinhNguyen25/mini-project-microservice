@@ -1,11 +1,11 @@
-import { Controller, Inject } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { MessagePattern, Payload } from "@nestjs/microservices";
-import { KAFKA_PATTERNS } from "src/auth/kafka.patterns";
-import { GetListUserDto } from "./dto/get-list.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { FindUserByIdsDto } from "./dto/find-user-ids.dto";
+import { Controller, Inject } from '@nestjs/common';
+import { UserService } from './user.service';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { KAFKA_PATTERNS } from 'src/auth/kafka.patterns';
+import { GetListUserDto } from './dto/get-list.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { FindUserByIdsDto } from './dto/find-user-ids.dto';
 
 @Controller()
 export class UserKafkaController {
@@ -35,7 +35,3 @@ export class UserKafkaController {
     async updateUser(@Payload() data: UpdateUserDto) {
         return await this.userService.updateUser(data);
     }
-
-
-
-}

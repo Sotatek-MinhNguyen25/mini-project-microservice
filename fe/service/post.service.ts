@@ -1,6 +1,8 @@
 import { AxiosResponse } from 'axios'
 import { get, post, put, deleteReq, upload } from '../lib/axiosClient'
 import { getAuthorizationHeader } from '../utils/auth'
+import React from 'react'
+import { ReactionType } from '@/types/post'
 
 const PostPrefix = '/post'
 const UploadPrefix = '/upload'
@@ -32,10 +34,11 @@ const postService = {
     return response.data
   },
 
-  addReaction: async (postId: string, type: string) => {
+  addReaction: async (userId:string, postId: string, type: ReactionType) => {
+    console.log('type in here:', type)
     const response: AxiosResponse = await post(
-      `${PostPrefix}/${postId}/reactions`,
-      { type },
+      `${PostPrefix}/reaction`,
+      { userId, postId, type },
       {
         headers: getAuthorizationHeader(),
       }

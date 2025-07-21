@@ -57,4 +57,4 @@ import { KAFKA_CLIENTS } from 'src/constants/app.constants';
   ],
   exports: [ClientsModule],
 })
-export class KafkaModule { }
+export class KafkaModule {}

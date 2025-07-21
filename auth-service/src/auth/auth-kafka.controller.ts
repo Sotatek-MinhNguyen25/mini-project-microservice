@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { CompleteRegisterDto } from './dto/complete-register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -16,9 +17,15 @@ export class AuthKafkaController {
   constructor(private readonly authService: AuthService) {}
 
   @MessagePattern(KAFKA_PATTERNS.REGISTER)
-  @ApiResponseOk(RESPONSE_MESSAGE.FORGOT_PASSWORD_SUCCESS)
+  @ApiResponseOk(RESPONSE_MESSAGE.SEND_OTP_SUCCESS)
   async register(@Payload() data: RegisterDto) {
     return this.authService.sendRegisterOtp(data);
+  }
+
+  @MessagePattern(KAFKA_PATTERNS.COMPLETE_REGISTER)
+  @ApiResponseOk(RESPONSE_MESSAGE.REGISTER_SUCCESS)
+  async completeRegister(@Payload() data: CompleteRegisterDto) {
+    return this.authService.completeRegister(data);
   }
 
   @MessagePattern(KAFKA_PATTERNS.LOGIN)

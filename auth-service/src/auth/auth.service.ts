@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -18,6 +14,11 @@ import { CompleteRegisterDto } from './dto/complete-register.dto';
 import { OTP_PURPOSE, USER_STATUS } from './auth.constant';
 import { RedisService } from '../redis/redis.service';
 import { AuthRepository } from 'src/auth/auth.repository';
+import {
+  RpcBadRequestException,
+  RpcNotFoundException,
+  RpcUnauthorizedException,
+} from 'src/shared/exceptions/rpc.exceptions';
 
 @Injectable()
 export class AuthService {
@@ -31,51 +32,68 @@ export class AuthService {
 
   private async getUserByEmailOrThrow(email: string) {
     const user = await this.authRepository.findUserByEmail(email);
-    if (!user) throw new BadRequestException(ERROR_MESSAGE.USER_NOT_FOUND);
+    if (!user) throw new RpcNotFoundException(ERROR_MESSAGE.USER_NOT_FOUND);
     return user;
   }
 
   private checkOtpOrThrow(otpObj: any, otp: string) {
     if (!otpObj || otpObj.code !== otp)
-      throw new BadRequestException(ERROR_MESSAGE.INVALID_OTP);
+      throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
     if (otpObj.expiresAt < new Date())
-      throw new BadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
+      throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
   }
 
   async sendRegisterOtp(dto: RegisterDto) {
-    console.log(dto.email);
-    const existed = await this.authRepository.findUserByEmail(dto.email);
-    if (existed)
-      throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
+    let user = await this.authRepository.findUserByEmail(dto.email);
+
+    if (user && user.status === USER_STATUS.VERIFIED) {
+      throw new RpcBadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
+    }
+
+    if (!user) {
+      user = await this.authRepository.createUser({
+        email: dto.email,
+        status: USER_STATUS.UNVERIFIED,
+        username: dto.email,
+      });
+    }
+
     await this.authRepository.createOTP({
-      userId: null,
-      email: dto.email,
+      userId: user.id,
       purpose: OTP_PURPOSE.EMAIL_VERIFICATION,
     });
+
     return {};
   }
 
   async completeRegister(dto: CompleteRegisterDto) {
-    const otp = await this.authRepository.findOTPByEmail(
-      dto.email,
+    const user = await this.authRepository.findUserByEmail(dto.email);
+
+    if (!user || user.status !== USER_STATUS.UNVERIFIED) {
+      throw new RpcBadRequestException(
+        ERROR_MESSAGE.USER_NOT_FOUND_OR_NOT_UNVERIFIED,
+      );
+    }
+
+    const otp = await this.authRepository.findOTP(
+      user.id,
       OTP_PURPOSE.EMAIL_VERIFICATION,
     );
     this.checkOtpOrThrow(otp!, dto.otp);
-    const existed = await this.authRepository.findUserByEmail(dto.email);
-    if (existed)
-      throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
-    const user = await this.authRepository.createUser({
-      email: dto.email,
+
+    const updatedUser = await this.authRepository.updateUser(user.id, {
       username: dto.username,
       password: dto.password,
       status: USER_STATUS.VERIFIED,
     });
+
     await this.authRepository.deleteOTP(otp!.id);
+
     const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      roles: user.roles,
-      username: user.username,
+      sub: updatedUser.id,
+      email: updatedUser.email,
+      roles: updatedUser.roles,
+      username: updatedUser.username,
     };
     const {
       accessToken,
@@ -109,13 +127,25 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
+    console.log(
+      '[AuthService.login] Received DTO:',
+      JSON.stringify(dto, null, 2),
+    );
+
     const user = await this.authRepository.findUserByEmail(dto.email);
-    if (!user) throw new UnauthorizedException(ERROR_MESSAGE.USER_NOT_FOUND);
+    if (!user) {
+      console.log(`[AuthService.login] User not found for email: ${dto.email}`);
+      throw new RpcNotFoundException(ERROR_MESSAGE.USER_NOT_FOUND);
+    }
+
+    console.log(`[AuthService.login] User found:`, user);
+
     if (!user.password || dto.password !== user.password) {
-      throw new UnauthorizedException(ERROR_MESSAGE.INVALID_PASSWORD);
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_PASSWORD);
     }
     if (user.status !== USER_STATUS.VERIFIED)
-      throw new UnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
+
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -159,7 +189,7 @@ export class AuthService {
         dto.refreshToken,
       );
       const user = await this.authRepository.findUserById(payload.sub);
-      if (!user) throw new UnauthorizedException(ERROR_MESSAGE.USER_NOT_FOUND);
+      if (!user) throw new RpcNotFoundException(ERROR_MESSAGE.USER_NOT_FOUND);
       const newPayload: JwtPayload = {
         sub: user.id,
         email: user.email,
@@ -178,7 +208,7 @@ export class AuthService {
         refreshTokenExpiresIn,
       };
     } catch {
-      throw new UnauthorizedException(ERROR_MESSAGE.INVALID_REFRESH_TOKEN);
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_REFRESH_TOKEN);
     }
   }
 
@@ -190,7 +220,7 @@ export class AuthService {
       const payload = this.customJwtService.verify<JwtPayload>(accessToken);
       //Đoạn này để debug
       if (!payload.jti) {
-        throw new UnauthorizedException(ERROR_MESSAGE.TOKEN_MISSING_JTI);
+        throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_MISSING_JTI);
       }
       await this.redisService.delJti(payload.jti);
       await this.redisService.removeJtiFromUserSet(payload.sub, payload.jti);
