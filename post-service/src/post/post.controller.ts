@@ -4,6 +4,7 @@ import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CONSTANTS } from 'constants/app.constants';
+import { PostQueryDto } from './dto/post-query.dto';
 
 @Controller()
 export class PostController {
@@ -15,8 +16,8 @@ export class PostController {
   }
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.GET)
-  async findAll() {
-    return await this.postService.findAll();
+  async findAll(postQueryDto: PostQueryDto) {
+    return await this.postService.findAll(postQueryDto);
   }
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.GET_DETAIL)

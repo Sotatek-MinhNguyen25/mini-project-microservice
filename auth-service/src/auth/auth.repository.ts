@@ -11,7 +11,7 @@ export class AuthRepository {
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({ where: { email } });
+    return await this.prisma.user.findFirst({ where: { email } });
   }
 
   async findUserById(id: string): Promise<User | null> {
@@ -30,6 +30,7 @@ export class AuthRepository {
     expiresAt?: Date;
   }): Promise<OTP> {
     let userId = data.userId;
+    console.log(data);
     if (!userId && data.email) {
       const user = await this.prisma.user.findUnique({
         where: { email: data.email },

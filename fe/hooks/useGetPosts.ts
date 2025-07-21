@@ -22,6 +22,7 @@ export function useGetPosts({ limit = 10 }: UseGetPostsOptions = {}) {
       // Handle both response formats
       const posts = Array.isArray(response) ? response : response.posts || [];
       const total = Array.isArray(response) ? undefined : response.total;
+      // console.log("Fetched posts:", posts, "Total:", total);
       return { posts, total, page: pageParam };
     },
     getNextPageParam: (lastPage) => {

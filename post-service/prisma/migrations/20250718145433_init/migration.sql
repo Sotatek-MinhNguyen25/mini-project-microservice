@@ -30,6 +30,8 @@ CREATE TABLE "PostTag" (
     "postId" TEXT NOT NULL,
     "tagId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "PostTag_pkey" PRIMARY KEY ("postId","tagId")
 );
@@ -54,6 +56,7 @@ CREATE TABLE "Reaction" (
     "postId" TEXT,
     "type" "ReactionType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Reaction_pkey" PRIMARY KEY ("id")
