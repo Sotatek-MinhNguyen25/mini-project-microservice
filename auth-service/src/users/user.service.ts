@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { OAuthProvider, Role, User, UserStatus } from "@prisma/client";
 import { GetListUserDto } from "./dto/get-list.dto";
 import * as _ from 'lodash';
+import { FindUserByIdsDto } from "./dto/find-user-ids.dto";
 
 @Injectable()
 export class UserService {
@@ -46,6 +47,13 @@ export class UserService {
         })
 
         return { data: _.omit(foundUser, 'password') as Omit<User, 'password'> }
+    }
+
+    async findUserByIds(dto: FindUserByIdsDto) {
+        const users = await this.authRepository.findUserByIds(dto.ids);
+        return {
+            data: (users ?? []).map(user => _.omit(user, 'password', 'roles'))
+        }
     }
 
     async findListsUser(dto: GetListUserDto) {
