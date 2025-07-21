@@ -20,6 +20,14 @@ export const KAFKA_PATTERNS = {
     UPDATE_PASSWORD: 'auth.update-password',
   },
 
+  USER: {
+    FIND_ONE: 'user.find-one',
+    FIND_MANY: 'user.find-many',
+    CREATE: 'user.create',
+    DELETE: 'user.delete',
+    UPDATE: 'user.update',
+  },
+
   // Post Service Events
   POST: {
     CREATE: 'post.create',

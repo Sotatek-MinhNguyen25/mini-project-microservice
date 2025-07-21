@@ -10,6 +10,7 @@ import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { ValidationPipe } from './shared/pipes/validation.pipe';
 import configuration from './config/configuration';
 import { AuthModule } from 'src/auth/auth.module';
+import { UserModule } from './users/user.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { AuthModule } from 'src/auth/auth.module';
     }),
     KafkaModule.register(['auth']),
     PrismaModule,
-    AuthModule, // Import AuthModule here
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
@@ -38,4 +40,4 @@ import { AuthModule } from 'src/auth/auth.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
