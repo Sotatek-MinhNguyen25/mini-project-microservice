@@ -4,8 +4,7 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean
 }
 
-const baseURL = 'http://127.0.0.1:3002/'
-const api = '/api'
+const baseURL = 'http://127.0.0.1:8000/'
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
@@ -75,7 +74,7 @@ axiosClient.interceptors.response.use(
         // Call logout API
         setTimeout(async () => {
           try {
-            await axios.post(`${baseURL}${api}/login`, null, {
+            await axios.post(`${baseURL}/login`, null, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
               },

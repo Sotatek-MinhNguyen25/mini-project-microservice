@@ -1,78 +1,99 @@
-"use client"
+'use client';
 
-import { useState, useRef } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/useToast"
-import { useAuth } from "@/contexts/auth-context"
-import type { Post, PostCardProps } from "@/types/post"
-import { Heart, MessageCircle, Share2, MoreHorizontal, Play, Pause, Volume2, VolumeX } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import Image from "next/image"
-import { CommentSection } from "./comment-section"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { CATEGORY_LABELS } from "@/const/category"
+import { useState, useRef } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/contexts/auth-context';
+import type { Post, PostCardProps } from '@/types/post';
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  MoreHorizontal,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import Image from 'next/image';
+import { CommentSection } from './comment-section';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { CATEGORY_LABELS } from '@/const/category';
 
 export function PostCard({ post }: PostCardProps) {
-  const [showComments, setShowComments] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const [showComments, setShowComments] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const reactionMutation = useMutation({
     mutationFn: async ({ postId, type }: { postId: string; type: string }) => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      return { success: true }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] })
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
       toast({
-        title: "Success",
-        description: "Reaction updated!",
-      })
+        title: 'Success',
+        description: 'Reaction updated!',
+      });
     },
-  })
+  });
 
-  const handleReaction = (type: "LIKE" | "LOVE" | "LAUGH" | "ANGRY" | "SAD") => {
-    if (!user) return
-    reactionMutation.mutate({ postId: post.id, type })
-  }
+  const handleReaction = (
+    type: 'LIKE' | 'LOVE' | 'LAUGH' | 'ANGRY' | 'SAD',
+  ) => {
+    if (!user) return;
+    reactionMutation.mutate({ postId: post.id, type });
+  };
 
   const toggleVideo = () => {
     if (videoRef.current) {
       if (isPlaying) {
-        videoRef.current.pause()
+        videoRef.current.pause();
       } else {
-        videoRef.current.play()
+        videoRef.current.play();
       }
-      setIsPlaying(!isPlaying)
+      setIsPlaying(!isPlaying);
     }
-  }
+  };
 
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted
-      setIsMuted(!isMuted)
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
     }
-  }
+  };
 
-  const userReaction = post.reactions.find((r) => r.userId === user?.id)
-  const fullName = `${post.author.profile.firstName} ${post.author.profile.lastName}`
-  const initials = `${post.author.profile.firstName[0]}${post.author.profile.lastName[0]}`
+  // const userReaction = post.reactions.find((r) => r.userId === user?.id)
+  // const fullName = `${post.author.profile.firstName} ${post.author.profile.lastName}`
+  // const initials = `${post.author.profile.firstName[0]}${post.author.profile.lastName[0]}`
 
   // Get category info
-  const categoryInfo = post.categories[0] ? CATEGORY_LABELS[post.categories[0].name] : null
+  // const categoryInfo = post.categories[0] ? CATEGORY_LABELS[post.categories[0].name] : null
 
   return (
     <Card className="card-hover glass-effect border-0 shadow-lg overflow-hidden">
       {/* Category Header - Elegant and refined */}
-      {categoryInfo && (
+      {/* {categoryInfo && (
         <div className="px-6 py-4 bg-gradient-to-r from-background via-muted/30 to-background border-b border-border/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -94,10 +115,10 @@ export function PostCard({ post }: PostCardProps) {
             </Badge>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Tags */}
-      {post.tags.length > 0 && (
+      {/* {post.tags.length > 0 && (
         <div className="px-6 pt-4 pb-2 bg-gradient-to-r from-primary/5 to-purple-600/5 border-b border-border/40">
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
@@ -111,24 +132,24 @@ export function PostCard({ post }: PostCardProps) {
             ))}
           </div>
         </div>
-      )}
+      )} */}
 
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <Avatar className="ring-2 ring-primary/20">
-              <AvatarImage src={post.author.profile.avatarUrl || "/placeholder.svg"} alt={fullName} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white">
+              {/* <AvatarImage src={post.author.profile.avatarUrl || "/placeholder.svg"} alt={fullName} /> */}
+              {/* <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white">
                 {initials}
-              </AvatarFallback>
+              </AvatarFallback> */}
             </Avatar>
             <div>
-              <p className="font-semibold text-foreground">{fullName}</p>
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
+              {/* <p className="font-semibold text-foreground">{fullName}</p> */}
+              {/* <p className="text-sm text-muted-foreground flex items-center gap-1">
                 @{post.author.username}
                 <span className="w-1 h-1 bg-muted-foreground rounded-full" />
                 {formatDistanceToNow(post.createdAt)} ago
-              </p>
+              </p> */}
             </div>
           </div>
           <DropdownMenu>
@@ -143,7 +164,9 @@ export function PostCard({ post }: PostCardProps) {
               {user?.id === post.authorId && (
                 <>
                   <DropdownMenuItem>✏️ Edit</DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600">🗑️ Delete</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-600">
+                    🗑️ Delete
+                  </DropdownMenuItem>
                 </>
               )}
             </DropdownMenuContent>
@@ -158,13 +181,15 @@ export function PostCard({ post }: PostCardProps) {
           </h3>
         )}
 
-        <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">{post.content}</p>
+        <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">
+          {post.content}
+        </p>
 
-        {post.images.length > 0 && (
+        {post.image.length > 0 && (
           <div className="grid gap-3 rounded-xl overflow-hidden">
-            {post.images.map((image) => (
+            {post.image.map((image) => (
               <div key={image.id} className="relative group">
-                {image.mimeType.startsWith("video/") ? (
+                {/* {image.mimeType.startsWith("video/") ? (
                   <div className="relative rounded-xl overflow-hidden bg-black">
                     <video
                       ref={videoRef}
@@ -206,7 +231,15 @@ export function PostCard({ post }: PostCardProps) {
                     className="rounded-xl object-cover w-full max-h-96 group-hover:scale-105 transition-transform duration-300"
                   />
                 )}
-                {image.caption && <p className="text-sm text-muted-foreground mt-2 italic">💬 {image.caption}</p>}
+                {image.caption && <p className="text-sm text-muted-foreground mt-2 italic">💬 {image.caption}</p>} */}
+
+                <Image
+                  src={image.url || '/placeholder.svg'}
+                  alt={image.altText}
+                  width={image.width || 800}
+                  height={image.height || 600}
+                  className="rounded-xl object-cover w-full max-h-96 group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
             ))}
           </div>
@@ -217,20 +250,20 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center space-x-1">
             <Button
-              variant={userReaction?.type === "LIKE" ? "default" : "ghost"}
+              // variant={userReaction?.type === "LIKE" ? "default" : "ghost"}
               size="sm"
-              onClick={() => handleReaction("LIKE")}
+              onClick={() => handleReaction('LIKE')}
               disabled={reactionMutation.isPending}
-              className={`transition-all duration-200 ${
-                userReaction?.type === "LIKE"
-                  ? "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25"
-                  : "hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
-              }`}
+              // className={`transition-all duration-200 ${
+              //   userReaction?.type === "LIKE"
+              //     ? "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25"
+              //     : "hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+              // }`}
             >
-              <Heart
+              {/* <Heart
                 className={`h-4 w-4 mr-2 transition-all ${userReaction?.type === "LIKE" ? "fill-current scale-110" : ""}`}
               />
-              {post._count.reactions}
+              {post._count.reactions} */}
             </Button>
 
             <Button
@@ -240,7 +273,7 @@ export function PostCard({ post }: PostCardProps) {
               className="hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-blue-900/20 transition-all"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
-              {post._count.comments}
+              {/* {post._count.comments} */}1 
             </Button>
 
             <Button
@@ -261,5 +294,5 @@ export function PostCard({ post }: PostCardProps) {
         )}
       </CardFooter>
     </Card>
-  )
+  );
 }
