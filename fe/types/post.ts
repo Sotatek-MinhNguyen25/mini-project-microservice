@@ -2,52 +2,103 @@ export interface Post {
   id: string;
   title: string;
   content: string;
-  // status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
   userId: string;
   image: PostImage[];
-  tags: Tag[];
-  // categories: Category[]
-  reactions: Reaction[];
+  tags: TagId[];
+  reaction: Reaction;
   comments: Comment[];
-  // _count: {
-  //   reactions: number
-  //   comments: number
-  // }
+  totalComment: number;
+}
+
+export interface IReactionType {
+  LIKE: 'LIKE';
+  LOVE: 'LOVE';
+  HAHA: 'HAHA';
+  WOW: 'WOW';
+  SAD: 'SAD';
+  ANGRY: 'ANGRY';
 }
 
 export enum ReactionType {
-  LIKE,
-  LOVE,
-  HAHA,
-  WOW,
-  SAD,
-  ANGRY,
+  LIKE = 'LIKE',
+  LOVE = 'LOVE',
+  HAHA = 'HAHA',
+  WOW = 'WOW',
+  SAD = 'SAD',
+  ANGRY = 'ANGRY',
 }
 
 export interface PostImage {
   id: string;
+  altText: string;
+  url: string;
+}
+
+// Request type for creating a post
+export interface CreatePostRequest {
+  title: string;
+  content: string;
+  userId: string;
+  postImages?: PostImage[];
+  tagIds?: TagId[];
+}
+
+// Response type for created post
+export interface PostImageResponse {
+  id: string;
   url: string;
   altText: string;
-  caption: string;
-  width: number;
-  height: number;
-  fileSize: number;
-  mimeType: string;
-  uploadedBy: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  postId: string;
 }
 
 export interface Tag {
   id: string;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface PostData {
+  title: string;
+  content: string;
+  userId: string;
+  files: File[];
+  postImages?: PostImage[];
+  tagIds?: TagId[];
+}
+
+export interface CreatePostResponseData {
+  id: string;
+  title: string;
+  content: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  image: PostImageResponse[];
+}
+
+export interface CreatePostResponse {
+  status: string;
+  statusCode: number;
+  message: string;
+  data: CreatePostResponseData;
+  meta: Record<string, any>;
+  timestamp: string;
+}
+
+export interface TagId {
+  tag: {
+    id: string;
+    name: string;
+  };
 }
 
 // export interface Category {
@@ -59,19 +110,11 @@ export interface Tag {
 // }
 
 export interface Reaction {
-  id: string;
-  userId: string;
-  type: ReactionType;
-  createdAt: Date;
-  deletedAt: Date | null;
-  user: {
-    username: string;
-    profile: {
-      firstName: string;
-      lastName: string;
-      avatarUrl: string;
-    };
-  };
+  summary: {
+    type: ReactionType;
+    count: number;
+  }[];
+  count: number;
 }
 
 export interface Comment {
@@ -143,4 +186,8 @@ export interface PostTagsInputProps {
   setCurrentTag: (tag: string) => void;
   handleTagKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   removeTag: (tag: string) => void;
+}
+
+export interface PostCardProps {
+  post: Post;
 }

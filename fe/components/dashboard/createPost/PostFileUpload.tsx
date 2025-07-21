@@ -1,14 +1,30 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ImageIcon, Video, X, Plus } from 'lucide-react'
-import { PostFileUploadProps } from '@/types/post'
+// import { PostFileUploadProps } from '@/types/post'
+
+export interface PostFileUploadProps {
+  filePreviews: Array<{
+    file: File;
+    url: string;
+    type: 'image' | 'video';
+    altText?: string;
+  }>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  removeFile: (index: number) => void;
+  updateAltText: (index: number, altText: string) => void;
+}
 
 export default function PostFileUpload({
   filePreviews,
   fileInputRef,
   handleFileChange,
   removeFile,
+  updateAltText,
 }: PostFileUploadProps) {
   return (
     <div>
@@ -42,7 +58,11 @@ export default function PostFileUpload({
             <div key={index} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden bg-muted">
                 {preview.type === 'image' ? (
-                  <img src={preview.url || '/placeholder.svg'} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={preview.url || '/placeholder.svg'}
+                    alt={preview.altText || `Preview ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <video src={preview.url} className="w-full h-full object-cover" muted />
                 )}
@@ -61,6 +81,17 @@ export default function PostFileUpload({
                   {preview.type === 'image' ? <ImageIcon className="h-3 w-3" /> : <Video className="h-3 w-3" />}
                 </Badge>
               </div>
+              {preview.type === 'image' && (
+                <div className="mt-2">
+                  <Input
+                    type="text"
+                    placeholder={`Alt text for image ${index + 1}`}
+                    value={preview.altText || ''}
+                    onChange={(e) => updateAltText(index, e.target.value)}
+                    className="text-sm border-border/40 focus:border-primary/50 focus:ring-primary/20"
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
