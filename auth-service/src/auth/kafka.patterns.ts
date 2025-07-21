@@ -7,7 +7,7 @@ export const KAFKA_PATTERNS = {
   FORGOT_PASSWORD: 'auth.forgot-password',
   VERIFY_FORGOT_PASSWORD: 'auth.verify-forgot-password',
   UPDATE_PASSWORD: 'auth.update-password',
-
+  COMPLETE_REGISTER: 'auth.complete-register',
   USER_CREATE: 'user.create',
   USER_FIND_ONE: 'user.find-one',
   USER_FIND_IDS: 'user.find-ids',

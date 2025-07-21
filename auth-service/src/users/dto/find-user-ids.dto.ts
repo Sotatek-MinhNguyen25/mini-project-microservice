@@ -1,7 +1,7 @@
-import { IsArray, IsUUID } from "class-validator";
+import { IsArray, IsUUID } from 'class-validator';
 
 export class FindUserByIdsDto {
-    @IsArray()
-    @IsUUID(undefined, { each: true })
-    ids: string[]
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  ids: string[];
 }

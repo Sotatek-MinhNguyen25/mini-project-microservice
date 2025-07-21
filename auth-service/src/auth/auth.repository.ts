@@ -4,7 +4,7 @@ import { Prisma, User, OTP, OTP_Purpose } from '@prisma/client';
 
 @Injectable()
 export class AuthRepository {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return await this.prisma.user.create({ data });
@@ -23,35 +23,27 @@ export class AuthRepository {
   }
 
   async createOTP(data: {
-    userId?: string | null;
-    email?: string;
+    userId: string;
     purpose: OTP_Purpose;
     code?: string;
     expiresAt?: Date;
   }): Promise<OTP> {
-    let userId = data.userId;
-    console.log(data);
-    if (!userId && data.email) {
-      const user = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
-      if (user) userId = user.id;
-    }
-    if (!userId) throw new Error('UserId is required to create OTP');
-
     const code =
       data.code || Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(
+      `[OTP CREATED] For user ${data.userId} with purpose ${data.purpose}: ${code}`,
+    );
     const expiresAt = data.expiresAt || new Date(Date.now() + 10 * 60 * 1000);
     return await this.prisma.oTP.upsert({
       where: {
         userId_purpose: {
-          userId,
+          userId: data.userId,
           purpose: data.purpose,
         },
       },
       update: { code, expiresAt },
       create: {
-        userId,
+        userId: data.userId,
         code,
         purpose: data.purpose,
         expiresAt,
@@ -90,8 +82,8 @@ export class AuthRepository {
   async findUserByIds(ids: string[]): Promise<User[] | null> {
     return this.prisma.user.findMany({
       where: {
-        id: { in: ids }
-      }
-    })
+        id: { in: ids },
+      },
+    });
   }
 }

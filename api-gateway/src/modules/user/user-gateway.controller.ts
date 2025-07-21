@@ -10,7 +10,7 @@ import { dot } from 'node:test/reporters';
 
 @Controller('users')
 export class UserGatewayController {
-  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) { }
+  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) {}
 
   async onModuleInit() {
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.CREATE);
@@ -18,8 +18,7 @@ export class UserGatewayController {
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.FIND_MANY);
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.FIND_IDS);
 
-
-    await this.client.connect()
+    await this.client.connect();
   }
 
   @Get()
@@ -31,9 +30,9 @@ export class UserGatewayController {
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_ONE, id));
   }
 
-  @Post("find-by-ids")
+  @Post('find-by-ids')
   async findUsersByIds(@Body() body: FindUsersByIdsDto) {
-    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_IDS, instanceToPlain(body)))
+    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_IDS, instanceToPlain(body)));
   }
 
   @Post()

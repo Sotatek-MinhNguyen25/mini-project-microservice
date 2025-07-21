@@ -7,6 +7,9 @@ export type OtpPurpose = (typeof OTP_PURPOSE)[keyof typeof OTP_PURPOSE];
 
 export const USER_STATUS = {
   VERIFIED: 'VERIFIED',
+  UNVERIFIED: 'UNVERIFIED',
+  BANNED: 'BANNED', // Bị cấm (không thể đăng nhập hoặc thực hiện hành động)
+  INACTIVE: 'INACTIVE', // Không hoạt động (có thể đăng nhập nhưng không thể thực hiện hành động)
 } as const;
 
 export type UserStatus = (typeof USER_STATUS)[keyof typeof USER_STATUS];
