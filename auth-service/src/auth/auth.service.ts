@@ -43,6 +43,7 @@ export class AuthService {
   }
 
   async sendRegisterOtp(dto: RegisterDto) {
+    console.log(dto.email);
     const existed = await this.authRepository.findUserByEmail(dto.email);
     if (existed)
       throw new BadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);

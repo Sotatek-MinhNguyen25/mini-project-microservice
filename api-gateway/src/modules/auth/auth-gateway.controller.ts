@@ -18,7 +18,7 @@ export class AuthGatewayController implements OnModuleInit {
 
   @Post('register')
   async register(@Body() body: RegisterDto) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REGISTER, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REGISTER, { ...body }));
   }
 
   @Post('login')

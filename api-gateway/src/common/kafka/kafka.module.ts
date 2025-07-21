@@ -15,6 +15,9 @@ import { KAFKA_CLIENTS } from 'src/constants/app.constants';
             brokers: [config.kafka.brokers],
             clientId: config.kafka.clientId + '-auth',
           },
+          consumer: {
+            groupId: config.kafka.clientId + '-auth-group',
+          },
         },
       },
       {

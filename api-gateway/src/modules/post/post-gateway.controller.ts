@@ -1,14 +1,15 @@
-import { Body, Controller, Get, Inject, OnModuleInit, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, OnModuleInit, Param, Post, Query } from '@nestjs/common';
 import { Public } from '../auth/jwt';
 import { config } from 'src/configs/config.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CreatePostDto } from './dto/create-post.dto';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiQuery } from '@nestjs/swagger';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateReactionDto } from './dto/create-reaction.dto';
+import { PostQueryDto } from './dto/post-query.dto';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
@@ -31,8 +32,11 @@ export class PostGatewayController implements OnModuleInit {
 
   @Public()
   @Get('')
-  async getPost() {
-    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET, {}));
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  async getPost(@Query() postQueryDto: PostQueryDto) {
+    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET, { ...postQueryDto }));
   }
 
   @Public()
