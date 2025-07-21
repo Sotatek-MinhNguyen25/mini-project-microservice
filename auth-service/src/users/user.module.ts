@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserKafkaController } from './user-kafka.controller';
 import { KafkaModule } from 'src/kafka/kafka.module';
+import { UserRepository } from './user.repository';
 
 
 @Module({
@@ -11,6 +12,7 @@ import { KafkaModule } from 'src/kafka/kafka.module';
         AuthModule
     ],
     controllers: [UserKafkaController],
-    providers: [UserService],
+    providers: [UserService, UserRepository],
+    exports: [UserService]
 })
 export class UserModule { }

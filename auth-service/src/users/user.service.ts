@@ -8,10 +8,15 @@ import { OAuthProvider, Role, User, UserStatus } from "@prisma/client";
 import { GetListUserDto } from "./dto/get-list.dto";
 import * as _ from 'lodash';
 import { FindUserByIdsDto } from "./dto/find-user-ids.dto";
+import { paginate } from "src/shared/utils/paginate.util";
+import { UserRepository } from "./user.repository";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UserService {
-    constructor(private readonly authRepository: AuthRepository) { }
+    constructor(private readonly authRepository: AuthRepository,
+        private readonly userRepository: UserRepository
+    ) { }
 
     async createUser(dto: CreateUserDto): Promise<{ data: User }> {
         // 1. check email
@@ -57,7 +62,24 @@ export class UserService {
     }
 
     async findListsUser(dto: GetListUserDto) {
+        return await this.userRepository.findUsers(dto)
+    }
 
+    async updateUser(dto: UpdateUserDto) {
+        const { id, ...updateData } = dto;
+        const existingUser = await this.authRepository.findUserById(id)
+
+        if (!existingUser) {
+            throw new RpcException({
+                statusCode: 400,
+                error: 'BAD_REQUEST',
+                message: ERROR_MESSAGE.USER_NOT_FOUND
+            })
+        }
+
+        const updatedUser = await this.userRepository.updateUser(id, updateData);
+
+        return { data: updatedUser };
     }
 
 

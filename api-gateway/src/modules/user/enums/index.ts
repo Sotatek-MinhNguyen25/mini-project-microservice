@@ -1,18 +1,18 @@
 export enum Role {
-    ADMIN,
-    EDITOR,
-    USER
+    ADMIN = 'ADMIN',
+    USER = 'USER',
+    EDITOR = 'EDITOR',
 }
 
 export enum UserStatus {
-    UNVERIFIED,
-    VERIFIED,
-    BANNED,
-    INACTIVE,
+    UNVERIFIED = 'UNVERIFIED',
+    VERIFIED = 'VERIFIED',
+    BANNED = 'BANNED',
+    INACTIVE = 'INACTIVE'
 }
 
 export enum OAuthProvider {
-    GITHUB,
-    GOOGLE,
-    FACEBOOK
+    GITHUB = 'GITHUB',
+    GOOGLE = 'GOOGLE',
+    FACEBOOK = 'FACEBOOK'
 }

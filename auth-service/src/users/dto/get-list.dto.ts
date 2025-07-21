@@ -1,7 +1,7 @@
 
-import { Role, UserStatus } from '@prisma/client';
+import { OAuthProvider, Role, UserStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export enum SortOrder {
     ASC = 'ASC',
@@ -16,26 +16,31 @@ export class GetListUserDto {
     @Type(() => Number)
     @IsNumber()
     @Min(1)
-    page?: number = 1;
+    page: number = 1;
 
     @Type(() => Number)
     @IsNumber()
     @Min(1)
-    limit?: number = 10;
+    limit: number = 10;
 
     @IsOptional()
     @IsString()
-    sortBy?: string = 'createdAt';
+    sortBy: string = 'createdAt';
 
     @IsOptional()
     @IsEnum(SortOrder)
-    sortOrder?: SortOrder = SortOrder.DESC;
+    sortOrder: SortOrder = SortOrder.DESC;
 
     @IsOptional()
     @IsEnum(Role, { each: true })
+    @IsArray()
     roles?: Role[];
 
     @IsOptional()
     @IsEnum(UserStatus)
     status?: UserStatus;
+
+    @IsOptional()
+    @IsEnum(OAuthProvider)
+    oauthProvider?: OAuthProvider;
 }

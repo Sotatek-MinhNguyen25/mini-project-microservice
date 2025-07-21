@@ -13,14 +13,11 @@ export class UserKafkaController {
 
     @MessagePattern(KAFKA_PATTERNS.USER_CREATE)
     async createUser(@Payload() data: CreateUserDto) {
-        console.log(data)
-
         return await this.userService.createUser(data);
     }
 
     @MessagePattern(KAFKA_PATTERNS.USER_FIND_ONE)
     async findUserById(@Payload() payload: string) {
-        console.log(payload)
         return await this.userService.findOneUser(payload);
     }
 
@@ -31,13 +28,12 @@ export class UserKafkaController {
 
     @MessagePattern(KAFKA_PATTERNS.USER_FIND_MANY)
     async findListsUser(@Payload() data: GetListUserDto) {
-        console.log(data)
         return await this.userService.findListsUser(data);
     }
 
     @MessagePattern(KAFKA_PATTERNS.USER_UPDATE)
     async updateUser(@Payload() data: UpdateUserDto) {
-
+        return await this.userService.updateUser(data);
     }
 
 
