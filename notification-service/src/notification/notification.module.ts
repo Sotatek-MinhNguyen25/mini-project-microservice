@@ -18,13 +18,12 @@ import * as Joi from 'joi';
         KAFKA_CLIENT_ID: Joi.string().required(),
         KAFKA_GROUP_ID: Joi.string().required(),
         KAFKA_TOPIC: Joi.string().required(),
+
         MAILTRAP_HOST: Joi.string().required(),
         MAILTRAP_PORT: Joi.number().required(),
         MAILTRAP_SECURE: Joi.boolean().required(),
         MAILTRAP_USER: Joi.string().required(),
-        MAILTRAP_PASS: Joi.string().required(),
         MAILTRAP_FROM: Joi.string().required(),
-        FRONTEND_URL: Joi.string().uri().required(),
       }),
     }),
     ClientsModule.registerAsync([
@@ -32,7 +31,7 @@ import * as Joi from 'joi';
         name: 'KAFKA_SERVICE',
         imports: [ConfigModule],
         useFactory: (configService: ConfigService) => {
-          const brokers = configService.get<string[]>('kafka.brokers') ?? ['localhost:9092'];
+          const brokers = configService.get<string[]>('kafka.brokers') ?? ['localhost:29092'];
           const clientId = configService.get<string>('kafka.clientId') ?? 'notification-service';
           const groupId = configService.get<string>('kafka.groupId') ?? 'notification-group';
 

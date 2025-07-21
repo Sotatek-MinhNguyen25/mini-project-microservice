@@ -37,7 +37,7 @@ model PostTag {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @updatedAt @default(now())
   deletedAt DateTime?
 
   @@id([postId, tagId])
