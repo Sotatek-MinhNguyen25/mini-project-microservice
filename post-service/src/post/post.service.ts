@@ -99,6 +99,16 @@ export class PostService implements OnModuleInit {
             createdAt: 'desc',
           },
         },
+        tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         createdAt: true,
       },
       where: searchConditon,

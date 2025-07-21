@@ -12,17 +12,16 @@ type PostsResponseData = PostsResponse | Post[];
 
 interface UseGetPostsOptions {
   limit?: number;
+  page?: number;
 }
 
-export function useGetPosts({ limit = 10 }: UseGetPostsOptions = {}) {
+export function useGetPosts({ page = 1, limit = 10 }: UseGetPostsOptions = {}) {
   return useInfiniteQuery({
-    queryKey: ["posts", limit],
+    queryKey: ["posts", page, limit],
     queryFn: async ({ pageParam = 1 }) => {
       const response = await postService.getPosts(pageParam, limit);
-      // Handle both response formats
       const posts = Array.isArray(response) ? response : response.posts || [];
       const total = Array.isArray(response) ? undefined : response.total;
-      // console.log("Fetched posts:", posts, "Total:", total);
       return { posts, total, page: pageParam };
     },
     getNextPageParam: (lastPage) => {

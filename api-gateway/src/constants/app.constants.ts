@@ -22,6 +22,7 @@ export const KAFKA_PATTERNS = {
 
   USER: {
     FIND_ONE: 'user.find-one',
+    FIND_IDS: 'user.find-ids',
     FIND_MANY: 'user.find-many',
     CREATE: 'user.create',
     DELETE: 'user.delete',

@@ -1,8 +1,8 @@
 'use client'
 
 import { Header } from './header'
-import { PostFeed } from './post-feed'
-import { CreatePost } from './create-post'
+import { PostFeed } from './postFeed'
+import { CreatePost } from './createPosts'
 import Link from "next/link"
 
 export function Dashboard() {

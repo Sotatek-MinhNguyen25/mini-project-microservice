@@ -193,9 +193,8 @@ export class UploadGatewayHTTPController {
   }
 
   private async uploadSingleFile(file: formidable.File & { buffer: Buffer }, user: IUser, field: string) {
-    const userId = this.getUserId(user);
     const formData = this.buildFormData([{ field, file }]);
-    const response = await this.httpPost(`${this.uploadServiceUrl}/upload?userId=${userId}`, formData);
+    const response = await this.httpPost(`${this.uploadServiceUrl}/upload`, formData);
     console.log('Upload Service Raw Response:', response?.data);
     return {
       data: response.data,
@@ -204,9 +203,8 @@ export class UploadGatewayHTTPController {
   }
 
   private async uploadMultipleFiles(files: (formidable.File & { buffer: Buffer })[], user: IUser, field: string) {
-    const userId = this.getUserId(user);
     const formData = this.buildFormData(files.map((file) => ({ field, file })));
-    const response = await this.httpPost(`${this.uploadServiceUrl}/uploads?userId=${userId}`, formData);
+    const response = await this.httpPost(`${this.uploadServiceUrl}/upload-multiple`, formData);
     return {
       data: response.data,
       message: `Files uploaded successfully`,
@@ -240,9 +238,5 @@ export class UploadGatewayHTTPController {
       });
     });
     return formData;
-  }
-
-  private getUserId(user: IUser): string {
-    return user?.userId ?? 'dummy-user-id';
   }
 }

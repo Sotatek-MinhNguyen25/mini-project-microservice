@@ -10,6 +10,7 @@ export const KAFKA_PATTERNS = {
 
   USER_CREATE: 'user.create',
   USER_FIND_ONE: 'user.find-one',
+  USER_FIND_IDS: 'user.find-ids',
   USER_FIND_MANY: 'user.find-many',
   USER_UPDATE: 'user.update',
   USER_DELETE: 'user.delete',
