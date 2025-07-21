@@ -11,7 +11,6 @@ export function PostFeed() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useGetPosts({ limit: 10 })
   const observerRef = useRef<HTMLDivElement>(null)
 
-  // Set up IntersectionObserver for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
