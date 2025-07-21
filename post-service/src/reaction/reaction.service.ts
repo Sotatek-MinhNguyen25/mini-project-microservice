@@ -69,8 +69,9 @@ export class ReactionService {
     if (reaction) {
       // redirect to update reaction?
       throw new RpcException({
-        status: 409,
+        statusCode: 409,
         message: 'User has already reacted to this post',
+        error: 'Conflict',
       });
     }
     const createdReaction = await this.prismaService.reaction.create({

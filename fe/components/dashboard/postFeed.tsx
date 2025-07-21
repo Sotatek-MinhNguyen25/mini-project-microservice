@@ -2,13 +2,13 @@
 
 import { useEffect, useRef } from 'react'
 import { useGetPosts } from '@/hooks/useGetPosts'
-import { PostCard } from './post-card'
+import { PostCard } from './postCard'
 import type { Post } from '@/types/post'
 import { Loader2, Sparkles } from 'lucide-react'
 import { generateMockPosts } from '@/const/category'
 
 export function PostFeed() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useGetPosts({ limit: 10 })
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useGetPosts({ page:1, limit: 10 })
   const observerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -32,8 +32,8 @@ export function PostFeed() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  // Flatten pages into a single posts array
-  const allPosts = data?.pages.flatMap((page) => page.posts) || generateMockPosts()
+
+  const allPosts = data?.pages.flatMap((page) => page.posts) || []
 
   if (isLoading) {
     return (

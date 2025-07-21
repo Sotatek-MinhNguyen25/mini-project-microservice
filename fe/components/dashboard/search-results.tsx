@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { PostCard } from "./post-card"
+import { PostCard } from "./postCard"
 import type { Post } from "@/types/post"
 import { Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"

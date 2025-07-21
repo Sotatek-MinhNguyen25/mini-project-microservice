@@ -74,18 +74,28 @@ export class PostService {
             createdAt: true,
           },
         },
+        tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         createdAt: true,
       },
 
-      where: {
-        OR: [
-          {
-            content: {
-              contains: postQueryDto.search,
-            },
-          },
-        ],
-      },
+      // where: {
+      //   OR: [
+      //     {
+      //       content: {
+      //         contains: postQueryDto.search,
+      //       },
+      //     },
+      //   ],
+      // },
     };
 
     const posts = await this.prisma.post.findMany({
