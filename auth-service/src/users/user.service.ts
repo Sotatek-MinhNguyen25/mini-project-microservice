@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRepository } from 'src/auth/auth.repository';
 import { CreateUserDto } from './dto/create-user.dto';
-import { RpcException } from '@nestjs/microservices';
+import { BaseRpcExceptionFilter, RpcException } from '@nestjs/microservices';
 import { ERROR_MESSAGE } from 'src/shared/message/error.message';
 import * as bcrypt from 'bcryptjs';
 import { OAuthProvider, Role, User, UserStatus } from '@prisma/client';
@@ -11,6 +11,7 @@ import { FindUserByIdsDto } from "./dto/find-user-ids.dto";
 import { paginate } from "src/shared/utils/paginate.util";
 import { UserRepository } from "./user.repository";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { RpcBadRequestException } from 'src/shared/exceptions/rpc.exceptions';
 
 @Injectable()
 export class UserService {
@@ -20,10 +21,10 @@ export class UserService {
 
     async createUser(dto: CreateUserDto): Promise<{ data: User }> {
         // 1. check email
-        const foundUser = await this.authRepository.findUserByEmail(dto.email);
+        const foundUser = await this.userRepository.findUserByEmailOrUsername(dto.email, dto.username);
         if (foundUser) throw new RpcException({
             statusCode: 409,
-            message: ERROR_MESSAGE.EMAIL_ALREADY_EXISTS,
+            message: ERROR_MESSAGE.USER_NOT_FOUND,
             error: "CONFLICT"
         });
 
@@ -75,6 +76,16 @@ export class UserService {
                 error: 'BAD_REQUEST',
                 message: ERROR_MESSAGE.USER_NOT_FOUND
             })
+        }
+
+        if (dto.email && dto.email !== existingUser.email) {
+            const foundUser = await this.authRepository.findUserByEmail(dto.email);
+            if (foundUser) throw new RpcBadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS)
+        }
+
+        if (dto.username && dto.username !== existingUser.username) {
+            const foundUser = await this.userRepository.findUserByUsername(dto.username)
+            if (foundUser) throw new RpcBadRequestException(ERROR_MESSAGE.USERNAME_ALREADY_EXITST)
         }
 
         const updatedUser = await this.userRepository.updateUser(id, updateData);
