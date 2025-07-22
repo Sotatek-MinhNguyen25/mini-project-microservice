@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, OTP, OTP_Purpose } from '@prisma/client';
+import { RpcBadRequestException } from 'src/shared/exceptions/rpc.exceptions';
 
 @Injectable()
 export class AuthRepository {
@@ -11,6 +12,7 @@ export class AuthRepository {
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
+    if (!email) throw new RpcBadRequestException('Email is required');
     return await this.prisma.user.findFirst({ where: { email } });
   }
 

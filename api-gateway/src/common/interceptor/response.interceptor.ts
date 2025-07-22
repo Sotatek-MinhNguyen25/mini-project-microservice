@@ -13,9 +13,10 @@ export class ResponseMessageInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((response) => ({
         status: 'success',
-        statusCode: 200 | statusCode,
-        message: responseMessage || '',
-        data: response.data || {},
+        statusCode: statusCode,
+        message: response.message || responseMessage || 'Request was successful',
+        code: response.code || 200,
+        data: response.data !== undefined ? response.data : response,
         meta: response.meta || {},
         timestamp: new Date().toISOString(),
       })),
