@@ -39,14 +39,14 @@ export class AuthGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Login to the system' })
   @ApiBody({ type: LoginDto })
   async login(@Body() body: LoginDto) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGIN, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGIN, { ...body }));
   }
 
   @Post('refresh-token')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({ type: RefreshTokenDto })
   async refreshToken(@Body() body: RefreshTokenDto) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REFRESH_TOKEN, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.REFRESH_TOKEN, { ...body }));
   }
 
   @Post('forgot-password')
@@ -63,7 +63,7 @@ export class AuthGatewayController implements OnModuleInit {
     },
   })
   async forgotPassword(@Body() body: any) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.FORGOT_PASSWORD, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.FORGOT_PASSWORD, { ...body }));
   }
 
   @Post('verify-forgot-password')
@@ -84,7 +84,7 @@ export class AuthGatewayController implements OnModuleInit {
     },
   })
   async verifyForgotPassword(@Body() body: any) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.VERIFY_FORGOT_PASSWORD, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.VERIFY_FORGOT_PASSWORD, { ...body }));
   }
 
   @Post('update-password')
@@ -109,7 +109,7 @@ export class AuthGatewayController implements OnModuleInit {
     },
   })
   async updatePassword(@Body() body: any) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.UPDATE_PASSWORD, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.UPDATE_PASSWORD, { ...body }));
   }
 
   @Post('logout')
@@ -126,6 +126,6 @@ export class AuthGatewayController implements OnModuleInit {
     },
   })
   async logout(@Body() body: { accessToken: string }) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGOUT, body));
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGOUT, { ...body }));
   }
 }

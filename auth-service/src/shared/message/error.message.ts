@@ -4,7 +4,7 @@ export const ERROR_MESSAGE = {
   USER_NOT_FOUND_OR_NOT_UNVERIFIED:
     'User not found or status is not unverified',
   USER_NOT_VERIFIED: 'User not verified',
-  INVALID_PASSWORD: 'The password is not correct',
+  INVALID_PASSWORD: 'Sai mịa nó mật khẩu rồi',
   INVALID_OTP: 'The OTP is not correct',
   INVALID_REFRESH_TOKEN: 'Refresh token không hợp lệ',
   TOKEN_MISSING_JTI: 'Token không hợp lệ: thiếu jti. Vui lòng đăng nhập lại!',
