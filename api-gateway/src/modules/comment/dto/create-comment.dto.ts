@@ -6,9 +6,9 @@ export class CreateCommentDto {
   @IsString()
   content: string;
 
-  @ApiProperty()
-  @IsUUID()
-  userId: string;
+  // @ApiProperty()
+  // @IsUUID()
+  // userId: string;
 
   @ApiProperty()
   @IsUUID()

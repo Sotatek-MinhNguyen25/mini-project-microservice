@@ -40,7 +40,9 @@ export const KAFKA_PATTERNS = {
     LIST: 'post.list',
     LIKE: 'post.like',
     UNLIKE: 'post.unlike',
-    COMMENT: 'comment.create',
+    COMMENT: {
+      CREATE: 'comment.create',
+    },
     TAG: {
       CREATE: 'tag.create',
       GET: 'tag.get',

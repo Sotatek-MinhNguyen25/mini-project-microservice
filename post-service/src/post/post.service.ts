@@ -6,12 +6,13 @@ import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostQueryDto } from './dto/post-query.dto';
 import { paginate } from 'src/common/pagination';
-import { Prisma } from '@prisma/client';
+import { Post, Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { ReactionService } from 'src/reaction/reaction.service';
 import { CONSTANTS } from 'src/common/constants/app.constants';
 import { User } from 'src/common/type/user';
 import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
+import * as _ from 'lodash';
 
 @Injectable()
 export class PostService implements OnModuleInit {
@@ -110,56 +111,50 @@ export class PostService implements OnModuleInit {
         }
       : {};
 
-    const prismaConditon: Prisma.PostFindManyArgs = {
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        userId: true,
-        image: {
-          select: {
-            id: true,
-            url: true,
-            altText: true,
-          },
+    const [posts, totalItem] = await this.prisma.$transaction([
+      this.prisma.post.findMany({
+        omit: {
+          updatedAt: true,
+          deletedAt: true,
         },
-        comments: {
-          take: 5,
-          select: {
-            id: true,
-            content: true,
-            userId: true,
-            createdAt: true,
+        include: {
+          comments: {
+            omit: {
+              deletedAt: true,
+              updatedAt: true,
+            },
           },
-          orderBy: {
-            createdAt: 'desc',
+          image: {
+            omit: {
+              updatedAt: true,
+              deletedAt: true,
+            },
           },
-        },
-        tags: {
-          select: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-              },
+          tags: {
+            omit: {
+              deletedAt: true,
+              updatedAt: true,
             },
           },
         },
-        createdAt: true,
-      },
-      where: searchConditon,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    };
+        orderBy: {
+          createdAt: 'desc',
+        },
+        where: searchConditon,
+        ...paginateCondition,
+      }),
+      this.prisma.post.count({ where: searchConditon }),
+    ]);
 
-    const posts = await this.prisma.post.findMany({
-      ...paginateCondition,
-      ...prismaConditon,
-    });
-
-    // Lay danh sach userIds tu cac post
-    const userIds = [...new Set(posts.map((post) => post.userId))];
+    // Lay danh sach userIds tu cac post va comment
+    const userIds = [
+      ...new Set(
+        posts.map((post) => [
+          ...post.userId,
+          ...post.comments.map((comment) => comment.userId),
+        ]),
+      ),
+    ];
 
     // Thay thong tin user tu service auth
     const users: User[] = (
@@ -168,21 +163,35 @@ export class PostService implements OnModuleInit {
       )
     ).data;
 
-    const totalItem = await this.prisma.post.count({
-      where: prismaConditon.where,
-    });
-
     // Anh xa lai response
     const result = await Promise.all(
-      posts.map(async (post) => ({
-        ...post,
-        user: users.find((value) => value.id === post.userId),
-        totalComment: (await this.commentService.countCommentsByPostId(post.id))
-          .data,
-        reaction: (
-          await this.reactionService.getReactionsSummaryByPostId(post.id)
-        ).data,
-      })),
+      posts.map(async (post) => {
+        // Nguoi dang bai
+        const author = users.find((user) => user.id === post.userId);
+
+        // Anh xa comment voi user info
+        const commentMapper = post.comments.map((comment) => {
+          const commentUser = users.find((user) => user.id === comment.userId);
+          return {
+            ..._.omit(comment, ['userId']),
+            user: _.pick(commentUser, ['id', 'email', 'username']),
+          };
+        });
+
+        // Tong so luong comment va reaction summary
+        const [totalComment, reaction] = await Promise.all([
+          this.commentService.countCommentsByPostId(post.id),
+          this.reactionService.getReactionsSummaryByPostId(post.id),
+        ]);
+
+        return {
+          ..._.omit(post, ['userId']),
+          user: _.pick(author, ['id', 'username', 'email']),
+          comments: commentMapper,
+          totalComment: totalComment.data,
+          reaction: reaction.data,
+        };
+      }),
     );
 
     return {
@@ -190,29 +199,28 @@ export class PostService implements OnModuleInit {
       meta: {
         page: postQueryDto.page,
         limit: postQueryDto.limit,
-        totalItem,
+        totalItem: totalItem,
         totalPage: Math.ceil(totalItem / postQueryDto.limit),
       },
     };
   }
 
   async findOne(id: string) {
-    const post = await this.prisma.post.findFirst({
+    const post = await this.prisma.post.findUnique({
       where: { id },
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        userId: true,
+      omit: {
+        updatedAt: true,
+        deletedAt: true,
+      },
+      include: {
         image: {
-          select: {
-            id: true,
-            altText: true,
-            url: true,
+          omit: {
+            updatedAt: true,
+            deletedAt: true,
           },
         },
         tags: {
-          select: {
+          include: {
             tag: {
               select: {
                 id: true,
@@ -221,12 +229,11 @@ export class PostService implements OnModuleInit {
             },
           },
         },
-        createdAt: true,
       },
     });
 
     if (!post) {
-      throw new RpcException({ status: 400, message: 'Post không tồn tại' });
+      throw new RpcNotFoundException('Không tìm thấy bài Post');
     }
 
     // User dang bai
@@ -237,21 +244,29 @@ export class PostService implements OnModuleInit {
       ),
     );
 
-    const comments = await this.commentService.getCommentsByPostId(post.id);
+    const tagDetail = post.tags.map((tag) => {
+      return {
+        id: tag.tag.id,
+        name: tag.tag.name,
+      };
+    });
 
-    const reaction = await this.reactionService.getReactionsSummaryByPostId(
-      post.id,
-    );
-    const commentCount = await this.commentService.countCommentsByPostId(
-      post.id,
-    );
-    const { userId, ...result } = post;
+    const [comments, reaction, reactionSummary, commentCount] =
+      await Promise.all([
+        this.commentService.getCommentsByPostId(post.id),
+        this.reactionService.getReactionsByPostId(post.id),
+        this.reactionService.getReactionsSummaryByPostId(post.id),
+        this.commentService.countCommentsByPostId(post.id),
+      ]);
+
     return {
       data: {
-        ...result,
-        user: author,
+        ..._.pick(post, ['id', 'title', 'content', 'createdAt', 'images']),
+        tags: tagDetail,
+        user: _.pick(author.data, ['id', 'email', 'username']),
         comments: comments.data,
-        reactionSummary: reaction.data,
+        reaction: reaction.data,
+        reactionSummary: reactionSummary.data,
         totalComment: commentCount.data,
       },
     };

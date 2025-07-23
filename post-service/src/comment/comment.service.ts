@@ -12,6 +12,7 @@ import {
   RpcConflictException,
   RpcNotFoundException,
 } from 'src/common/exception/rpc.exception';
+import * as _ from 'lodash';
 
 @Injectable()
 export class CommentService implements OnModuleInit {
@@ -30,15 +31,6 @@ export class CommentService implements OnModuleInit {
   async create(
     createCommentDto: CreateCommentDto,
   ): Promise<ConsumerResult<Comment>> {
-    const comment = await this.prismaService.comment.findFirst({
-      where: {
-        userId: createCommentDto.userId,
-        postId: createCommentDto.postId,
-      },
-    });
-    if (comment) {
-      throw new RpcConflictException('Comment already excisted');
-    }
     const createdComment = await this.prismaService.comment.create({
       data: createCommentDto,
     });
@@ -55,9 +47,7 @@ export class CommentService implements OnModuleInit {
     return { data: count, meta: {} };
   }
 
-  async getCommentsByPostId(
-    postId: string,
-  ): Promise<ConsumerResult<Comment[]>> {
+  async getCommentsByPostId(postId: string): Promise<ConsumerResult<any[]>> {
     const comments = await this.prismaService.comment.findMany({
       where: {
         postId: postId,
@@ -76,8 +66,11 @@ export class CommentService implements OnModuleInit {
     ).data;
 
     const result = comments.map((comment) => ({
-      ...comment,
-      user: userInfo.find((u) => u.id === comment.userId),
+      ..._.pick(comment, ['id', 'content', 'createdAt']),
+      user: _.pick(
+        userInfo.find((u) => u.id === comment.userId),
+        ['id', 'email', 'username'],
+      ),
     }));
     return { data: result, meta: {} };
   }

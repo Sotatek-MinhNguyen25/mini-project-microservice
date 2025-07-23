@@ -13,10 +13,6 @@ enum ReactionType {
 export class CreateReactionDto {
   @ApiProperty()
   @IsUUID()
-  userId: string;
-
-  @ApiProperty()
-  @IsUUID()
   postId: string;
 
   @ApiProperty({ enum: ReactionType })

@@ -14,6 +14,7 @@ import { TagGatewayModule } from './modules/tag/tag-gateway.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/jwt';
 import { RolesGuard } from './common/roles/role.guard';
+import { CommentGatewayModule } from './modules/comment/comment-gateway.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RolesGuard } from './common/roles/role.guard';
     AuthGatewayModule,
     PostGatewayModule,
     TagGatewayModule,
+    CommentGatewayModule,
     UploadGatewayModule,
     NotificationGatewayModule,
     UserGatewayModule,
@@ -35,8 +37,8 @@ import { RolesGuard } from './common/roles/role.guard';
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
-    }
+      useClass: RolesGuard,
+    },
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -11,6 +11,8 @@ import {
   RpcConflictException,
   RpcNotFoundException,
 } from 'src/common/exception/rpc.exception';
+import { User } from 'src/common/type/user';
+import * as _ from 'lodash';
 
 @Injectable()
 export class ReactionService {
@@ -21,9 +23,7 @@ export class ReactionService {
   ) {}
 
   //get all reactions of a post
-  async getReactionsByPostId(
-    postId: string,
-  ): Promise<ConsumerResult<Reaction[]>> {
+  async getReactionsByPostId(postId: string): Promise<ConsumerResult<any[]>> {
     const reactions = await this.prismaService.reaction.findMany({
       where: {
         postId: postId,
@@ -31,10 +31,22 @@ export class ReactionService {
     });
     // should we show the name of user who reacted?
     const userIds = [...new Set(reactions.map((reaction) => reaction.userId))];
-    const userInfo = await firstValueFrom(
-      this.authClient.send('findAllUser', { userIds: userIds }),
-    );
-    return { data: reactions, meta: {} };
+    const users: User[] = (
+      await firstValueFrom(
+        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, {
+          userIds: userIds,
+        }),
+      )
+    ).data;
+    // Anh xa user vao reaction
+    const result = reactions.map((reaction) => {
+      const userReaction = users.find((user) => user.id === reaction.userId);
+      return {
+        ..._.pick(reaction, ['id', 'type', 'createdAt']),
+        user: _.pick(userReaction, ['id', 'email', 'username']),
+      };
+    });
+    return { data: result, meta: {} };
   }
 
   async getReactionsSummaryByPostId(

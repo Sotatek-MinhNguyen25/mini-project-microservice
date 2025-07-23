@@ -28,9 +28,9 @@ export class CreatePostDto {
   @IsString()
   content: string;
 
-  @ApiProperty({ example: 'e63fd118-3b3b-4ac0-96b3-3502239c756f' })
-  @IsUUID()
-  userId: string;
+  // @ApiProperty({ example: 'e63fd118-3b3b-4ac0-96b3-3502239c756f' })
+  // @IsUUID()
+  // userId: string;
 
   @ApiProperty({ type: [PostImage], required: false })
   @IsArray()
