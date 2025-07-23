@@ -1,6 +1,6 @@
-import { Controller, Injectable, Logger } from '@nestjs/common';
+import { Controller, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MessagePattern, Payload, Ctx, KafkaContext } from '@nestjs/microservices';
+import { Payload, EventPattern, ClientKafka } from '@nestjs/microservices';
 import { NotificationService } from '../notification/notification.service';
 import { KAFKA_MESSAGE_TYPES } from 'src/kafka/constants';
 
@@ -12,10 +12,29 @@ export class KafkaConsumerService {
   constructor(
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
+    @Inject('KAFKA_NOTIFICATION_SERVICE')
+    private readonly notificationClient: ClientKafka,
   ) {}
 
-  @MessagePattern(KAFKA_MESSAGE_TYPES.WELCOME_EMAIL)
-  async handleWelcomeEmail(@Payload() payload: { email: string; username: string }, @Ctx() context: KafkaContext) {
+  onModuleInit() {
+    this.notificationClient.subscribeToResponseOf(KAFKA_MESSAGE_TYPES.WELCOME_EMAIL);
+    this.notificationClient.subscribeToResponseOf(KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL);
+  }
+
+  @EventPattern(KAFKA_MESSAGE_TYPES.VERIFY_REGISTER_EMAIL)
+  async handleVerifyRegisterEmail(@Payload() payload: { email: string; otp: string }) {
+    try {
+      this.logger.log(`Processing ${KAFKA_MESSAGE_TYPES.VERIFY_REGISTER_EMAIL} message for ${payload.email}`);
+      await this.notificationService.sendVerifyRegisterEmail(payload.email, payload.otp);
+      this.logger.log(`Successfully sent verify register email to ${payload.email}`);
+    } catch (error) {
+      this.logger.error(`Error processing ${KAFKA_MESSAGE_TYPES.VERIFY_REGISTER_EMAIL} message: ${error.message}`);
+      throw error;
+    }
+  }
+
+  @EventPattern(KAFKA_MESSAGE_TYPES.WELCOME_EMAIL)
+  async handleWelcomeEmail(@Payload() payload: { email: string; username: string }) {
     try {
       this.logger.log(`Processing ${KAFKA_MESSAGE_TYPES.WELCOME_EMAIL} message for ${payload.email}`);
       await this.notificationService.sendWelcomeEmail(payload.email, payload.username);
@@ -26,11 +45,8 @@ export class KafkaConsumerService {
     }
   }
 
-  @MessagePattern(KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL)
-  async handlePasswordResetEmail(
-    @Payload() payload: { email: string; resetToken: string },
-    @Ctx() context: KafkaContext,
-  ) {
+  @EventPattern(KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL)
+  async handlePasswordResetEmail(@Payload() payload: { email: string; resetToken: string }) {
     try {
       this.logger.log(`Processing ${KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL} message for ${payload.email}`);
       await this.notificationService.sendPasswordResetEmail(payload.email, payload.resetToken);
