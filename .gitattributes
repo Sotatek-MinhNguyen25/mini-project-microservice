@@ -1,0 +1,2 @@
+# Đảm bảo tất cả các file văn bản đều là LF trong repository
+* text=auto eol=lf
