@@ -32,6 +32,37 @@ export class PostService implements OnModuleInit {
   }
 
   async create(createPostDto: CreatePostDto) {
+    const user = await firstValueFrom(
+      this.authClient.send(
+        CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+        createPostDto.userId,
+      ),
+    );
+    if (!user) {
+      throw new RpcException({
+        statusCode: 401,
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+      });
+    }
+
+    await Promise.all(
+      createPostDto.tagIds.map(async (tagId) => {
+        const tag = await this.prisma.tag.findUnique({
+          where: {
+            id: tagId.tagId,
+          },
+        });
+        if (!tag) {
+          throw new RpcException({
+            statusCode: 409,
+            message: `Không tồn tại tagId: ${tagId.tagId}`,
+            error: 'Conflick database',
+          });
+        }
+      }),
+    );
+
     const post = await this.prisma.post.create({
       data: {
         title: createPostDto.title,
