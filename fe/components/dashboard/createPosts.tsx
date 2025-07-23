@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/useToast';
-import { useGetTags } from '@/hooks/useGetTags';
+import { useGetTags } from '@/hooks/usePosts';
 import CompactPostView from './createPost/CompactPostView';
 import PostFormHeader from './createPost/PostFormHeader';
 import PostFormFields from './createPost/PostFormFields';
@@ -11,7 +11,7 @@ import PostTagsInput from './createPost/PostTagsInput';
 import PostFileUpload from './createPost/PostFileUpload';
 import { Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useCreatePost } from '@/hooks/useCreatePost';
+import { useCreatePost } from '@/hooks/usePosts';
 import { CreatePostRequest, PostImage, TagId, Tag } from '@/types/post';
 import { FilePreview } from '@/types';
 

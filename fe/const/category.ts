@@ -38,7 +38,7 @@ export const FILTER_CATEGORIES = [
   { value: "technology", label: "🔧 Công nghệ" },
 ]
 
-export const generateMockPosts = (): Post[] => {
+export const generateMockPosts = (): any => {
   return [
     {
       id: "1",

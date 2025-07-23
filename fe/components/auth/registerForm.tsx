@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import type React from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useRegister } from "@/hooks/useRegister";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/useToast";
-import { Loader2 } from "lucide-react";
+import type React from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useRegister, useVerifyEmail } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/useToast';
+import { Loader2 } from 'lucide-react';
 
 export function RegisterForm() {
   const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    firstName: "",
-    lastName: "",
+    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
   });
-  const { mutate: register, isPending } = useRegister();
+  const { mutate: verify, isPending } = useVerifyEmail();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -35,41 +35,19 @@ export function RegisterForm() {
 
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Passwords do not match',
+        variant: 'destructive',
       });
       return;
     }
-
-    if (formData.email === "mock@email.com") {
-      toast({
-        title: "Info",
-        description: "Please check your email for verification.",
-      });
-      router.push(`/auth/register/verify?email=${encodeURIComponent(formData.email)}`);
-      return;
-    }
-
-    register(
-      {
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-      },
-      {
-        onSuccess: () => {
-          router.push(`/auth/register/verify?email=${encodeURIComponent(formData.email)}`);
-        },
-      }
-    );
+    sessionStorage.setItem('registerForm', JSON.stringify(formData));
+    verify(formData.email);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      {/* <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">First Name</Label>
           <Input
@@ -92,7 +70,7 @@ export function RegisterForm() {
             required
           />
         </div>
-      </div>
+      </div> */}
       <div className="space-y-2">
         <Label htmlFor="username">Username</Label>
         <Input

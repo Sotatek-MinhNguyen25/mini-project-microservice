@@ -23,7 +23,7 @@ async function bootstrap() {
     options: {
       client: {
         clientId: 'auth-service-client',
-        brokers: [process.env.KAFKA_BROKER ?? 'localhost:9092'],
+        brokers: [process.env.KAFKA_BROKER ?? 'localhost:29092'],
       },
       consumer: {
         groupId: 'auth-service-consumer-group-v2',

@@ -2,6 +2,7 @@ import { AxiosResponse } from 'axios'
 import { get, post, put, deleteReq } from '../lib/axiosClient'
 import { getAuthorizationHeader } from '../utils/auth'
 import { RegisterData } from '@/types/auth'
+import { send } from 'process'
 
 const authService = {
   getUserProfile: async (userId: string) => {
@@ -34,6 +35,11 @@ const authService = {
 
   resetPassword: async (email: string) => {
     const response: AxiosResponse = await post('/auth/reset-password', { email })
+    return response.data
+  },
+
+  sendVerificationEmail: async (email: string) => {
+    const response: AxiosResponse = await post('/auth/send-register-otp', { email })
     return response.data
   },
 

@@ -5,12 +5,22 @@ export interface Post {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
-  userId: string;
+  user: PUser;
   image: PostImage[];
   tags: TagId[];
   reaction: Reaction;
   comments: Comment[];
   totalComment: number;
+}
+
+export interface PUser {
+  id: string;
+  username: string;
+  status: string;
+  email: string;
+  initials: string;
+  avatar?: string;
+  name?: string;
 }
 
 export interface IReactionType {
@@ -190,4 +200,21 @@ export interface PostTagsInputProps {
 
 export interface PostCardProps {
   post: Post;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface GetTagsResponse {
+  status: string;
+  statusCode: number;
+  message: string;
+  data: Tag[];
+  meta: Record<string, any>;
+  timestamp: string;
 }

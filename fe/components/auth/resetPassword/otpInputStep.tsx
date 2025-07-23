@@ -13,7 +13,6 @@ export default function OtpVerificationStep({
   handleOtpSubmit,
   otpRefs,
 }: OtpVerificationStepProps) {
-  const MOCK_OTP = '123456'
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return
@@ -22,9 +21,6 @@ export default function OtpVerificationStep({
     setOtp(newOtp)
     if (value && index < 5) {
       otpRefs.current[index + 1]?.focus()
-    }
-    if (newOtp.every((digit) => digit !== '') && newOtp.join('').length === 6) {
-      handleOtpSubmit(newOtp.join(''))
     }
   }
 
@@ -41,9 +37,6 @@ export default function OtpVerificationStep({
         <h2 className="text-2xl font-bold">Enter Verification Code</h2>
         <p className="text-muted-foreground">
           We've sent a 6-digit code to <span className="font-semibold">{email}</span>
-        </p>
-        <p className="text-xs text-muted-foreground mt-2">
-          Demo code: <span className="font-mono bg-muted px-2 py-1 rounded">{MOCK_OTP}</span>
         </p>
       </div>
       <div className="space-y-4">

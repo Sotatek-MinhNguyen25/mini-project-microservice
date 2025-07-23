@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useGetPosts } from '@/hooks/useGetPosts'
+import { useGetPosts } from '@/hooks/usePosts'
 import { PostCard } from './postCard'
 import type { Post } from '@/types/post'
 import { Loader2, Sparkles } from 'lucide-react'
