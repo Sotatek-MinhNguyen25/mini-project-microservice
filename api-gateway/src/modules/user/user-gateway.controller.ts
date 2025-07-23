@@ -17,7 +17,7 @@ import { Role } from '../../common/roles/role.enum';
 @Controller('users')
 @ApiBearerAuth()
 export class UserGatewayController {
-  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) {}
+  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) { }
 
   async onModuleInit() {
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.CREATE);
@@ -55,13 +55,11 @@ export class UserGatewayController {
   }
 
   @Patch(':id')
-  @Patch(':id')
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const data = { ...body, id };
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.UPDATE, data));
   }
 
-  @Delete(':id')
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.DELETE, id));

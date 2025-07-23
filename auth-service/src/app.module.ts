@@ -25,14 +25,14 @@ import { UserModule } from './users/user.module';
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter,
+    // },
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

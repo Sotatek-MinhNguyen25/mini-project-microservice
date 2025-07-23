@@ -4,8 +4,8 @@ import { OAuthProvider, Role, UserStatus } from '../enums';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum SortOrder {
-  ASC = 'asc',
-  DESC = 'desc',
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 export class GetListUserDto {
