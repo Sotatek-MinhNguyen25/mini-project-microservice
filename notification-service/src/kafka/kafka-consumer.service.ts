@@ -27,7 +27,10 @@ export class KafkaConsumerService {
   }
 
   @MessagePattern(KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL)
-  async handlePasswordResetEmail(@Payload() payload: { email: string; resetToken: string }, @Ctx() context: KafkaContext) {
+  async handlePasswordResetEmail(
+    @Payload() payload: { email: string; resetToken: string },
+    @Ctx() context: KafkaContext,
+  ) {
     try {
       this.logger.log(`Processing ${KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL} message for ${payload.email}`);
       await this.notificationService.sendPasswordResetEmail(payload.email, payload.resetToken);

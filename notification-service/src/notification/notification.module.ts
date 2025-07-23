@@ -11,10 +11,7 @@ import * as Joi from 'joi';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [
-        path.resolve(process.cwd(), '.env.kafka'),
-        path.resolve(process.cwd(), '.env'),
-      ],
+      envFilePath: [path.resolve(process.cwd(), '.env.kafka'), path.resolve(process.cwd(), '.env')],
       load: [mailConfig, kafkaConfig],
       validationSchema: Joi.object({
         KAFKA_BROKERS: Joi.string().required(),
@@ -29,7 +26,7 @@ import * as Joi from 'joi';
         MAILTRAP_FROM: Joi.string().required(),
       }),
     }),
-    KafkaModule,
+    KafkaModule.register(['notification']),
   ],
   providers: [NotificationService, KafkaConsumerService],
   exports: [NotificationService],

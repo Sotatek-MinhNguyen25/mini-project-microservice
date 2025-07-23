@@ -69,4 +69,14 @@ export class NotificationService {
     });
     await this.sendEmail(to, subject, { html });
   }
+
+  async sendVerifyRegisterEmail(to: string, otp: string): Promise<void> {
+    const subject = 'Verify your registration';
+    const html = this.loadTemplate('welcome', {
+      username: otp, // Nếu template welcome cần username, có thể cần chỉnh lại template hoặc truyền thêm tham số
+      otp,
+      frontendUrl: this.configService.get<string>('app.frontendUrl') ?? '',
+    });
+    await this.sendEmail(to, subject, { html });
+  }
 }
