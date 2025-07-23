@@ -157,16 +157,17 @@ export class PostService implements OnModuleInit {
     const userIds = [
       ...new Set(
         posts.map((post) => [
-          ...post.userId,
+          post.userId,
           ...post.comments.map((comment) => comment.userId),
         ]),
       ),
-    ];
+    ].flat();
 
-    // Thay thong tin user tu service auth
     const users: User[] = (
       await firstValueFrom(
-        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, userIds),
+        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, {
+          ids: userIds,
+        }),
       )
     ).data;
 

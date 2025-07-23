@@ -23,6 +23,7 @@ export class UserKafkaController {
 
   @MessagePattern(KAFKA_PATTERNS.USER_FIND_IDS)
   async findUsersByIds(@Payload() dto: FindUserByIdsDto) {
+    console.log(dto)
     return await this.userService.findUserByIds(dto);
   }
 
