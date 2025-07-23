@@ -11,8 +11,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthUser } from 'src/common/decorator/auth-user.decorator';
 import { JwtPayload } from 'src/common/type/jwt-payload.type';
-import { Roles } from '../auth/roles/role.decorator';
-import { Role } from '../auth/roles/role.enum';
+import { Roles } from '../../common/decorator/role.decorator';
+import { Role } from '../../common/roles/role.enum';
 
 @Roles(Role.ADMIN)
 @Controller('users')

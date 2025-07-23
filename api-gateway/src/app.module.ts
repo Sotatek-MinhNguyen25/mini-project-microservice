@@ -13,7 +13,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { TagGatewayModule } from './modules/tag/tag-gateway.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './modules/auth/jwt';
-import { RolesGuard } from './modules/auth/roles/role.guard';
+import { RolesGuard } from './common/roles/role.guard';
 
 @Module({
   imports: [
