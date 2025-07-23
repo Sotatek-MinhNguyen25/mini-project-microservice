@@ -28,6 +28,9 @@ import { KAFKA_CLIENTS } from 'src/constants/app.constants';
             brokers: [config.kafka.brokers],
             clientId: config.kafka.clientId + '-post',
           },
+          consumer: {
+            groupId: config.kafka.clientId + '-post-group',
+          },
         },
       },
       {

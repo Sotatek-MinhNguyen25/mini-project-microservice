@@ -1,72 +1,79 @@
-import axios, { AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
+import axios, {
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean
+  _retry?: boolean;
 }
 
-const baseURL = 'http://127.0.0.1:8000/'
+const baseURL = 'http://127.0.0.1:8081/';
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
-}
+};
 
 const axiosClient = axios.create({
   baseURL,
   responseType: 'json',
   timeout: 10000,
-})
+});
 
 const defaultConfig = async (): Promise<AxiosRequestConfig> => {
   return {
     headers: defaultHeaders,
-  }
-}
+  };
+};
 
-const mergeConfig = async (config?: AxiosRequestConfig): Promise<AxiosRequestConfig> => {
-  const _defaultConfig = await defaultConfig()
-  let headers = _defaultConfig.headers
+const mergeConfig = async (
+  config?: AxiosRequestConfig,
+): Promise<AxiosRequestConfig> => {
+  const _defaultConfig = await defaultConfig();
+  let headers = _defaultConfig.headers;
 
   if (config && config.headers) {
     headers = {
       ...headers,
       ...config.headers,
-    }
+    };
   }
 
   return {
     ..._defaultConfig,
     ...config,
     headers,
-  }
-}
+  };
+};
 
 axiosClient.interceptors.request.use(
   (config) => {
     // Attach token if exists
-    const token = localStorage.getItem('accessToken')
+    const token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
 axiosClient.interceptors.response.use(
   (response) => {
-    return response
+    return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as ExtendedAxiosRequestConfig
+    const originalRequest = error.config as ExtendedAxiosRequestConfig;
 
     if (error.response) {
-      const { status } = error.response
+      const { status } = error.response;
 
       // Handle Unauthorized (401) errors
       if (originalRequest && status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true
+        originalRequest._retry = true;
       }
 
       // Handle Forbidden (403) errors
@@ -78,17 +85,17 @@ axiosClient.interceptors.response.use(
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
               },
-            })
+            });
           } catch (error) {
             /* empty */
           }
 
           // Clear tokens and redirect to log in
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('profile')
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('profile');
 
-          window.location.href = '/'
-        }, 2000)
+          window.location.href = '/';
+        }, 2000);
       }
 
       // Handle server errors (5xx)
@@ -97,56 +104,78 @@ axiosClient.interceptors.response.use(
       }
     }
 
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
-export const get = async (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const _mergeConfig = await mergeConfig(config)
+export const get = async (
+  url: string,
+  config?: AxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const _mergeConfig = await mergeConfig(config);
 
   return axiosClient
     .get(url, _mergeConfig)
     .then((res) => res.data)
-    .catch((err) => err.response)
-}
+    .catch((err) => err.response);
+};
 
-export const post = async <T>(url: string, data: T, config?: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const _mergeConfig = await mergeConfig(config)
+export const post = async <T>(
+  url: string,
+  data: T,
+  config?: AxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const _mergeConfig = await mergeConfig(config);
 
   return axiosClient
     .post(url, data, _mergeConfig)
     .then((res) => res)
-    .catch((err) => err.response)
-}
+    .catch((err) => err.response);
+};
 
-export const put = async <T>(url: string, data: T, config?: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const _mergeConfig = await mergeConfig(config)
+export const put = async <T>(
+  url: string,
+  data: T,
+  config?: AxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const _mergeConfig = await mergeConfig(config);
 
   return axiosClient
     .put(url, data, _mergeConfig)
     .then((res) => res)
-    .catch((err) => err.response)
-}
+    .catch((err) => err.response);
+};
 
-export const patch = async <T>(url: string, data: T, config?: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const _mergeConfig = await mergeConfig(config)
+export const patch = async <T>(
+  url: string,
+  data: T,
+  config?: AxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const _mergeConfig = await mergeConfig(config);
 
   return axiosClient
     .patch(url, data, _mergeConfig)
     .then((res) => res)
-    .catch((err) => err.response)
-}
+    .catch((err) => err.response);
+};
 
-export const deleteReq = async (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> => {
-  const _mergeConfig = await mergeConfig(config)
+export const deleteReq = async (
+  url: string,
+  config?: AxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const _mergeConfig = await mergeConfig(config);
 
   return axiosClient
     .delete(url, _mergeConfig)
     .then((res) => res)
-    .catch((err) => err.response)
-}
+    .catch((err) => err.response);
+};
 
-export const upload = async (url: string, formData: FormData, config?: AxiosRequestConfig): Promise<AxiosResponse> => {
+export const upload = async (
+  url: string,
+  formData: FormData,
+  config?: AxiosRequestConfig,
+): Promise<AxiosResponse> => {
   // Merge custom config with multipart headers
   const _mergeConfig = {
     ...(await mergeConfig(config)),
@@ -154,12 +183,12 @@ export const upload = async (url: string, formData: FormData, config?: AxiosRequ
       ...config?.headers,
       'Content-Type': 'multipart/form-data',
     },
-  }
+  };
 
   return axiosClient
     .post(url, formData, _mergeConfig)
     .then((res) => res)
-    .catch((err) => err.response)
-}
+    .catch((err) => err.response);
+};
 
-export default axiosClient
+export default axiosClient;

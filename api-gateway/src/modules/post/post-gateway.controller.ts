@@ -10,6 +10,7 @@ import { PostQueryDto } from './dto/post-query.dto';
 import { AuthUser } from 'src/common/decorator/auth-user.decorator';
 import { JwtPayload } from 'src/common/type/jwt-payload.type';
 import { CreateCommentDto } from '../comment/dto/create-comment.dto';
+import { CreateTagDto } from './dto/create-tag.dto';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {
@@ -19,6 +20,9 @@ export class PostGatewayController implements OnModuleInit {
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.CREATE);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET_DETAIL);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.COMMENT.CREATE);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.CREATE);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.GET);
 
     // Reaction
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.REACTION.CREATE);
