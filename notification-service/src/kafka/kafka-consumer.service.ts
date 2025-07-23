@@ -1,6 +1,6 @@
-import { Controller, Inject, Injectable, Logger } from '@nestjs/common';
+import { Controller, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Payload, EventPattern, ClientKafka } from '@nestjs/microservices';
+import { Payload, EventPattern } from '@nestjs/microservices';
 import { NotificationService } from '../notification/notification.service';
 import { KAFKA_MESSAGE_TYPES } from 'src/kafka/constants';
 
@@ -12,14 +12,7 @@ export class KafkaConsumerService {
   constructor(
     private readonly configService: ConfigService,
     private readonly notificationService: NotificationService,
-    @Inject('KAFKA_NOTIFICATION_SERVICE')
-    private readonly notificationClient: ClientKafka,
   ) {}
-
-  onModuleInit() {
-    this.notificationClient.subscribeToResponseOf(KAFKA_MESSAGE_TYPES.WELCOME_EMAIL);
-    this.notificationClient.subscribeToResponseOf(KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL);
-  }
 
   @EventPattern(KAFKA_MESSAGE_TYPES.VERIFY_REGISTER_EMAIL)
   async handleVerifyRegisterEmail(@Payload() payload: { email: string; otp: string }) {
