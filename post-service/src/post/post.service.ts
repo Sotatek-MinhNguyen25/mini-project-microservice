@@ -97,6 +97,7 @@ export class PostService implements OnModuleInit {
   }
 
   async findAll(postQueryDto: PostQueryDto) {
+    console.log(postQueryDto);
     const paginateCondition = paginate(postQueryDto.page, postQueryDto.limit);
 
     const searchConditon = postQueryDto.search
@@ -135,6 +136,13 @@ export class PostService implements OnModuleInit {
               tag: true,
             },
           },
+          ...(postQueryDto.userId && {
+            reactions: {
+              where: {
+                userId: postQueryDto.userId,
+              },
+            },
+          }),
         },
         orderBy: {
           createdAt: 'desc',
