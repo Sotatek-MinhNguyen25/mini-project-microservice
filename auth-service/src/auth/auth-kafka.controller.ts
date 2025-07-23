@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -11,13 +11,15 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ApiResponseOk } from '../shared/decorators/response.decorator';
 import { RESPONSE_MESSAGE } from '../shared/message/response.message';
 import { KAFKA_PATTERNS } from './kafka.patterns';
+import { ValidationPipe } from '../shared/pipes/validation.pipe';
 
 @Controller()
+@UsePipes(new ValidationPipe())
 export class AuthKafkaController {
   constructor(private readonly authService: AuthService) {}
 
   @MessagePattern(KAFKA_PATTERNS.REGISTER)
-  @ApiResponseOk(RESPONSE_MESSAGE.SEND_OTP_SUCCESS)
+  @ApiResponseOk(RESPONSE_MESSAGE.REGISTER_SUCCESS)
   async register(@Payload() data: RegisterDto) {
     return this.authService.sendRegisterOtp(data);
   }

@@ -6,13 +6,10 @@ import { UserKafkaController } from './user-kafka.controller';
 import { KafkaModule } from 'src/kafka/kafka.module';
 import { UserRepository } from './user.repository';
 
-
 @Module({
-    imports: [
-        AuthModule
-    ],
-    controllers: [UserKafkaController],
-    providers: [UserService, UserRepository],
-    exports: [UserService]
+  imports: [AuthModule],
+  controllers: [UserKafkaController],
+  providers: [UserService, UserRepository],
+  exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -6,7 +6,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { VerifyRegisterDto } from './dto/verify-register.dto';
 import { VerifyForgotPasswordDto } from './dto/verify-forgot-password.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-
 import { ERROR_MESSAGE } from '../shared/message/error.message';
 import { CustomJwtService } from '../jwt/custom-jwt.service';
 import { JwtPayload } from '../shared/type/jwt.type';
@@ -19,16 +18,27 @@ import {
   RpcNotFoundException,
   RpcUnauthorizedException,
 } from 'src/shared/exceptions/rpc.exceptions';
+import { ClientKafka } from '@nestjs/microservices';
+import { KAFKA_PATTERNS } from './kafka.patterns';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly customJwtService: CustomJwtService,
     private readonly redisService: RedisService,
+    @Inject('KAFKA_NOTIFICATION_SERVICE')
+    private readonly notificationClient: ClientKafka,
   ) {}
 
-  // Đã chuyển logic tạo token sang JwtService custom
+  onModuleInit() {
+    this.notificationClient.subscribeToResponseOf(
+      KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
+    );
+    this.notificationClient.subscribeToResponseOf(
+      KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD,
+    );
+  }
 
   private async getUserByEmailOrThrow(email: string) {
     const user = await this.authRepository.findUserByEmail(email);
@@ -45,11 +55,9 @@ export class AuthService {
 
   async sendRegisterOtp(dto: RegisterDto) {
     let user = await this.authRepository.findUserByEmail(dto.email);
-
     if (user && user.status === USER_STATUS.VERIFIED) {
       throw new RpcBadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
     }
-
     if (!user) {
       user = await this.authRepository.createUser({
         email: dto.email,
@@ -57,38 +65,45 @@ export class AuthService {
         username: dto.email,
       });
     }
-
-    await this.authRepository.createOTP({
+    const otp = await this.authRepository.createOTP({
       userId: user.id,
       purpose: OTP_PURPOSE.EMAIL_VERIFICATION,
     });
-
+    // Gửi message sang notification-service
+    console.log('[AUTH-SERVICE] Emit notification', {
+      topic: KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
+      payload: { email: dto.email, otp: otp.code },
+    });
+    this.notificationClient
+      .emit(KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL, {
+        email: dto.email,
+        otp: otp.code,
+      })
+      .subscribe({
+        next: (res) => console.log('[AUTH-SERVICE] Emit result:', res),
+        error: (err) => console.error('[AUTH-SERVICE] Emit error:', err),
+      });
     return {};
   }
 
   async completeRegister(dto: CompleteRegisterDto) {
     const user = await this.authRepository.findUserByEmail(dto.email);
-
     if (!user || user.status !== USER_STATUS.UNVERIFIED) {
       throw new RpcBadRequestException(
         ERROR_MESSAGE.USER_NOT_FOUND_OR_NOT_UNVERIFIED,
       );
     }
-
     const otp = await this.authRepository.findOTP(
       user.id,
       OTP_PURPOSE.EMAIL_VERIFICATION,
     );
     this.checkOtpOrThrow(otp!, dto.otp);
-
     const updatedUser = await this.authRepository.updateUser(user.id, {
       username: dto.username,
       password: dto.password,
       status: USER_STATUS.VERIFIED,
     });
-
     await this.authRepository.deleteOTP(otp!.id);
-
     const payload: JwtPayload = {
       sub: updatedUser.id,
       email: updatedUser.email,
@@ -127,25 +142,15 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    console.log(
-      '[AuthService.login] Received DTO:',
-      JSON.stringify(dto, null, 2),
-    );
-
     const user = await this.authRepository.findUserByEmail(dto.email);
     if (!user) {
-      console.log(`[AuthService.login] User not found for email: ${dto.email}`);
       throw new RpcNotFoundException(ERROR_MESSAGE.USER_NOT_FOUND);
     }
-
-    console.log(`[AuthService.login] User found:`, user);
-
     if (!user.password || dto.password !== user.password) {
       throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_PASSWORD);
     }
     if (user.status !== USER_STATUS.VERIFIED)
       throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
-
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -232,9 +237,14 @@ export class AuthService {
 
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
-    await this.authRepository.createOTP({
+    const otp = await this.authRepository.createOTP({
       userId: user.id,
       purpose: OTP_PURPOSE.FORGOT_PASSWORD,
+    });
+    // Gửi message sang notification-service
+    this.notificationClient.emit(KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD, {
+      email: dto.email,
+      otp: otp.code,
     });
     return {};
   }

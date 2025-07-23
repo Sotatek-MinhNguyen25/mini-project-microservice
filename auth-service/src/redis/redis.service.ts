@@ -9,17 +9,8 @@ export class RedisService implements OnModuleDestroy {
     const redisHost = process.env.REDIS_HOST || 'localhost';
     const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
     const redisPassword = process.env.REDIS_PASSWORD || undefined;
-    const redisUsername = process.env.REDIS_USERNAME || 'default'; // Thêm username, mặc định là 'default'
+    const redisUsername = process.env.REDIS_USERNAME || 'default';
     const redisUrl = process.env.REDIS_URL;
-
-    // Log thông tin kết nối
-    console.log('==== REDIS DEBUG INFO ====');
-    console.log('REDIS_URL:', redisUrl ? '********' : undefined);
-    console.log('REDIS_HOST:', redisHost);
-    console.log('REDIS_PORT:', redisPort);
-    console.log('REDIS_USERNAME:', redisUsername);
-    console.log('REDIS_PASSWORD:', redisPassword ? redisPassword : undefined);
-    console.log('==========================');
 
     if (redisUrl) {
       this.redisClient = new Redis(redisUrl);
@@ -29,7 +20,7 @@ export class RedisService implements OnModuleDestroy {
         port: redisPort,
         username: redisUsername,
         password: redisPassword,
-        tls: {}, // Bật TLS để kết nối đến Redis Cloud
+        tls: {},
       });
     }
   }

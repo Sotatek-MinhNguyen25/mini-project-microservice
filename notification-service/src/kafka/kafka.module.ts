@@ -1,36 +1,26 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+// kafka.module.ts
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import { ClientProxyFactory } from '@nestjs/microservices';
+import { KafkaConfigHelper } from './kafka-config.helper'; // Adjust the import path as necessary';
 
-@Module({
-  imports: [
-    ConfigModule,
-    ClientsModule.registerAsync([
-      {
-        name: 'KAFKA_SERVICE',
-        imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => {
-          const brokers = configService.get<string[]>('kafka.brokers') ?? ['localhost:29092'];
-          const clientId = configService.get<string>('kafka.clientId') ?? 'notification-service';
-          const groupId = configService.get<string>('kafka.groupId') ?? 'notification-group';
-
-          return {
-            transport: Transport.KAFKA,
-            options: {
-              client: {
-                clientId,
-                brokers,
-              },
-              consumer: {
-                groupId,
-              },
-            },
-          };
-        },
-        inject: [ConfigService],
+@Global()
+@Module({})
+export class KafkaModule {
+  static register(serviceNames: string[]): DynamicModule {
+    const kafkaProviders: Provider[] = serviceNames.map((name) => ({
+      provide: `KAFKA_${name.toUpperCase()}_SERVICE`,
+      useFactory: (helper: KafkaConfigHelper) => {
+        const config = helper.createConfigKafka(name.toLowerCase());
+        return ClientProxyFactory.create(config);
       },
-    ]),
-  ],
-  exports: ['KAFKA_SERVICE'],
-})
-export class KafkaModule {}
+      inject: [KafkaConfigHelper],
+    }));
+
+    return {
+      module: KafkaModule,
+      providers: [KafkaConfigHelper, ...kafkaProviders],
+      exports: kafkaProviders,
+      global: true,
+    };
+  }
+}

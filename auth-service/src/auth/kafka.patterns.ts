@@ -18,4 +18,6 @@ export const KAFKA_PATTERNS = {
   USER_DETAIL_GET: 'user.detail.get',
   USER_DETAIL_UPDATE: 'user.detail.update',
   USER_DETAIL_AVATAR_UPDATE: 'user.detail.avatar-update',
+  NOTIFICATION_VERIFY_REGISTER_EMAIL: 'notification.handleVerifyRegisterEmail',
+  NOTIFICATION_FORGOT_PASSWORD: 'notification.handleForgotPassword',
 } as const;
