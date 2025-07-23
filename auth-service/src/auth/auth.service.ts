@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -22,13 +23,29 @@ import {
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_PATTERNS } from './kafka.patterns';
 import { Inject } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
+import { KAFKA_PATTERNS } from './kafka.patterns';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
+export class AuthService implements OnModuleInit {
 export class AuthService implements OnModuleInit {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly customJwtService: CustomJwtService,
     private readonly redisService: RedisService,
+    @Inject('KAFKA_NOTIFICATION_SERVICE')
+    private readonly notificationClient: ClientKafka,
+  ) {}
+
+  onModuleInit() {
+    this.notificationClient.subscribeToResponseOf(
+      KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
+    );
+    this.notificationClient.subscribeToResponseOf(
+      KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD,
+    );
+  }
     @Inject('KAFKA_NOTIFICATION_SERVICE')
     private readonly notificationClient: ClientKafka,
   ) {}
@@ -72,6 +89,7 @@ export class AuthService implements OnModuleInit {
       });
     }
 
+    const otp = await this.authRepository.createOTP({
     const otp = await this.authRepository.createOTP({
       userId: user.id,
       purpose: OTP_PURPOSE.EMAIL_VERIFICATION,
@@ -253,8 +271,14 @@ export class AuthService implements OnModuleInit {
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
     const otp = await this.authRepository.createOTP({
+    const otp = await this.authRepository.createOTP({
       userId: user.id,
       purpose: OTP_PURPOSE.FORGOT_PASSWORD,
+    });
+    // Gửi message sang notification-service
+    this.notificationClient.emit(KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD, {
+      email: dto.email,
+      otp: otp.code,
     });
     // Gửi message sang notification-service
     this.notificationClient.emit(KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD, {
