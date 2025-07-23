@@ -1,12 +1,11 @@
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { ClientKafka, ClientProxy } from '@nestjs/microservices';
+import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
 import { GetListUserDto } from './dto/get-list.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { instanceToPlain } from 'class-transformer';
 import { FindUsersByIdsDto } from './dto/find-user-ids.dto';
-import { dot } from 'node:test/reporters';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthUser } from 'src/common/decorator/auth-user.decorator';
@@ -18,7 +17,6 @@ import { Role } from '../../common/roles/role.enum';
 @Controller('users')
 @ApiBearerAuth()
 export class UserGatewayController {
-  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) {}
   constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) {}
 
   async onModuleInit() {
@@ -60,14 +58,12 @@ export class UserGatewayController {
   @Patch(':id')
   async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
     const data = { ...body, id };
-    const data = { ...body, id };
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.UPDATE, data));
   }
 
   @Delete(':id')
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {
-    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.DELETE, id));
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.DELETE, id));
   }
 
