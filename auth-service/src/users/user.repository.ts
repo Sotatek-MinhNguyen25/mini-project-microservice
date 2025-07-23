@@ -9,7 +9,9 @@ export class UserRepository {
     constructor(private readonly prisma: PrismaService) { }
 
     async findUsers(dto: GetListUserDto) {
-        const where: Prisma.UserWhereInput = {};
+        const where: Prisma.UserWhereInput = {
+            deletedAt: null
+        };
 
         if (dto.search) {
             where.OR = [
@@ -45,7 +47,7 @@ export class UserRepository {
 
     async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
         return this.prisma.user.update({
-            where: { id },
+            where: { id, deletedAt: null },
             data,
         });
     }
@@ -53,9 +55,14 @@ export class UserRepository {
     async findUserByEmailOrUsername(email: string, username: string): Promise<User | null> {
         return await this.prisma.user.findFirst({
             where: {
-                OR: [
-                    { email: email },
-                    { username: username }
+                AND: [
+                    { deletedAt: null },
+                    {
+                        OR: [
+                            { email: email },
+                            { username: username }
+                        ]
+                    }
                 ]
             }
         })
@@ -63,7 +70,16 @@ export class UserRepository {
 
     async findUserByUsername(username: string): Promise<User | null> {
         return await this.prisma.user.findUnique({
-            where: { username }
+            where: { username, deletedAt: null }
+        })
+    }
+
+    async deleteUser(id: string): Promise<User> {
+        return await this.prisma.user.update({
+            where: { id },
+            data: {
+                deletedAt: new Date(),
+            }
         })
     }
 }

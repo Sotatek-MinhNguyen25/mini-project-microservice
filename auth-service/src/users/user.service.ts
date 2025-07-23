@@ -66,7 +66,7 @@ export class UserService {
         return await this.userRepository.findUsers(dto)
     }
 
-    async updateUser(dto: UpdateUserDto) {
+    async updateUser(dto: UpdateUserDto): Promise<{ data: User }> {
         const { id, ...updateData } = dto;
         const existingUser = await this.authRepository.findUserById(id)
 
@@ -91,5 +91,13 @@ export class UserService {
         const updatedUser = await this.userRepository.updateUser(id, updateData);
 
         return { data: updatedUser };
+    }
+
+    async deleteUser(id: string): Promise<{ data: User }> {
+        const foundUser = await this.authRepository.findUserById(id);
+        if (!foundUser) throw new RpcBadRequestException(ERROR_MESSAGE.USER_NOT_FOUND);
+
+        return { data: await this.userRepository.deleteUser(id) };
+
     }
 }

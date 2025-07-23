@@ -35,4 +35,10 @@ export class UserKafkaController {
     async updateUser(@Payload() data: UpdateUserDto) {
         return await this.userService.updateUser(data);
     }
+
+    @MessagePattern(KAFKA_PATTERNS.USER_DELETE)
+    async deleteUser(@Payload() payload: string) {
+        console.log(payload)
+        return await this.userService.deleteUser(payload)
+    }
 }
