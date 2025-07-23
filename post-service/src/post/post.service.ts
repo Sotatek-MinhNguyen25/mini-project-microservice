@@ -237,12 +237,15 @@ export class PostService implements OnModuleInit {
     }
 
     // User dang bai
-    const author = await firstValueFrom(
+    const author = (await firstValueFrom(
       this.authClient.send(
         CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
         post.userId,
       ),
-    );
+    )).data; 
+ 
+
+    console.log('author', author);
 
     const tagDetail = post.tags.map((tag) => {
       return {

@@ -1,8 +1,9 @@
-// components/ProtectedRoute.jsx
-"use client";
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { DecodedToken } from '@/types/auth';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -12,27 +13,27 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('accessToken');
         if (!token) {
           router.push('/auth/login');
           return;
         }
-        console.log('Auth token found:', token);
-        setIsAuthenticated(true);
-        // const response = await fetch('https://your-backend-api/verify-token', {
-        //   headers: { Authorization: `Bearer ${token}` },
-        //   credentials: 'include', // Include cookies if using them
-        // });
 
-        // if (response.ok) {
-        //   setIsAuthenticated(true);
-        // } else {
-        //   localStorage.removeItem('auth_token');
-        //   router.push('/login');
-        // }
+        const decodedUser: DecodedToken = jwtDecode(token);
+        const role = decodedUser.roles?.[0]?.trim().toUpperCase();
+
+        if (role === 'ADMIN') {
+          router.push('/admin');
+        } else if (role === 'USER') {
+          router.push('/');
+        } else {
+          router.push('/auth/login');
+        }
+
+        setIsAuthenticated(true);
       } catch (error) {
         console.error('Auth check failed:', error);
-        router.push('/login');
+        router.push('/auth/login');
       } finally {
         setIsLoading(false);
       }

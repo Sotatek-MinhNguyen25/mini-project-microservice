@@ -8,32 +8,31 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Post } from '@/types/post';
-
-// Placeholder user data (since author data is not available)
-const DUMMY_USER = {
-  name: 'Dummy User',
-  username: 'dummyuser',
-  avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_nLCu85ayoTKwYw6alnvrockq5QBT2ZWR2g&s',
-  initials: 'DU',
-};
+import { Post, PUser } from '@/types/post';
+import { DEFAULT_USER as DEFAULT_USER } from '@/const/user';
 
 export function PostHeader({ post }: { post: Post }) {
+  const { user } = post;
+  const displayUser: PUser = user ? user : DEFAULT_USER;
+  displayUser.initials =
+    displayUser.initials ||
+    `${displayUser.username[0]}${displayUser.username[1]}`.toUpperCase();
+
   return (
-    <div className="pb-3 px-6">
+    <div className="pb-3 px-6 py-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
           <Avatar className="ring-2 ring-primary/20">
-            <AvatarImage src={DUMMY_USER.avatar} alt="avatar" />
+            <AvatarImage src={displayUser.avatar} alt="avatar" />
             <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white">
-              {DUMMY_USER.initials}
+              {displayUser.initials}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold text-foreground">{DUMMY_USER.name}</p>
+            <p className="font-semibold text-foreground">
+              {displayUser.username}
+            </p>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
-              @{DUMMY_USER.username}
-              <span className="w-1 h-1 bg-muted-foreground rounded-full" />
               {formatDistanceToNow(post.createdAt)} ago
             </p>
           </div>

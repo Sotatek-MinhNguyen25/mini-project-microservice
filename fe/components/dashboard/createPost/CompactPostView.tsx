@@ -6,7 +6,7 @@ import { ImageIcon, Video } from "lucide-react";
 import { CompactPostViewProps } from "@/types/post";
 
 export default function CompactPostView({ user, fullName, setIsExpanded }: CompactPostViewProps) {
-  const initials = `${user.profile.firstName[0]}${user.profile.lastName[0]}`;
+  const initials = `${user.username[0]}${user.username[1]}`;
 
   return (
     <Card
