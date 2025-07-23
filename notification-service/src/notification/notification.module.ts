@@ -28,8 +28,8 @@ import * as Joi from 'joi';
     }),
     KafkaModule.register(['notification']),
   ],
-  controllers: [KafkaConsumerService],
   providers: [NotificationService],
+  controllers: [KafkaConsumerService],
   exports: [NotificationService],
 })
 export class NotificationModule { }

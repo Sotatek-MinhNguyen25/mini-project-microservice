@@ -30,13 +30,17 @@ export class PostGatewayController implements OnModuleInit {
     await this.postClient.connect();
   }
 
-  @Public()
+  // @Public()
   @Get('')
+  @ApiBearerAuth()
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
-  async getPost(@Query() postQueryDto: PostQueryDto) {
-    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET, { ...postQueryDto }));
+  async getPost(@AuthUser() user: JwtPayload, @Query() postQueryDto: PostQueryDto) {
+    console.log(user);
+    return await firstValueFrom(
+      this.postClient.send(KAFKA_PATTERNS.POST.GET, { ...postQueryDto, ...(user?.sub && { userId: user.sub }) }),
+    );
   }
 
   @Post('')
