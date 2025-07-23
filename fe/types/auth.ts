@@ -72,8 +72,9 @@ export interface RegisterData {
   email: string
   username: string
   password: string
-  firstName: string
-  lastName: string
+  otp?: string
+  // firstName: string
+  // lastName: string
 }
 
 export interface RegisterResponse {
@@ -83,4 +84,41 @@ export interface RegisterResponse {
   firstName: string
   lastName: string
   [key: string]: any
+}
+
+export interface ResetPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+  [key: string]: any;
+}
+
+export interface MutationOptions {
+  onSuccess?: (data: ResetPasswordResponse) => void;
+  onError?: (error: unknown) => void;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface ApiResponse {
+  statusCode: number;
+  data: LoginResponse;
+  message?: string;
+}
+
+export interface DecodedToken {
+  email: string;
+  roles: string[];
+  exp: number;
+  username: string;
 }

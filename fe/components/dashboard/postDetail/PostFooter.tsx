@@ -2,15 +2,15 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { CommentSection } from '../commentSection';
-import { useNewReaction } from '@/hooks/useNewReaction';
-import { useAuth } from '@/contexts/auth-context';
+import { useNewReaction } from '@/hooks/usePosts';
 import { Post, ReactionType } from '@/types/post';
+import { DEFAULT_USER } from '@/const/user';
 
 export function PostFooter({ post }: { post: Post }) {
   const [showComments, setShowComments] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const reactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { user } = useAuth();
+  const user = DEFAULT_USER;
   const reactionMutation = useNewReaction();
 
   const handleReaction = (type: ReactionType) => {
@@ -42,20 +42,7 @@ export function PostFooter({ post }: { post: Post }) {
   };
 
   const userReaction = post.reaction.summary.find((r) => {
-    switch (r.type) {
-      case ReactionType.LIKE:
-        return r.userId === user?.id;
-      case ReactionType.LOVE:
-        return r.userId === user?.id;
-      case ReactionType.HAHA:
-        return r.userId === user?.id;
-      case ReactionType.WOW:
-        return r.userId === user?.id;
-      case ReactionType.SAD:
-        return r.userId === user?.id;
-      case ReactionType.ANGRY:
-        return r.userId === user?.id;
-    }
+    return r.type === ReactionType.LIKE
   });
 
   return (
@@ -68,7 +55,7 @@ export function PostFooter({ post }: { post: Post }) {
             onMouseLeave={handleReactionLeave}
             className="relative"
           >
-            <Button
+            {/* <Button
               variant={userReaction ? 'default' : 'ghost'}
               size="sm"
               disabled={reactionMutation.isPending}
@@ -82,7 +69,7 @@ export function PostFooter({ post }: { post: Post }) {
                 className={`h-4 w-4 mr-2 transition-all ${userReaction ? 'fill-current scale-110' : ''}`}
               />
               {post.reaction.count}
-            </Button>
+            </Button> */}
 
             {showReactions && (
               <div

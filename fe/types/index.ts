@@ -52,13 +52,13 @@ export interface SearchResultsProps {
 }
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface LoginResponse {
   accessToken: string;
-  profile?: Record<string, any>;
+  refreshToken: string;
 }
 
 export interface UseLoginReturn {

@@ -17,11 +17,13 @@ import {
 import { LogOut, Settings, User, Moon, Sun, Sparkles, Search } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+import { DEFAULT_USER } from '@/const/user'
 
 export function Header() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const { theme, setTheme } = useTheme()
   const [searchQuery, setSearchQuery] = useState('')
+  const user = DEFAULT_USER
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,10 +33,10 @@ export function Header() {
     }
   }
 
-  if (!user) return null
+  // if (!user) return null
 
-  const fullName = `${user.profile.firstName} ${user.profile.lastName}`
-  const initials = `${user.profile.firstName[0]}${user.profile.lastName[0]}`
+  const fullName = `${user.username} ${user.username}`
+  const initials = `${user.username[0]}${user.username[1]}`
 
   return (
     <header className="sticky top-0 z-50 glass-effect border-b border-border/40 backdrop-blur-xl">
@@ -87,7 +89,7 @@ export function Header() {
                   className="relative h-10 w-10 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all"
                 >
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={fullName} />
+                    {/* <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={fullName} /> */}
                     <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white">
                       {initials}
                     </AvatarFallback>
@@ -97,7 +99,7 @@ export function Header() {
               <DropdownMenuContent className="w-56 glass-effect" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-3 bg-gradient-to-r from-primary/10 to-purple-600/10 rounded-md mx-2 mb-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={fullName} />
+                    {/* <AvatarImage src={user.profile.avatarUrl || '/placeholder.svg'} alt={fullName} /> */}
                     <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-xs">
                       {initials}
                     </AvatarFallback>
