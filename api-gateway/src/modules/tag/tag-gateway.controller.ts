@@ -13,6 +13,7 @@ export class TagGatewayController implements OnModuleInit {
     // Tag
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.CREATE);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.TAG.GET);
+    await this.postClient.connect();
   }
   // Tag
   @Public()

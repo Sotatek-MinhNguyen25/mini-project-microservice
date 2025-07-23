@@ -131,9 +131,8 @@ export class PostService implements OnModuleInit {
             },
           },
           tags: {
-            omit: {
-              deletedAt: true,
-              updatedAt: true,
+            include: {
+              tag: true,
             },
           },
         },
@@ -184,8 +183,16 @@ export class PostService implements OnModuleInit {
           this.reactionService.getReactionsSummaryByPostId(post.id),
         ]);
 
+        // Lay tag details
+        const tagDetail = post.tags.map((tag) => {
+          return {
+            id: tag.tag.id,
+            name: tag.tag.name,
+          };
+        });
         return {
           ..._.omit(post, ['userId']),
+          tag: tagDetail,
           user: _.pick(author, ['id', 'username', 'email']),
           comments: commentMapper,
           totalComment: totalComment.data,
@@ -237,13 +244,14 @@ export class PostService implements OnModuleInit {
     }
 
     // User dang bai
-    const author = (await firstValueFrom(
-      this.authClient.send(
-        CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
-        post.userId,
-      ),
-    )).data; 
- 
+    const author = (
+      await firstValueFrom(
+        this.authClient.send(
+          CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+          post.userId,
+        ),
+      )
+    ).data;
 
     console.log('author', author);
 
