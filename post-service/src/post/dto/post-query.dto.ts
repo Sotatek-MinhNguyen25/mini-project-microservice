@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class PostQueryDto {
   @IsString()
@@ -12,4 +12,8 @@ export class PostQueryDto {
 
   @IsNumber()
   limit: number = 10;
+
+  @IsUUID()
+  @IsOptional()
+  userId?: string;
 }
