@@ -2,7 +2,7 @@ import { Body, Controller } from '@nestjs/common';
 import { ReactionService } from './reaction.service';
 import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CONSTANTS } from 'constants/app.constants';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 
 @Controller()
 export class ReactionController {

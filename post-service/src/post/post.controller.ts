@@ -3,7 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { CONSTANTS } from 'constants/app.constants';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 import { PostQueryDto } from './dto/post-query.dto';
 
 @Controller()
@@ -30,8 +30,8 @@ export class PostController {
     return this.postService.update(updatePostDto.id, updatePostDto);
   }
 
-  @MessagePattern('removePost')
-  remove(@Payload() id: number) {
-    return this.postService.remove(id);
+  @MessagePattern('deletePost')
+  delete(@Payload() id: string) {
+    return this.postService.delete(id);
   }
 }

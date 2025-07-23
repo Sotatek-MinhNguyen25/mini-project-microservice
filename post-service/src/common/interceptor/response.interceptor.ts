@@ -9,7 +9,7 @@ export class ResponseInterceptor implements NestInterceptor {
   ): Observable<any> | Promise<Observable<any>> {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    // const request = ctx.getRequest<Request>();
     const statusCode = response.statusCode;
     return next.handle().pipe(
       map((data) => ({

@@ -3,7 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { CONSTANTS } from 'constants/app.constants';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 
 @Controller()
 export class CommentController {

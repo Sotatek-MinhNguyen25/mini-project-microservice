@@ -2,12 +2,16 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { ClientKafka, RpcException } from '@nestjs/microservices';
+import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CONSTANTS } from 'constants/app.constants';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 import { ConsumerResult } from '../common/type/consumer-result';
 import { Comment } from '@prisma/client';
 import { User } from 'src/common/type/user';
+import {
+  RpcConflictException,
+  RpcNotFoundException,
+} from 'src/common/exception/rpc.exception';
 
 @Injectable()
 export class CommentService implements OnModuleInit {
@@ -33,10 +37,7 @@ export class CommentService implements OnModuleInit {
       },
     });
     if (comment) {
-      throw new RpcException({
-        status: 409,
-        message: 'Comment already excisted',
-      });
+      throw new RpcConflictException('Comment already excisted');
     }
     const createdComment = await this.prismaService.comment.create({
       data: createCommentDto,
@@ -90,10 +91,7 @@ export class CommentService implements OnModuleInit {
       },
     });
     if (!comment) {
-      throw new RpcException({
-        status: 404,
-        message: 'Comment not found',
-      });
+      throw new RpcNotFoundException('Comment not found');
     }
     const updatedComment = await this.prismaService.comment.update({
       where: {
@@ -111,7 +109,7 @@ export class CommentService implements OnModuleInit {
       },
     });
     if (!comment) {
-      throw new RpcException({ status: 404, message: 'Comment not found' });
+      throw new RpcNotFoundException('Comment not found');
     }
 
     // soft delete
