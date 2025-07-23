@@ -28,6 +28,9 @@ export const KAFKA_PATTERNS = {
     CREATE: 'user.create',
     DELETE: 'user.delete',
     UPDATE: 'user.update',
+    DETAIL_GET: 'user.detail.get',
+    DETAIL_UPDATE: 'user.detail.update',
+    DETAIL_AVATAR_UPDATE: 'user.detail.avatar-update',
   },
 
   // Post Service Events

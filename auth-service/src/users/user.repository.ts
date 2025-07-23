@@ -47,7 +47,7 @@ export class UserRepository {
 
     async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
         return this.prisma.user.update({
-            where: { id, deletedAt: null },
+            where: { id },
             data,
         });
     }
@@ -69,7 +69,7 @@ export class UserRepository {
     }
 
     async findUserByUsername(username: string): Promise<User | null> {
-        return await this.prisma.user.findUnique({
+        return await this.prisma.user.findFirst({
             where: { username, deletedAt: null }
         })
     }
@@ -81,5 +81,14 @@ export class UserRepository {
                 deletedAt: new Date(),
             }
         })
+    }
+
+    async findUserById(id: string): Promise<User | null> {
+        return await this.prisma.user.findFirst({
+            where: {
+                id: id,
+                deletedAt: null,
+            },
+        });
     }
 }

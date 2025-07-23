@@ -68,7 +68,7 @@ export class UserService {
 
     async updateUser(dto: UpdateUserDto): Promise<{ data: User }> {
         const { id, ...updateData } = dto;
-        const existingUser = await this.authRepository.findUserById(id)
+        const existingUser = await this.userRepository.findUserById(id)
 
         if (!existingUser) {
             throw new RpcException({
@@ -99,5 +99,9 @@ export class UserService {
 
         return { data: await this.userRepository.deleteUser(id) };
 
+    }
+
+    async getMe(id: string): Promise<{ data: Omit<User, 'password'> }> {
+        return { data: _.omit(await this.userRepository.findUserById(id), 'password') }
     }
 }

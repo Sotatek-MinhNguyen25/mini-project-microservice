@@ -27,6 +27,7 @@ export class UserGatewayController {
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.FIND_IDS);
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.UPDATE);
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.DELETE);
+    this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.DETAIL_GET);
 
     await this.client.connect()
   }
@@ -61,6 +62,12 @@ export class UserGatewayController {
   @Delete(":id")
   async deleteUser(@Param('id') id: string) {
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.DELETE, id))
+  }
+
+  @Roles(Role.USER)
+  @Get("/profile/me")
+  async getMe(@AuthUser() payload: JwtPayload) {
+    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.DETAIL_GET, payload.sub))
   }
 
 }
