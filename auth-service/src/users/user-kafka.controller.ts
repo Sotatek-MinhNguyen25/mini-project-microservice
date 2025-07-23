@@ -41,4 +41,9 @@ export class UserKafkaController {
         console.log(payload)
         return await this.userService.deleteUser(payload)
     }
+
+    @MessagePattern(KAFKA_PATTERNS.USER_DETAIL_GET)
+    async getMe(@Payload() payload: any) {
+        return await this.userService.getMe(payload);
+    }
 }
