@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateTagDto, PostTagDto, UpdateTagDto } from './tag.dto';
-import { CONSTANTS } from 'constants/app.constants';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 
 @Controller()
 export class TagController {

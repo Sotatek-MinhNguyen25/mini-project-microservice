@@ -2,12 +2,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
 import { Reaction } from '@prisma/client';
-import { ClientKafka, RpcException } from '@nestjs/microservices';
-import { CONSTANTS } from 'constants/app.constants';
+import { ClientKafka } from '@nestjs/microservices';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 import { ReactionSummary } from './reaction.interface';
 import { ConsumerResult } from 'src/common/type/consumer-result';
 import { firstValueFrom } from 'rxjs';
-// import { firstValueFrom } from 'rxjs';
+import {
+  RpcConflictException,
+  RpcNotFoundException,
+} from 'src/common/exception/rpc.exception';
 
 @Injectable()
 export class ReactionService {
@@ -69,11 +72,7 @@ export class ReactionService {
     });
     if (reaction) {
       // redirect to update reaction?
-      throw new RpcException({
-        statusCode: 409,
-        message: 'User has already reacted to this post',
-        error: 'Conflict',
-      });
+      throw new RpcConflictException('User has already reacted to this post');
     }
     const createdReaction = await this.prismaService.reaction.create({
       data: createReactionDto,
@@ -91,10 +90,9 @@ export class ReactionService {
       },
     });
     if (!reaction) {
-      throw new RpcException({
-        status: 404,
-        message: 'User has not reacted to this post or has has been deleted',
-      });
+      throw new RpcNotFoundException(
+        'User has not reacted to this post or has has been deleted',
+      );
     }
     // check for permission?
 
@@ -114,7 +112,7 @@ export class ReactionService {
       },
     });
     if (!reaction) {
-      throw new RpcException({ status: 404, message: 'Reaction not found' });
+      throw new RpcNotFoundException('Reaction not found');
     }
 
     // soft delete
