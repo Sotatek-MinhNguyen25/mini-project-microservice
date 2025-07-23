@@ -11,6 +11,9 @@ import { UserGatewayModule } from './modules/user/user-gateway.module';
 import { JwtModule } from './modules/auth/jwt/jwt.module';
 import { RedisModule } from './common/redis/redis.module';
 import { TagGatewayModule } from './modules/tag/tag-gateway.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './modules/auth/jwt';
+import { RolesGuard } from './common/roles/role.guard';
 
 @Module({
   imports: [
@@ -25,11 +28,15 @@ import { TagGatewayModule } from './modules/tag/tag-gateway.module';
     JwtModule,
     RedisModule,
   ],
-  // providers: [
-  //   {
-  //     provide: APP_GUARD,
-  //     useClass: JwtAuthGuard,
-  //   },
-  // ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    }
+  ],
 })
-export class AppModule {}
+export class AppModule { }

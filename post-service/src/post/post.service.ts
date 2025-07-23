@@ -6,11 +6,12 @@ import { ClientKafka, RpcException } from '@nestjs/microservices';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostQueryDto } from './dto/post-query.dto';
 import { paginate } from 'src/common/pagination';
-import { Post, Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { ReactionService } from 'src/reaction/reaction.service';
-import { CONSTANTS } from 'constants/app.constants';
+import { CONSTANTS } from 'src/common/constants/app.constants';
 import { User } from 'src/common/type/user';
+import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
 
 @Injectable()
 export class PostService implements OnModuleInit {
@@ -256,11 +257,36 @@ export class PostService implements OnModuleInit {
     };
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: string, updatePostDto: UpdatePostDto) {
+    const post = await this.prisma.post.findFirst({
+      where: {
+        id,
+      },
+    });
+    if (!post) {
+      throw new RpcNotFoundException('Post not found');
+    }
+    const updatedPost = await this.prisma.post.update({
+      where: {
+        id,
+      },
+      data: updatePostDto,
+    });
+    return { data: updatedPost, meta: {} };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async delete(id: string) {
+    const post = await this.prisma.post.findFirst({
+      where: { id: id },
+    });
+    if (!post) {
+      throw new RpcNotFoundException('Post not found');
+    }
+    return this.prisma.post.update({
+      where: { id: id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
   }
 }

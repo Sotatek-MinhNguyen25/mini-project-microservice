@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 import { ClientKafka, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
@@ -8,8 +8,15 @@ import { instanceToPlain } from 'class-transformer';
 import { FindUsersByIdsDto } from './dto/find-user-ids.dto';
 import { dot } from 'node:test/reporters';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthUser } from 'src/common/decorator/auth-user.decorator';
+import { JwtPayload } from 'src/common/type/jwt-payload.type';
+import { Roles } from '../../common/decorator/role.decorator';
+import { Role } from '../../common/roles/role.enum';
 
+@Roles(Role.ADMIN)
 @Controller('users')
+@ApiBearerAuth()
 export class UserGatewayController {
   constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) { }
 
@@ -19,12 +26,14 @@ export class UserGatewayController {
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.FIND_MANY);
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.FIND_IDS);
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.UPDATE);
+    this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.DELETE);
 
     await this.client.connect()
   }
 
   @Get()
-  async getUsers(@Query() dto: GetListUserDto) {
+  async getUsers(@Query() dto: GetListUserDto, @AuthUser() user: JwtPayload) {
+    console.log(user)
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_MANY, instanceToPlain(dto)));
   }
 
@@ -48,4 +57,10 @@ export class UserGatewayController {
     const data = { ...body, id }
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.UPDATE, data));
   }
+
+  @Delete(":id")
+  async deleteUser(@Param('id') id: string) {
+    return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.DELETE, id))
+  }
+
 }

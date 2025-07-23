@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { RedisService } from 'src/common/redis/redis.service';
 import { Request } from 'express';
 import { MESSAGE } from 'src/constants/message.constants';
+import { IS_PUBLIC_KEY } from './jwt.decorator';
+import { Reflector } from '@nestjs/core';
 
 interface JwtPayload {
   sub: string;
@@ -21,9 +23,18 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
-  ) {}
+    private reflector: Reflector
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
     const request = context.switchToHttp().getRequest<AuthRequest>();
     const authHeader = request.headers['authorization'];
     if (!authHeader) throw new UnauthorizedException(MESSAGE.NO_TOKEN);
