@@ -8,13 +8,13 @@ import { UserForm } from '@/components/admin/users/user-form';
 import { Modal } from '@/components/admin/ui/modal';
 import { Pagination } from '@/components/admin/ui/pagination';
 import { AUser } from '@/types/admin';
-import { toast } from 'sonner';
+import { useToast } from '@/components/admin/ui/use-toast';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '@radix-ui/react-dialog';
+} from '@/components/admin/ui/dialog';
 import { DialogFooter, DialogHeader } from '@/components/ui/dialog';
 
 export default function UsersPage() {
@@ -29,6 +29,7 @@ export default function UsersPage() {
     deleteUser,
   } = useUsers();
 
+  const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AUser | null>(null);
@@ -72,7 +73,10 @@ export default function UsersPage() {
     await deleteUser(editingUser?.id!);
     setIsDeleteDialogOpen(false);
     setEditingUser(null);
-    toast.success('User deleted successfully!');
+    toast({
+      title: 'User deleted',
+      description: 'The user has been deleted successfully.',
+    });
   };
 
   const handleSubmit = async (
@@ -86,7 +90,10 @@ export default function UsersPage() {
       }
       setIsModalOpen(false);
       setEditingUser(null);
-      toast.success('User saved successfully!');
+      toast({
+        title: 'User saved',
+        description: 'The user has been saved successfully.',
+      });
     } catch (error) {
       console.error('Error saving user:', error);
     }

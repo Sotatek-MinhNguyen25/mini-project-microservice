@@ -5,7 +5,6 @@ import type React from 'react';
 import { User } from '@/types/auth';
 import { AUser } from '@/types/admin';
 import { useForm, UseFormReturn } from 'react-hook-form';
-import { toast } from 'sonner';
 
 interface UserFormProps {
   user?: AUser;
