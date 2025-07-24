@@ -13,3 +13,10 @@ export const USER_STATUS = {
 } as const;
 
 export type UserStatus = (typeof USER_STATUS)[keyof typeof USER_STATUS];
+
+export const OTP_STATUS = {
+  CREATED: 1,
+  VERIFIED: 2,
+} as const;
+
+export type OtpStatus = (typeof OTP_STATUS)[keyof typeof OTP_STATUS];

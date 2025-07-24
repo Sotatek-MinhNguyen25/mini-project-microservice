@@ -80,7 +80,7 @@ export class AuthController {
   }
 
   /**
-   * Gửi OTP quên mật khẩu về email
+   * Gửi OTP quên mật khẩu về email (OTP sẽ được lưu trong Redis, TTL cấu hình qua env)
    */
   @Post('forgot-password')
   @ApiResponseOk(RESPONSE_MESSAGE.FORGOT_PASSWORD_SUCCESS)
@@ -89,7 +89,7 @@ export class AuthController {
   }
 
   /**
-   * Xác thực OTP quên mật khẩu
+   * Xác thực OTP quên mật khẩu (OTP phải còn hạn và ở trạng thái CREATED)
    */
   @Post('verify-forgot-password')
   @ApiResponseOk(RESPONSE_MESSAGE.VERIFY_FORGOT_PASSWORD_SUCCESS)
@@ -98,7 +98,7 @@ export class AuthController {
   }
 
   /**
-   * Đổi mật khẩu sau khi xác thực OTP quên mật khẩu
+   * Đổi mật khẩu sau khi xác thực OTP quên mật khẩu (OTP phải ở trạng thái VERIFIED)
    */
   @Post('update-password')
   @ApiResponseOk(RESPONSE_MESSAGE.UPDATE_PASSWORD_SUCCESS)

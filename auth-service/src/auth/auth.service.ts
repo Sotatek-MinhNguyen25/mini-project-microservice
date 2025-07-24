@@ -10,7 +10,12 @@ import { ERROR_MESSAGE } from '../shared/message/error.message';
 import { CustomJwtService } from '../jwt/custom-jwt.service';
 import { JwtPayload } from '../shared/type/jwt.type';
 import { CompleteRegisterDto } from './dto/complete-register.dto';
-import { OTP_PURPOSE, USER_STATUS } from './auth.constant';
+import {
+  USER_STATUS,
+  OTP_STATUS,
+  OTP_PURPOSE,
+  OtpPurpose,
+} from './auth.constant';
 import { RedisService } from '../redis/redis.service';
 import { AuthRepository } from 'src/auth/auth.repository';
 import {
@@ -20,6 +25,7 @@ import {
 } from 'src/shared/exceptions/rpc.exceptions';
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_PATTERNS } from './kafka.patterns';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -29,6 +35,7 @@ export class AuthService implements OnModuleInit {
     private readonly redisService: RedisService,
     @Inject('KAFKA_NOTIFICATION_SERVICE')
     private readonly notificationClient: ClientKafka,
+    private readonly configService: ConfigService,
   ) {}
 
   onModuleInit() {
@@ -46,10 +53,16 @@ export class AuthService implements OnModuleInit {
     return user;
   }
 
-  private checkOtpOrThrow(otpObj: any, otp: string) {
-    if (!otpObj || otpObj.code !== otp)
+  private async checkOtpOrThrow(
+    email: string,
+    otp: string,
+    otpPurpose: OtpPurpose,
+  ) {
+    const otpObj = await this.redisService.getOtp(email, otpPurpose);
+    if (!otpObj || otpObj.otp !== otp)
       throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    if (otpObj.expiresAt < new Date())
+    //Cái logic dưới có vẻ thừa nhg cứ check lại cho chắc
+    if (otpObj.expiresAt < new Date() || otpObj.status !== OTP_STATUS.CREATED)
       throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
   }
 
@@ -72,19 +85,20 @@ export class AuthService implements OnModuleInit {
         username: dto.email,
       });
     }
-    const otp = await this.authRepository.createOTP({
-      userId: user.id,
-      purpose: OTP_PURPOSE.EMAIL_VERIFICATION,
-    });
+    const otp = await this.redisService.createForgotOtp(
+      dto.email,
+      OTP_PURPOSE.EMAIL_VERIFICATION,
+      this.parseTTL(this.configService.get<string>('OTP_TTL') || '300'),
+    );
     // Gửi message sang notification-service
     console.log('[AUTH-SERVICE] Emit notification', {
       topic: KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
-      payload: { email: dto.email, otp: otp.code },
+      payload: { email: dto.email, otp: otp },
     });
     this.notificationClient
       .emit(KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL, {
         email: dto.email,
-        otp: otp.code,
+        otp: otp,
       })
       .subscribe({
         next: (res) => console.log('[AUTH-SERVICE] Emit result:', res),
@@ -100,17 +114,25 @@ export class AuthService implements OnModuleInit {
         ERROR_MESSAGE.USER_NOT_FOUND_OR_NOT_UNVERIFIED,
       );
     }
-    const otp = await this.authRepository.findOTP(
-      user.id,
+    const otp = await this.redisService.getOtp(
+      dto.email,
       OTP_PURPOSE.EMAIL_VERIFICATION,
     );
-    this.checkOtpOrThrow(otp!, dto.otp);
+    await this.checkOtpOrThrow(
+      dto.email,
+      dto.otp,
+      OTP_PURPOSE.EMAIL_VERIFICATION,
+    );
     const updatedUser = await this.authRepository.updateUser(user.id, {
       username: dto.username,
       password: dto.password,
       status: USER_STATUS.VERIFIED,
     });
-    await this.authRepository.deleteOTP(otp!.id);
+    await this.redisService.deleteOtp(
+      dto.email,
+      OTP_PURPOSE.EMAIL_VERIFICATION,
+      otp.otp,
+    );
     const payload: JwtPayload = {
       sub: updatedUser.id,
       email: updatedUser.email,
@@ -243,26 +265,32 @@ export class AuthService implements OnModuleInit {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.createOTP({
-      userId: user.id,
-      purpose: OTP_PURPOSE.FORGOT_PASSWORD,
-    });
+    await this.getUserByEmailOrThrow(dto.email);
+    const ttl = parseInt(
+      this.configService.get<string>('FORGOT_OTP_TTL') || '300',
+      10,
+    );
+    // Tạo OTP mới, xóa OTP cũ nếu có, đảm bảo không trùng toàn hệ thống
+    const otp = await this.redisService.createForgotOtp(
+      dto.email,
+      OTP_PURPOSE.FORGOT_PASSWORD,
+      ttl,
+    );
     // Gửi message sang notification-service
     this.notificationClient.emit(KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD, {
       email: dto.email,
-      otp: otp.code,
+      otp,
     });
     return {};
   }
 
   async verifyRegister(dto: VerifyRegisterDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.findOTP(
-      user.id,
+    await this.checkOtpOrThrow(
+      dto.email,
+      dto.otp,
       OTP_PURPOSE.EMAIL_VERIFICATION,
     );
-    this.checkOtpOrThrow(otp!, dto.otp);
     await this.authRepository.updateUser(user.id, {
       status: USER_STATUS.VERIFIED,
     });
@@ -270,31 +298,50 @@ export class AuthService implements OnModuleInit {
   }
 
   async verifyForgotPassword(dto: VerifyForgotPasswordDto) {
-    const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.findOTP(
-      user.id,
+    const otpData = await this.redisService.getOtp(
+      dto.email,
       OTP_PURPOSE.FORGOT_PASSWORD,
     );
-    this.checkOtpOrThrow(otp!, dto.otp);
+    if (!otpData) throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
+    if (otpData.otp !== dto.otp)
+      throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
+    if (otpData.status !== OTP_STATUS.CREATED)
+      throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
+    await this.redisService.updateOtpStatus(
+      dto.email,
+      OTP_PURPOSE.FORGOT_PASSWORD,
+      OTP_STATUS.VERIFIED,
+    );
     return {};
   }
 
   async updatePassword(dto: UpdatePasswordDto) {
-    const user = await this.getUserByEmailOrThrow(dto.email);
-    const otp = await this.authRepository.findOTP(
-      user.id,
+    const otpData = await this.redisService.getOtp(
+      dto.email,
       OTP_PURPOSE.FORGOT_PASSWORD,
     );
-    this.checkOtpOrThrow(otp!, dto.otp);
+    if (!otpData) throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
+    if (otpData.otp !== dto.otp)
+      throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
+    if (otpData.status !== OTP_STATUS.VERIFIED)
+      throw new RpcBadRequestException('OTP not verified');
+    // Đổi mật khẩu
+    const user = await this.getUserByEmailOrThrow(dto.email);
     await this.authRepository.updateUser(user.id, {
       password: dto.newPassword,
     });
+    // Xóa OTP khỏi Redis
+    await this.redisService.deleteOtp(
+      dto.email,
+      OTP_PURPOSE.FORGOT_PASSWORD,
+      dto.otp,
+    );
     // Revoke toàn bộ token cũ
     await this.redisService.revokeAllUserJtis(user.id);
     return {};
   }
 
-  // Helper để parse TTL từ chuỗi (15m, 7d, ...)
+  // Helper để parse TTL từ chuỗi (15m, 7d, ...) lẽ ra nên xài thư viện ms cơ mà thôi tự viết cho nhanh hehe
   private parseTTL(str: string): number {
     if (str.endsWith('m')) return parseInt(str) * 60;
     if (str.endsWith('h')) return parseInt(str) * 60 * 60;

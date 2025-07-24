@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Inject, OnModuleInit, Param, Post, Query } from '@nestjs/common';
-import { Public } from '../auth/jwt';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -9,8 +8,6 @@ import { CreateReactionDto } from './dto/create-reaction.dto';
 import { PostQueryDto } from './dto/post-query.dto';
 import { AuthUser } from 'src/common/decorator/auth-user.decorator';
 import { JwtPayload } from 'src/common/type/jwt-payload.type';
-import { CreateCommentDto } from '../comment/dto/create-comment.dto';
-import { CreateTagDto } from './dto/create-tag.dto';
 
 @Controller('post')
 export class PostGatewayController implements OnModuleInit {

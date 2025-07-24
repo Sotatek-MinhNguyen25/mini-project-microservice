@@ -49,18 +49,27 @@ export class AuthKafkaController {
     return this.authService.logout(data.accessToken);
   }
 
+  /**
+   * Gửi OTP quên mật khẩu về email (OTP sẽ được lưu trong Redis, TTL cấu hình qua env)
+   */
   @MessagePattern(KAFKA_PATTERNS.FORGOT_PASSWORD)
   @ApiResponseOk(RESPONSE_MESSAGE.FORGOT_PASSWORD_SUCCESS)
   async forgotPassword(@Payload() data: ForgotPasswordDto) {
     return this.authService.forgotPassword(data);
   }
 
+  /**
+   * Xác thực OTP quên mật khẩu (OTP phải còn hạn và ở trạng thái CREATED)
+   */
   @MessagePattern(KAFKA_PATTERNS.VERIFY_FORGOT_PASSWORD)
   @ApiResponseOk(RESPONSE_MESSAGE.VERIFY_FORGOT_PASSWORD_SUCCESS)
   async verifyForgotPassword(@Payload() data: VerifyForgotPasswordDto) {
     return this.authService.verifyForgotPassword(data);
   }
 
+  /**
+   * Đổi mật khẩu sau khi xác thực OTP quên mật khẩu (OTP phải ở trạng thái VERIFIED)
+   */
   @MessagePattern(KAFKA_PATTERNS.UPDATE_PASSWORD)
   @ApiResponseOk(RESPONSE_MESSAGE.UPDATE_PASSWORD_SUCCESS)
   async updatePassword(@Payload() data: UpdatePasswordDto) {

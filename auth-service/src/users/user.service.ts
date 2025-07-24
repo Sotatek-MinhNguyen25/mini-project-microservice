@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRepository } from 'src/auth/auth.repository';
 import { CreateUserDto } from './dto/create-user.dto';
-import { BaseRpcExceptionFilter, RpcException } from '@nestjs/microservices';
+import { RpcException } from '@nestjs/microservices';
 import { ERROR_MESSAGE } from 'src/shared/message/error.message';
 import * as bcrypt from 'bcryptjs';
-import { OAuthProvider, Role, User, UserStatus } from '@prisma/client';
+import { Role, User, UserStatus } from '@prisma/client';
 import { GetListUserDto } from './dto/get-list.dto';
 import * as _ from 'lodash';
 import { FindUserByIdsDto } from './dto/find-user-ids.dto';
-import { paginate } from 'src/shared/utils/paginate.util';
 import { UserRepository } from './user.repository';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RpcBadRequestException } from 'src/shared/exceptions/rpc.exceptions';
