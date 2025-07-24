@@ -2,17 +2,10 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from 'src/common/redis/redis.service';
 import { Request } from 'express';
+import { JwtPayload } from 'src/common/type/jwt-payload.type';
 import { MESSAGE } from 'src/constants/message.constants';
 import { IS_PUBLIC_KEY } from './jwt.decorator';
 import { Reflector } from '@nestjs/core';
-
-interface JwtPayload {
-  sub: string;
-  jti: string;
-  iat?: number;
-  exp?: number;
-  [key: string]: any;
-}
 
 interface AuthRequest extends Request {
   user?: JwtPayload;
@@ -39,9 +32,9 @@ export class JwtAuthGuard implements CanActivate {
     if (!authHeader) throw new UnauthorizedException(MESSAGE.NO_TOKEN);
 
     const token = typeof authHeader === 'string' ? authHeader.replace('Bearer ', '') : '';
-    let payload: any = null;
+    let payload: JwtPayload;
     try {
-      payload = this.jwtService.decode(token) as JwtPayload;
+      payload = this.jwtService.decode(token);
     } catch {
       throw new UnauthorizedException(MESSAGE.INVALID_TOKEN);
     }

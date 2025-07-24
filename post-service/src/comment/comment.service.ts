@@ -58,10 +58,9 @@ export class CommentService implements OnModuleInit {
 
     const userInfo: User[] = (
       await firstValueFrom(
-        this.authClient.send(
-          CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS,
-          userIdList,
-        ),
+        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, {
+          ids: userIdList,
+        }),
       )
     ).data;
 

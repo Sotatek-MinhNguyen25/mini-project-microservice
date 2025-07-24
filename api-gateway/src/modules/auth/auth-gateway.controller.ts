@@ -9,8 +9,8 @@ import { Public } from './jwt/jwt.decorator';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 
-@Controller('auth')
 @Public()
+@Controller('auth')
 export class AuthGatewayController implements OnModuleInit {
   constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly authClient: ClientKafka) {}
 

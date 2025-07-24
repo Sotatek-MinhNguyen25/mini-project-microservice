@@ -34,7 +34,7 @@ export class ReactionService {
     const users: User[] = (
       await firstValueFrom(
         this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, {
-          userIds: userIds,
+          ids: userIds,
         }),
       )
     ).data;
