@@ -1,16 +1,19 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: false,
   images: {
-    domains: [
-      'images.pexels.com',
-      'res.cloudinary.com',
-      'cdn.sanity.io',
-      's3.amazonaws.com',
-      'cdn.prod.website-files.com',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**', // Cho phép tất cả hostname
+      },
+      {
+        protocol: 'http',
+        hostname: '**', // Cho phép tất cả hostname với HTTP
+      }
     ],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
