@@ -5,7 +5,7 @@ import { RpcBadRequestException } from 'src/shared/exceptions/rpc.exceptions';
 
 @Injectable()
 export class AuthRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return await this.prisma.user.create({ data });
@@ -13,15 +13,15 @@ export class AuthRepository {
 
   async findUserByEmail(email: string): Promise<User | null> {
     if (!email) throw new RpcBadRequestException('Email is required');
-    return await this.prisma.user.findFirst({ where: { email } });
+    return await this.prisma.user.findFirst({ where: { email, deletedAt: null } });
   }
 
   async findUserById(id: string): Promise<User | null> {
-    return await this.prisma.user.findUnique({ where: { id } });
+    return await this.prisma.user.findFirst({ where: { id, deletedAt: null } });
   }
 
   async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
-    return await this.prisma.user.update({ where: { id }, data });
+    return await this.prisma.user.update({ where: { id, deletedAt: null }, data });
   }
 
   async findUserByIds(ids: string[]): Promise<User[] | null> {
