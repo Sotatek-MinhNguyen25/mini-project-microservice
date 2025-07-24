@@ -9,7 +9,9 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-const baseURL = process.env.API_URL || 'http://localhost:8000/';
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
+console.log('Using API baseURL:', baseURL);
+
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
