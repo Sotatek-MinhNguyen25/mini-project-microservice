@@ -5,21 +5,9 @@ import {
   useInfiniteQuery,
 } from '@tanstack/react-query';
 import postService from '@/service/post.service';
-import {
-  CreatePostRequest,
-  GetTagsResponse,
-  Post,
-  PostData,
-  ReactionType,
-} from '@/types/post';
-import axios from 'axios';
+import { GetTagsResponse, Post, ReactionType } from '@/types/post';
 import { useToast } from './useToast';
 import { useState } from 'react';
-
-interface PostsResponse {
-  posts: Post[];
-  total?: number;
-}
 
 interface UseGetPostsOptions {
   limit?: number;

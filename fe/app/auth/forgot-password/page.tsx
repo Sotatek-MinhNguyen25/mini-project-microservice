@@ -8,9 +8,8 @@ import EmailInputStep from '../../../components/auth/resetPassword/emailInputSte
 import OtpVerificationStep from '../../../components/auth/resetPassword/otpInputStep';
 import NewPasswordStep from '../../../components/auth/resetPassword/newPasswordStep';
 import SuccessStep from '../../../components/auth/resetPassword/successStep';
+import { useResetPassword, useSendResetPassword, useVerifyOtpResetPassword } from '@/hooks/useAuth';
 import { Errors } from '@/types';
-
-const MOCK_OTP = '123456';
 
 export default function ResetPasswordPage() {
   const [step, setStep] = useState<number>(1);
@@ -22,6 +21,9 @@ export default function ResetPasswordPage() {
   const [countdown, setCountdown] = useState<number>(0);
   const [errors, setErrors] = useState<Errors>({});
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const resetPasswordMutation = useResetPassword();
+  const sendOTPMutation = useVerifyOtpResetPassword();
+  const sendPasswordMutation = useSendResetPassword();
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -38,11 +40,18 @@ export default function ResetPasswordPage() {
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep(2);
-      setCountdown(60);
-    }, 1000);
+    resetPasswordMutation.mutate({ email }, {
+      onSuccess: () => {
+        sessionStorage.setItem('resetEmail', email);
+        setIsLoading(false);
+        setStep(2);
+        setCountdown(60);
+      },
+      onError: (error) => {
+        setIsLoading(false);
+        setErrors({ email: error.message });
+      }
+    });
   };
 
   const handleOtpSubmit = (otpCode: string = otp.join('')) => {
@@ -51,11 +60,17 @@ export default function ResetPasswordPage() {
       setErrors({ otp: 'Please enter all 6 digits' });
       return;
     }
-    if (otpCode !== MOCK_OTP) {
-      setErrors({ otp: 'Invalid OTP. Please try again.' });
-      return;
-    }
-    setStep(3);
+    sessionStorage.setItem('otpResetPassword', otpCode);
+    sendOTPMutation.mutate({ email, otp: otpCode }, {
+      onSuccess: () => {
+        setOtp(['', '', '', '', '', ''])
+        setErrors({});
+        setStep(3);
+      },
+      onError: (error) => {
+        setErrors({ otp: error.message });
+      }
+    }); 
   };
 
   const handlePasswordSubmit = async () => {
@@ -69,17 +84,44 @@ export default function ResetPasswordPage() {
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep(4);
-    }, 1000);
+    const otpCode = sessionStorage.getItem('otpResetPassword') || '';
+    const email = sessionStorage.getItem('resetEmail') || '';
+    sendPasswordMutation.mutate(
+      { email, password: newPassword, otp: otpCode },
+      {
+        onSuccess: () => {
+          setIsLoading(false);
+          sessionStorage.removeItem('otpResetPassword');
+          sessionStorage.removeItem('resetEmail');
+          setNewPassword('');
+          setStep(4);
+        },
+        onError: (error) => {
+          setIsLoading(false);
+          setErrors({ password: error.message });
+        },
+      }
+    );
   };
 
   const handleResendOtp = () => {
     setOtp(['', '', '', '', '', '']);
     setErrors({});
     setCountdown(60);
-    console.log('Resending OTP to:', email);
+    const email = sessionStorage.getItem('resetEmail') || '';
+    if (!email) {
+      setErrors({ email: 'Email is required to resend OTP' });
+      return;
+    }
+    resetPasswordMutation.mutate({ email }, {
+      onSuccess: () => {
+        setIsLoading(false);
+      },
+      onError: (error) => {
+        setIsLoading(false);
+        setErrors({ email: error.message });
+      }
+    });
   };
 
   const renderStep = () => {

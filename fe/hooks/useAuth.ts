@@ -207,6 +207,50 @@ export function useResetPassword() {
   });
 }
 
+export function useVerifyOtpResetPassword() {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ email, otp }: { email: string; otp: string }) =>
+      authService.verifyResetPasswordOTP(email, otp),
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Please login to your account.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Invalid OTP',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
+export function useSendResetPassword() {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: ({ email, otp, password }: { email: string; otp: string; password: string }) =>
+      authService.sendNewPassword(email, password, otp),
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Please login to your account.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Invalid password',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 export function useVerifyOtp(email: string) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [errors, setErrors] = useState<{ otp?: string }>({});
