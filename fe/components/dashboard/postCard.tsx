@@ -10,7 +10,6 @@ import { PostFooter } from './postDetail/PostFooter';
 export function PostCard({ post }: { post: Post }) {
   return (
     <Card className="card-hover glass-effect border-0 shadow-lg overflow-hidden">
-      <PostTags tags={post.tags} />
       <PostHeader post={post} />
       <PostContent post={post} />
       <PostFooter post={post} />

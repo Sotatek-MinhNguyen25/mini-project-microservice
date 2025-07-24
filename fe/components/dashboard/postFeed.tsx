@@ -3,9 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useGetPosts } from '@/hooks/usePosts'
 import { PostCard } from './postCard'
-import type { Post } from '@/types/post'
 import { Loader2, Sparkles } from 'lucide-react'
-import { generateMockPosts } from '@/const/category'
 
 export function PostFeed() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useGetPosts({ page:1, limit: 10 })

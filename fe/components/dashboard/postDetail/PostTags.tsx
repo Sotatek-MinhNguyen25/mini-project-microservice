@@ -5,7 +5,7 @@ export function PostTags({ tags }: { tags: Post['tags'] }) {
   if (!tags.length) return null;
 
   return (
-    <div className="px-6 pt-4 pb-2 bg-gradient-to-r from-primary/5 to-purple-600/5 border-b border-border/40">
+    <div>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
           <Badge

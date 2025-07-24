@@ -324,7 +324,7 @@ export class AuthService implements OnModuleInit {
     if (otpData.otp !== dto.otp)
       throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
     if (otpData.status !== OTP_STATUS.VERIFIED)
-      throw new RpcBadRequestException('OTP not verified');
+      throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
     // Đổi mật khẩu
     const user = await this.getUserByEmailOrThrow(dto.email);
     await this.authRepository.updateUser(user.id, {
@@ -339,6 +339,19 @@ export class AuthService implements OnModuleInit {
     // Revoke toàn bộ token cũ
     await this.redisService.revokeAllUserJtis(user.id);
     return {};
+  }
+
+  async logoutAllByUserId(userId: string) {
+    try {
+      const jtis = await this.redisService.getUserJtis(userId);
+      for (const jti of jtis) {
+        await this.redisService.delJti(jti);
+      }
+      await this.redisService.revokeAllUserJtis(userId);
+      return {};
+    } catch (e) {
+      return { message: 'Logout all failed: ' + (e.message || e) };
+    }
   }
 
   // Helper để parse TTL từ chuỗi (15m, 7d, ...) lẽ ra nên xài thư viện ms cơ mà thôi tự viết cho nhanh hehe
