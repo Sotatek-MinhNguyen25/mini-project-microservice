@@ -140,6 +140,7 @@ export class PostService implements OnModuleInit {
             reactions: {
               where: {
                 userId: postQueryDto.userId,
+                deletedAt: null,
               },
             },
           }),
