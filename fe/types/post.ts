@@ -8,7 +8,14 @@ export interface Post {
   user: PUser;
   image: PostImage[];
   tags: TagId[];
-  reaction: Reaction;
+  reactions: Reaction[];
+  reaction: {
+    summary: {
+      type: ReactionType;
+      count: number;
+    }[];
+    count: number;
+  };
   comments: Comment[];
   totalComment: number;
 }
@@ -51,7 +58,6 @@ export interface PostImage {
 export interface CreatePostRequest {
   title: string;
   content: string;
-  userId: string;
   postImages?: PostImage[];
   tagIds?: TagId[];
 }
@@ -105,47 +111,33 @@ export interface CreatePostResponse {
 }
 
 export interface TagId {
+  tagId: string;
   tag: {
     id: string;
     name: string;
   };
 }
 
-// export interface Category {
-//   id: string
-//   name: string
-//   createdAt: Date
-//   updatedAt: Date
-//   deletedAt: Date | null
-// }
-
 export interface Reaction {
-  summary: {
-    type: ReactionType;
-    count: number;
-  }[];
-  count: number;
+  id: string;
+  type: string;
+  postId: string;
+  userId: string;
 }
 
 export interface Comment {
   id: string;
   content: string;
-  authorId: string;
   postId: string;
   parentId: string | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
-  author: {
+  user: {
+    id: string;
     username: string;
-    profile: {
-      firstName: string;
-      lastName: string;
-      avatarUrl: string;
-    };
+    email: string;
   };
-  replies: Comment[];
-  reactions: Reaction[];
 }
 
 export interface CommentSectionProps {
@@ -159,7 +151,7 @@ export interface PostCardProps {
 
 export interface CompactPostViewProps {
   user: any;
-  fullName: string;
+  // fullName: string;
   setIsExpanded: (value: boolean) => void;
 }
 
@@ -185,7 +177,7 @@ export interface PostFormFieldsProps {
   setContent: (content: string) => void;
 }
 export interface PostFormHeaderProps {
-  fullName: string;
+  // fullName: string;
   user: any; // Replace with proper User type from your auth context
   setIsExpanded: (value: boolean) => void;
 }

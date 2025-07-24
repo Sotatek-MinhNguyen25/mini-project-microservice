@@ -70,7 +70,7 @@ export function PostTable({
                       key={tag.id}
                       className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
                     >
-                      {tag.tag.name}
+                      {tag.name}
                     </span>
                   ))}
                   {post.tags.length > 2 && (

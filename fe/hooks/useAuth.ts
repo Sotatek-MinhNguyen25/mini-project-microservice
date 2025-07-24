@@ -45,7 +45,7 @@ export function useLogin() {
     mutationFn: async ({ email, password }) => {
       return await authService.login(email, password);
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       if (response.statusCode === 200 || response.statusCode === 201) {
         const { accessToken, refreshToken } = response.data!;
         localStorage.setItem('accessToken', accessToken);
@@ -54,7 +54,14 @@ export function useLogin() {
         try {
           const decodedUser: DecodedToken = jwtDecode(accessToken);
           console.log('Decoded user:', decodedUser.roles[0]);
-          
+
+          const userProfile = await authService.me();
+
+          if (!userProfile || !userProfile.roles || userProfile.roles.length === 0) {
+            throw new Error('User profile is incomplete or roles are missing');
+          }
+
+          localStorage.setItem('userProfile', JSON.stringify(userProfile));
           const role = decodedUser.roles?.[0]?.trim().toUpperCase();
           localStorage.setItem('userRole', role);
 

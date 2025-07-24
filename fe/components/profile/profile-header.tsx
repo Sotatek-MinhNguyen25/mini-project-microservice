@@ -9,8 +9,7 @@ import { Edit, Calendar, Mail, UserIcon, Shield, CheckCircle } from "lucide-reac
 import { formatDistanceToNow } from "date-fns"
 
 export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
-  const fullName = `${user.profile.firstName} ${user.profile.lastName}`
-  const initials = `${user.profile.firstName[0]}${user.profile.lastName[0]}`
+  const initials = `${user.username[0]}${user.username[1]}`
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -47,7 +46,7 @@ export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
         {/* Avatar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-16">
           <Avatar className="w-32 h-32 border-4 border-background shadow-xl">
-            <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} />
+            {/* <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} /> */}
             <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-2xl">
               {initials}
             </AvatarFallback>
@@ -57,15 +56,11 @@ export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl font-bold text-foreground">{fullName}</h1>
-                  {user.status === "ACTIVE" && <CheckCircle className={`h-5 w-5 ${getStatusColor(user.status)}`} />}
+                  {/* <h1 className="text-2xl font-bold text-foreground">{fullName}</h1> */}
+                  {user.status === "VERIFIED" && <CheckCircle className={`h-5 w-5 ${getStatusColor(user.status)}`} />}
                 </div>
                 <p className="text-muted-foreground mb-2">@{user.username}</p>
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className={getRoleColor(user.roles)}>
-                    <Shield className="h-3 w-3 mr-1" />
-                    {user.roles}
-                  </Badge>
                   <Badge variant="outline" className={getStatusColor(user.status)}>
                     {user.status}
                   </Badge>
@@ -79,13 +74,6 @@ export function ProfileHeader({ user, onEditClick }: ProfileHeaderProps) {
             </div>
           </div>
         </div>
-
-        {/* Bio */}
-        {user.profile.bio && (
-          <div className="mt-6">
-            <p className="text-foreground/90 leading-relaxed">{user.profile.bio}</p>
-          </div>
-        )}
 
         {/* User Info */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

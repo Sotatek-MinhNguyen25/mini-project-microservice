@@ -2,8 +2,8 @@ export interface User {
   id: string
   email: string
   username: string
-  roles: 'USER' | 'ADMIN'
-  status: 'ACTIVE' | 'INACTIVE' | 'BANNED'
+  roles: string[]
+  status: 'VERIFIED' | 'UNVERIFIED' | 'DELETED'
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -16,7 +16,6 @@ export interface UserProfile {
   id: string
   firstName: string
   lastName: string
-  bio: string
   avatarUrl: string
   createdAt: Date
   updatedAt: Date
@@ -121,4 +120,5 @@ export interface DecodedToken {
   roles: string[];
   exp: number;
   username: string;
+  sub:string;
 }

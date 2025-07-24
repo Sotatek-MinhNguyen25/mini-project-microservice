@@ -47,6 +47,13 @@ const authService = {
     const response: AxiosResponse = await post('/auth/verify-otp', { email, otp })
     return response.data
   },
+
+  me: async () => {
+    const response: AxiosResponse = await get('/users/profile/me', {
+      headers: getAuthorizationHeader(),
+    })
+    return response.data
+  }
 }
 
 export default authService

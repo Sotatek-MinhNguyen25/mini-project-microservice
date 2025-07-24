@@ -22,10 +22,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    const userData = localStorage.getItem('user_data');
+    const userLC = localStorage.getItem('userProfile');
 
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    if (token && userLC) {
+      setUser(JSON.parse(userLC));
     }
     setIsLoading(false);
   }, []);
