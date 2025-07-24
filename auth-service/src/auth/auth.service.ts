@@ -56,13 +56,22 @@ export class AuthService implements OnModuleInit {
   async sendRegisterOtp(dto: RegisterDto) {
     let user = await this.authRepository.findUserByEmail(dto.email);
     if (user) {
-      throw new RpcBadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
+      if (user.status !== USER_STATUS.UNVERIFIED) {
+        console.log('{AUTH-SERVICE} User already exists', user);
+        console.error(
+          '[AUTH-SERVICE] Throw RpcBadRequestException:',
+          ERROR_MESSAGE.EMAIL_ALREADY_EXISTS,
+        );
+        throw new RpcBadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
+      }
+      // Nếu user UNVERIFIED thì tiếp tục tạo OTP mới cho user này
+    } else {
+      user = await this.authRepository.createUser({
+        email: dto.email,
+        status: USER_STATUS.UNVERIFIED,
+        username: dto.email,
+      });
     }
-    user = await this.authRepository.createUser({
-      email: dto.email,
-      status: USER_STATUS.UNVERIFIED,
-      username: dto.email,
-    });
     const otp = await this.authRepository.createOTP({
       userId: user.id,
       purpose: OTP_PURPOSE.EMAIL_VERIFICATION,
