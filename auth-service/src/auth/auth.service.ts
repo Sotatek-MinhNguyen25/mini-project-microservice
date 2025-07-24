@@ -230,17 +230,26 @@ export class AuthService implements OnModuleInit {
         email: user.email,
         roles: user.roles,
         username: user.username,
-        jti: payload.jti,
       };
-      const { accessToken, expiresIn: accessTokenExpiresIn } =
-        this.customJwtService.createAT(newPayload);
-      const { refreshToken, expiresIn: refreshTokenExpiresIn } =
-        this.customJwtService.createRT(newPayload);
+      const {
+        accessToken,
+        expiresIn: accessTokenExpiresIn,
+        jti: atJti,
+      } = this.customJwtService.createAT(newPayload);
+      // Lưu jti của access token mới vào Redis
+      await this.redisService.setJti(
+        atJti,
+        this.parseTTL(accessTokenExpiresIn),
+      );
+      await this.redisService.addJtiToUserSet(
+        user.id,
+        atJti,
+        this.parseTTL(accessTokenExpiresIn),
+      );
       return {
         accessToken,
-        refreshToken,
+        refreshToken: dto.refreshToken, // giữ nguyên RT cũ
         accessTokenExpiresIn,
-        refreshTokenExpiresIn,
       };
     } catch {
       throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_REFRESH_TOKEN);
