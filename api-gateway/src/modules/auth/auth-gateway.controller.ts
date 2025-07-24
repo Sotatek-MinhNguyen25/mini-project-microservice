@@ -5,7 +5,7 @@ import { RegisterDto } from './dto/register.dto';
 import { CompleteRegisterDto } from './dto/complete-register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { Public } from './jwt/jwt.decorator';
+import { Public } from '../../common/jwt';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 

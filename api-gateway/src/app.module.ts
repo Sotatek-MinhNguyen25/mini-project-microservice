@@ -8,11 +8,11 @@ import { NotificationGatewayModule } from './modules/notification/notification-g
 // import { JwtAuthGuard } from './modules/auth/jwt';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { UserGatewayModule } from './modules/user/user-gateway.module';
-import { JwtModule } from './modules/auth/jwt/jwt.module';
+import { JwtModule } from './common/jwt/jwt.module';
 import { RedisModule } from './common/redis/redis.module';
 import { TagGatewayModule } from './modules/tag/tag-gateway.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './modules/auth/jwt';
+import { JwtAuthGuard } from './common/jwt';
 import { RolesGuard } from './common/roles/role.guard';
 import { CommentGatewayModule } from './modules/comment/comment-gateway.module';
 

@@ -6,7 +6,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorator/auth-user.decorator';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { IUser } from '../user/interface/user.interface';
-import { Public } from '../auth/jwt';
+import { Public } from '../../common/jwt';
 
 @Public()
 @ApiTags('Upload')

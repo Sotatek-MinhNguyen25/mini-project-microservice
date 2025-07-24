@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthGatewayController } from './auth-gateway.controller';
-import { JwtStrategy } from './jwt';
+import { JwtStrategy } from '../../common/jwt';
 import { KafkaModule } from 'src/common/kafka/kafka.module';
 
 @Module({

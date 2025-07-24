@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorator/auth-user.decorator';
 import { IUser } from '../user/interface/user.interface';
-import { Public } from '../auth/jwt';
+import { Public } from '../../common/jwt';
 import { AxiosResponse } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';

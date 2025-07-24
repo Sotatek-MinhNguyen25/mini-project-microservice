@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Inject, OnModuleInit, Post } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
-import { Public } from '../auth/jwt';
+import { Public } from '../../common/jwt';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateTagDto } from '../post/dto/create-tag.dto';
 import { firstValueFrom } from 'rxjs';
