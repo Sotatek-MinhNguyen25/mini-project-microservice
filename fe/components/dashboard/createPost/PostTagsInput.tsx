@@ -21,6 +21,7 @@ export default function PostTagsInput({
   removeTag,
   isLoading,
 }: PostTagsInputProps) {
+  console.log('PostTagsInput', tags, availableTags);
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</Label>

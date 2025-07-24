@@ -121,12 +121,8 @@ export function useGetTags() {
   return useQuery<GetTagsResponse, Error>({
     queryKey: ['tags'],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:8000/tag', {
-        headers: {
-          accept: '*/*',
-        },
-      });
-      return response.data;
+      const response = await postService.getTags();
+      return response;
     },
   });
 }
@@ -180,13 +176,8 @@ export function useAddReaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      postId,
-      type,
-    }: {
-      postId: string;
-      type: ReactionType;
-    }) => postService.addReaction(postId, type),
+    mutationFn: ({ postId, type }: { postId: string; type: ReactionType }) =>
+      postService.addReaction(postId, type),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
