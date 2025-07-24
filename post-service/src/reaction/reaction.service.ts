@@ -76,20 +76,46 @@ export class ReactionService {
   async createReaction(
     createReactionDto: CreateReactionDto,
   ): Promise<ConsumerResult<Reaction>> {
+    // Tim kiem xem user da tung reaction chua
     const reaction = await this.prismaService.reaction.findFirst({
       where: {
         postId: createReactionDto.postId,
         userId: createReactionDto.userId,
       },
     });
-    if (reaction) {
-      // redirect to update reaction?
-      throw new RpcConflictException('User has already reacted to this post');
+    let reactionRes: Reaction;
+    // Neu user chua tung reaction
+    if (!reaction) {
+      reactionRes = await this.prismaService.reaction.create({
+        data: createReactionDto,
+      });
+      return { data: reactionRes };
     }
-    const createdReaction = await this.prismaService.reaction.create({
-      data: createReactionDto,
+
+    // Neu user huy reaction bang cach reaction tuong tu reaction da tao
+    if (reaction.type === createReactionDto.type && !reaction.deletedAt) {
+      reactionRes = await this.prismaService.reaction.update({
+        where: {
+          id: reaction.id,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+      return { data: reactionRes };
+    }
+
+    // Thay doi reaction
+    reactionRes = await this.prismaService.reaction.update({
+      where: {
+        id: reaction.id,
+      },
+      data: {
+        type: createReactionDto.type,
+        deletedAt: null,
+      },
     });
-    return { data: createdReaction, meta: {} };
+    return { data: reactionRes };
   }
 
   async updateReaction(
