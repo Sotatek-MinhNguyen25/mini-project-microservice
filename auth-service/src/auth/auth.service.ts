@@ -45,6 +45,7 @@ export class AuthService implements OnModuleInit {
     this.notificationClient.subscribeToResponseOf(
       KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD,
     );
+    this.notificationClient.subscribeToResponseOf('123');
   }
 
   private async getUserByEmailOrThrow(email: string) {
