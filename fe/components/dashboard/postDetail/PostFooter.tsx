@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/auth-context';
 import { reactionEmojis } from '@/const/reaction';
 
 export function PostFooter({ post }: { post: Post }) {
-  console.log('PostFooter', post.reactions);
   const [showComments, setShowComments] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const reactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,11 +72,13 @@ export function PostFooter({ post }: { post: Post }) {
                   : 'hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20'
               }`}
             >
-              <Heart
-                className={`h-4 w-4 mr-2 transition-all ${
-                  userReaction ? 'fill-current scale-110' : ''
-                }`}
-              />
+              <span className="mr-2 text-lg">
+                {userReaction ? (
+                  reactionEmojis[userReaction.type as ReactionType]
+                ) : (
+                  <Heart className="h-4 w-4" />
+                )}
+              </span>
               {post.reaction.count}
             </Button>
 
@@ -127,9 +128,9 @@ export function PostFooter({ post }: { post: Post }) {
         </div>
       </div>
 
-      {showComments && (
+      {showComments && user && (
         <div className="w-full pt-4 border-t border-border/40">
-          <CommentSection postId={post.id} comments={post.comments} />
+          <CommentSection postId={post.id} comments={post.comments}/>
         </div>
       )}
     </div>

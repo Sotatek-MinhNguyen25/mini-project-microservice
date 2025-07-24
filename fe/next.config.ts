@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       'res.cloudinary.com',
       'cdn.sanity.io',
       's3.amazonaws.com',
+      'cdn.prod.website-files.com',
     ],
   },
 };

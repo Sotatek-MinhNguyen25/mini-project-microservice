@@ -3,31 +3,29 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useToast } from '@/hooks/useToast';
-import { useGetTags } from '@/hooks/usePosts';
+import { useGetTags, useCreatePost } from '@/hooks/usePosts';
 import CompactPostView from './createPost/CompactPostView';
 import PostFormHeader from './createPost/PostFormHeader';
-import PostFormFields from './createPost/PostFormFields';
 import PostTagsInput from './createPost/PostTagsInput';
 import PostFileUpload from './createPost/PostFileUpload';
-import { Loader2 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { useCreatePost } from '@/hooks/usePosts';
+import { LoadingOutlined } from '@ant-design/icons';
+import { Form, Input, Button } from 'antd';
 import { CreatePostRequest, PostImage, TagId, Tag } from '@/types/post';
 import { FilePreview } from '@/types';
-import { DEFAULT_USER } from '@/const/user';
+import { useTheme } from 'next-themes';
 
 interface ExtendedFilePreview extends FilePreview {
   altText?: string;
 }
 
 export function CreatePost() {
+  const [form] = Form.useForm();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [content, setContent] = useState<string>('');
-  const [title, setTitle] = useState<string>('');
   const [filePreviews, setFilePreviews] = useState<ExtendedFilePreview[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<TagId[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const  user  = DEFAULT_USER;
+  const { user } = useAuth();
+  const { theme } = useTheme();
   const { toast } = useToast();
   const { mutate: createPost, isPending } = useCreatePost();
   const {
@@ -36,15 +34,55 @@ export function CreatePost() {
     error: tagsError,
   } = useGetTags();
 
-  const tags: Tag[] = tagsResponse?.data || [];
+  const tags: any = tagsResponse || [];
+  const MAX_TITLE_LENGTH = 100;
+  const MAX_CONTENT_LENGTH = 5000;
+  const MAX_TAGS = 5;
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+  const ALLOWED_FILE_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'video/mp4',
+    'video/webm',
+  ];
+
+  const inputClassName =
+    theme === 'dark'
+      ? 'bg-gray-700 text-white border-gray-600 hover:border-gray-500 focus:border-blue-500'
+      : 'bg-white text-gray-900 border-gray-300 hover:border-gray-400 focus:border-blue-500';
+
+  const formClassName =
+    theme === 'dark'
+      ? 'space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg'
+      : 'space-y-6 bg-white p-6 rounded-lg shadow-lg';
+
+  const buttonClassName =
+    theme === 'dark'
+      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200'
+      : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200';
+
+  const cancelButtonClassName =
+    theme === 'dark'
+      ? 'text-gray-300 hover:text-white'
+      : 'text-gray-600 hover:text-gray-900';
 
   const handleTagSelect = (tagId: string) => {
-    if (!selectedTagIds.some((tag) => tag.tagId === tagId)) {
-      const tag = tags.find((tag) => tag.id === tagId);
+    if (selectedTagIds.length >= MAX_TAGS) {
+      toast({
+        title: 'Tag Limit Reached',
+        description: `You can only select up to ${MAX_TAGS} tags`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!selectedTagIds.some((tag: any) => tag.tagId === tagId)) {
+      const tag = tags.find((tag: any) => tag.id === tagId);
       if (tag) {
         setSelectedTagIds([
           ...selectedTagIds,
-          { tagId: tag.id, tag: { id: tag.id, name: tag.name } }
+          { tagId: tag.id, tag: { id: tag.id, name: tag.name } },
         ]);
       }
     }
@@ -59,7 +97,41 @@ export function CreatePost() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      files.forEach((file) => {
+
+      if (filePreviews.length + files.length > MAX_FILES) {
+        toast({
+          title: 'File Limit Reached',
+          description: `You can only upload up to ${MAX_FILES} files`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const validFiles = files.filter((file) => {
+        if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+          toast({
+            title: 'Invalid File Type',
+            description:
+              'Only JPEG, PNG images, and MP4, WebM videos are allowed',
+            variant: 'destructive',
+          });
+          return false;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          toast({
+            title: 'File Too Large',
+            description: `Each file must be less than ${
+              MAX_FILE_SIZE / (1024 * 1024)
+            }MB`,
+            variant: 'destructive',
+          });
+          return false;
+        }
+        return true;
+      });
+
+      validFiles.forEach((file) => {
         const url = URL.createObjectURL(file);
         const type = file.type.startsWith('image/') ? 'image' : 'video';
         const altText = file.type.startsWith('image/')
@@ -71,6 +143,14 @@ export function CreatePost() {
   };
 
   const updateAltText = (index: number, altText: string) => {
+    if (altText.length > 200) {
+      toast({
+        title: 'Alt Text Too Long',
+        description: 'Alt text must be 200 characters or less',
+        variant: 'destructive',
+      });
+      return;
+    }
     setFilePreviews((prev) =>
       prev.map((preview, i) =>
         i === index ? { ...preview, altText } : preview,
@@ -86,12 +166,11 @@ export function CreatePost() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim() || !user) {
+  const handleSubmit = async (values: { title: string; content: string }) => {
+    if (!user) {
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in content and ensure you are logged in',
+        title: 'Authentication Required',
+        description: 'Please log in to create a post',
         variant: 'destructive',
       });
       return;
@@ -116,8 +195,8 @@ export function CreatePost() {
       }));
 
     const postData: CreatePostRequest = {
-      title: title || 'Untitled Post',
-      content,
+      title: values.title?.trim() || 'Untitled Post',
+      content: values.content.trim(),
       postImages: postImages.length > 0 ? postImages : undefined,
       tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
     };
@@ -129,8 +208,7 @@ export function CreatePost() {
       },
       {
         onSuccess: () => {
-          setContent('');
-          setTitle('');
+          form.resetFields();
           setSelectedTagIds([]);
           setFilePreviews([]);
           setIsExpanded(false);
@@ -152,24 +230,61 @@ export function CreatePost() {
 
   if (!user) return null;
 
-  // const fullName = `${user.profile.firstName} ${user.profile.lastName}`;
-
   return isExpanded ? (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
+    <Form
+      form={form}
+      onFinish={handleSubmit}
+      layout="vertical"
+      className={formClassName}
     >
-      <PostFormHeader
-        // fullName={fullName}
-        user={user}
-        setIsExpanded={setIsExpanded}
-      />
-      <PostFormFields
-        title={title}
-        setTitle={setTitle}
-        content={content}
-        setContent={setContent}
-      />
+      <PostFormHeader user={user} setIsExpanded={setIsExpanded} />
+
+      <Form.Item
+        name="title"
+        label={
+          <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+            Title
+          </span>
+        }
+        rules={[
+          { required: true, message: 'Title is required' },
+          {
+            max: MAX_TITLE_LENGTH,
+            message: `Title must be ${MAX_TITLE_LENGTH} characters or less`,
+          },
+        ]}
+      >
+        <Input
+          placeholder="Enter post title"
+          className={`${inputClassName} rounded-md transition-all duration-200`}
+          style={{ color: '#000' }}
+          autoFocus
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="content"
+        label={
+          <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+            Content
+          </span>
+        }
+        rules={[
+          { required: true, message: 'Content is required' },
+          {
+            max: MAX_CONTENT_LENGTH,
+            message: `Content must be ${MAX_CONTENT_LENGTH} characters or less`,
+          },
+        ]}
+      >
+        <Input.TextArea
+          rows={4}
+          placeholder="What's on your mind?"
+          className={`${inputClassName} rounded-md transition-all duration-200`}
+          style={{ color: '#000' }}
+        />
+      </Form.Item>
+
       <PostTagsInput
         tags={selectedTagIds.map((tag) => tag.tagId)}
         availableTags={tags}
@@ -177,6 +292,7 @@ export function CreatePost() {
         removeTag={removeTag}
         isLoading={isTagsLoading}
       />
+
       <PostFileUpload
         filePreviews={filePreviews}
         fileInputRef={fileInputRef}
@@ -184,29 +300,30 @@ export function CreatePost() {
         removeFile={removeFile}
         updateAltText={updateAltText}
       />
-      <div className="flex justify-between items-center pt-4 border-t border-border/40">
+
+      <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button
           type="button"
-          onClick={() => setIsExpanded(false)}
-          className="text-muted-foreground hover:text-foreground"
+          onClick={() => {
+            form.resetFields();
+            setIsExpanded(false);
+          }}
+          className={cancelButtonClassName}
         >
           Cancel
         </Button>
         <Button
-          type="submit"
-          className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-          disabled={!content.trim() || isPending || isTagsLoading}
+          type="primary"
+          htmlType="submit"
+          className={buttonClassName}
+          disabled={isPending || isTagsLoading}
+          icon={isPending ? <LoadingOutlined /> : null}
         >
-          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isPending ? 'Sharing...' : 'Share Post'} ✨
         </Button>
       </div>
-    </form>
+    </Form>
   ) : (
-    <CompactPostView
-      user={user}
-      // fullName={fullName}
-      setIsExpanded={setIsExpanded}
-    />
+    <CompactPostView user={user} setIsExpanded={setIsExpanded} />
   );
 }

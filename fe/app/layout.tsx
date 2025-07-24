@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import 'antd/dist/reset.css';
 import { Providers } from "@/components/providers"
 import { Toaster } from "@/components/ui/toaster"
 

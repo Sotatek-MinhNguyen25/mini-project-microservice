@@ -28,6 +28,13 @@ const postService = {
     return response.data;
   },
 
+  getTags : async () => {
+    const response: AxiosResponse = await get(`/tag`, {
+      headers: getAuthorizationHeader(),
+    });
+    return response.data;
+  },
+
   deletePost: async (id: string) => {
     const response: AxiosResponse = await deleteReq(`${PostPrefix}/${id}`, {
       headers: getAuthorizationHeader(),
@@ -114,8 +121,9 @@ const postService = {
 
   uploadMultipleFiles: async (files: File[]) => {
     const formData = new FormData();
-    files.forEach((file, index) => {
-      formData.append(`files[${index}]`, file);
+
+    files.forEach((file) => {
+      formData.append('files', file);
     });
 
     const response: AxiosResponse = await upload(
@@ -126,8 +134,9 @@ const postService = {
           'Content-Type': 'multipart/form-data',
           ...getAuthorizationHeader(),
         },
-      },
+      }
     );
+
     return response.data;
   },
 
