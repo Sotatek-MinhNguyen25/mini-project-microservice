@@ -45,13 +45,25 @@ export const KAFKA_PATTERNS = {
     UNLIKE: 'post.unlike',
     COMMENT: {
       CREATE: 'comment.create',
+      GET_BY_POST: 'comment.get_by_post',
+      UPDATE: 'comment.update',
+      DELETE: 'comment.delete',
     },
     TAG: {
       CREATE: 'tag.create',
       GET: 'tag.get',
+      UPDATE: 'tag.update',
+      DELETE: 'tag.delete',
+      GET_BY_POST_ID: 'tag.get_by_post',
+      CREATE_POST_TAG: 'posttag.create',
+      DELETE_POST_TAG: 'posttag.delete',
     },
     REACTION: {
+      GET_BY_POST: 'reaction.get_by_post',
+      GET_SUMMARY_BY_POST: 'reaction.get_summary_by_post',
       CREATE: 'reaction.create',
+      UPDATE: 'reaction.update',
+      DELETE: 'reaction.delete',
     },
   },
 

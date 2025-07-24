@@ -14,18 +14,18 @@ export class CommentController {
     return this.commentService.create(createCommentDto);
   }
 
-  @MessagePattern('findAllComment')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.COMMENT.GET_BY_POST)
   findAll(@Payload() postId: string) {
     return this.commentService.getCommentsByPostId(postId);
   }
 
-  @MessagePattern('updateComment')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.COMMENT.UPDATE)
   update(@Payload() updateCommentDto: UpdateCommentDto) {
     return this.commentService.update(updateCommentDto);
   }
 
-  @MessagePattern('deleteComment')
-  remove(@Payload() id: string) {
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.COMMENT.DELETE)
+  delete(@Payload() id: string) {
     return this.commentService.delete(id);
   }
 }
