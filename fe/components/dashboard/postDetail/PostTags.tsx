@@ -15,7 +15,7 @@ export function PostTags({ tags }: { tags: Post['tags'] }) {
           >
             #{tag.tag.name}
           </Badge>
-        ))}
+        ))} 
       </div>
     </div>
   );
