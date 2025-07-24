@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ImageIcon, Video } from "lucide-react";
 import { CompactPostViewProps } from "@/types/post";
+import { DEFAULT_USER } from "@/const/user";
 
-export default function CompactPostView({ user, fullName, setIsExpanded }: CompactPostViewProps) {
+export default function CompactPostView({ user = DEFAULT_USER, setIsExpanded }: CompactPostViewProps) {
   const initials = `${user.username[0]}${user.username[1]}`;
 
   return (
@@ -16,14 +17,14 @@ export default function CompactPostView({ user, fullName, setIsExpanded }: Compa
       <CardContent className="p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="ring-2 ring-primary/20">
-            <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} />
+            {/* <AvatarImage src={user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} /> */}
             <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 bg-muted/50 rounded-full px-4 py-3 text-muted-foreground hover:bg-muted/70 transition-colors">
-            What's on your mind, {user.profile.firstName}?
-          </div>
+            {/* What's on your mind, {user.profile.firstName}? */}
+          </div>  
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="sm" className="text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20">
               <ImageIcon className="h-4 w-4 mr-1" />

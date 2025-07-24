@@ -63,7 +63,7 @@ export class UserService {
 
   async findUserByIds(dto: FindUserByIdsDto) {
     const users = await this.authRepository.findUserByIds(dto.ids);
-    return (users ?? []).map((user) => _.omit(user, 'password', 'roles'))
+    return (users ?? []).map((user) => _.omit(user, 'password', 'roles'));
   }
 
   async findListsUser(dto: GetListUserDto) {
