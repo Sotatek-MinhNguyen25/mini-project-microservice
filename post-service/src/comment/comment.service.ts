@@ -8,10 +8,7 @@ import { CONSTANTS } from 'src/common/constants/app.constants';
 import { ConsumerResult } from '../common/type/consumer-result';
 import { Comment } from '@prisma/client';
 import { User } from 'src/common/type/user';
-import {
-  RpcConflictException,
-  RpcNotFoundException,
-} from 'src/common/exception/rpc.exception';
+import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
 import * as _ from 'lodash';
 
 @Injectable()

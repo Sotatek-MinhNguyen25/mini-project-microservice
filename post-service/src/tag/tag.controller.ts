@@ -8,22 +8,22 @@ import { CONSTANTS } from 'src/common/constants/app.constants';
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.GET_TAGS)
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.GET)
   getTags() {
     return this.tagService.getTags();
   }
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.CREATE_TAG)
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.CREATE)
   createTag(@Payload() createTagDto: CreateTagDto) {
     return this.tagService.createTag(createTagDto);
   }
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.UPDATE_TAG)
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.UPDATE)
   updateTag(@Payload() updateTagDto: UpdateTagDto) {
     return this.tagService.updateTag(updateTagDto);
   }
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.DELETE_TAG)
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.TAG.DELETE)
   deleteTag(@Payload() id: string) {
     return this.tagService.deleteTag(id);
   }

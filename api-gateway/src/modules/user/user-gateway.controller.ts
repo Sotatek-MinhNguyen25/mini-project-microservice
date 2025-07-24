@@ -17,7 +17,7 @@ import { Role } from '../../common/roles/role.enum';
 @Controller('users')
 @ApiBearerAuth()
 export class UserGatewayController {
-  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) { }
+  constructor(@Inject(KAFKA_CLIENTS.AUTH) private readonly client: ClientKafka) {}
 
   async onModuleInit() {
     this.client.subscribeToResponseOf(KAFKA_PATTERNS.USER.CREATE);
@@ -34,7 +34,6 @@ export class UserGatewayController {
 
   @Get()
   async getUsers(@Query() dto: GetListUserDto, @AuthUser() user: JwtPayload) {
-    console.log(user);
     console.log(user);
     return await firstValueFrom(this.client.send(KAFKA_PATTERNS.USER.FIND_MANY, instanceToPlain(dto)));
   }

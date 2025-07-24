@@ -25,12 +25,12 @@ export class PostController {
     return await this.postService.findOne(id);
   }
 
-  @MessagePattern('updatePost')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.UPDATE)
   update(@Payload() updatePostDto: UpdatePostDto) {
     return this.postService.update(updatePostDto.id, updatePostDto);
   }
 
-  @MessagePattern('deletePost')
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.DELETE)
   delete(@Payload() id: string) {
     return this.postService.delete(id);
   }
