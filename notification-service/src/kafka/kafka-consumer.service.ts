@@ -38,11 +38,11 @@ export class KafkaConsumerService {
     }
   }
 
-  @EventPattern(KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL)
-  async handlePasswordResetEmail(@Payload() payload: { email: string; resetToken: string }) {
+  @EventPattern(KAFKA_MESSAGE_TYPES.NOTIFICATION_FORGOT_PASSWORD)
+  async handlePasswordResetEmail(@Payload() payload: { email: string; otp: string }) {
     try {
-      this.logger.log(`Processing ${KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL} message for ${payload.email}`);
-      await this.notificationService.sendPasswordResetEmail(payload.email, payload.resetToken);
+      this.logger.log(`Processing ${KAFKA_MESSAGE_TYPES.NOTIFICATION_FORGOT_PASSWORD} message for ${payload.email}`);
+      await this.notificationService.sendPasswordResetEmail(payload.email, payload.otp);
       this.logger.log(`Successfully sent password reset email to ${payload.email}`);
     } catch (error) {
       this.logger.error(`Error processing ${KAFKA_MESSAGE_TYPES.PASSWORD_RESET_EMAIL} message: ${error.message}`);
