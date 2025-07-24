@@ -14,14 +14,12 @@ import {
 } from '@/types/post';
 import axios from 'axios';
 import { useToast } from './useToast';
-import { DEFAULT_USER } from '@/const/user';
+import { useState } from 'react';
 
 interface PostsResponse {
   posts: Post[];
   total?: number;
 }
-
-type PostsResponseData = PostsResponse | Post[];
 
 interface UseGetPostsOptions {
   limit?: number;
@@ -51,7 +49,7 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (postData: PostData) => {
+    mutationFn: async (postData: any) => {
       const { files, ...rest } = postData;
 
       let postImages = rest.postImages || [];
@@ -88,10 +86,9 @@ export function useCreatePost() {
       }
 
       try {
-        const createPostData: CreatePostRequest = {
+        const createPostData: any = {
           title: rest.title,
           content: rest.content,
-          userId: 'e63fd118-3b3b-4ac0-96b3-3502239c756f',
           postImages: postImages.length > 0 ? postImages : undefined,
           tagIds:
             rest.tagIds && rest.tagIds.length > 0 ? rest.tagIds : undefined,
@@ -198,21 +195,42 @@ export function useAddReaction() {
   });
 }
 
-export function useCreateComment() {
+export const useComment = (postId: string) => {
+  const [newComment, setNewComment] = useState('');
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({
-      postId,
-      content,
-      parentId,
-    }: {
-      postId: string;
-      content: string;
-      parentId?: string;
-    }) => postService.createComment(postId, content, parentId),
+  const commentMutation = useMutation({
+    mutationFn: async ({ content }: { content: string }) => {
+      return postService.createComment(postId, content);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setNewComment('');
+      toast({
+        title: 'Success',
+        description: 'Comment added!',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to add comment',
+      });
     },
   });
-}
+
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    commentMutation.mutate({ content: newComment });
+  };
+
+  return {
+    newComment,
+    setNewComment,
+    commentMutation,
+    handleSubmitComment,
+  };
+};

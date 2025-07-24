@@ -1,7 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { get, post, put, deleteReq, upload } from '../lib/axiosClient';
 import { getAuthorizationHeader } from '../utils/auth';
-import React from 'react';
 import { ReactionType } from '@/types/post';
 
 const PostPrefix = '/post';
@@ -47,10 +46,10 @@ const postService = {
     return response;
   },
 
-  createComment: async (postId: string, content: string, parentId?: string) => {
+  createComment: async (postId: string, content: string) => {
     const response: AxiosResponse = await post(
-      `${PostPrefix}/${postId}/comments`,
-      { content, parentId },
+      `/comment`,
+      { postId, content },
       {
         headers: getAuthorizationHeader(),
       },

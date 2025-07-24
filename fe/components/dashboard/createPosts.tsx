@@ -14,6 +14,7 @@ import { Button } from '../ui/button';
 import { useCreatePost } from '@/hooks/usePosts';
 import { CreatePostRequest, PostImage, TagId, Tag } from '@/types/post';
 import { FilePreview } from '@/types';
+import { DEFAULT_USER } from '@/const/user';
 
 interface ExtendedFilePreview extends FilePreview {
   altText?: string;
@@ -26,7 +27,7 @@ export function CreatePost() {
   const [filePreviews, setFilePreviews] = useState<ExtendedFilePreview[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<TagId[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const  user  = DEFAULT_USER;
   const { toast } = useToast();
   const { mutate: createPost, isPending } = useCreatePost();
   const {
@@ -38,17 +39,20 @@ export function CreatePost() {
   const tags: Tag[] = tagsResponse?.data || [];
 
   const handleTagSelect = (tagId: string) => {
-    if (!selectedTagIds.some((tag) => tag.id === tagId)) {
+    if (!selectedTagIds.some((tag) => tag.tagId === tagId)) {
       const tag = tags.find((tag) => tag.id === tagId);
       if (tag) {
-        setSelectedTagIds([...selectedTagIds, tag]);
+        setSelectedTagIds([
+          ...selectedTagIds,
+          { tagId: tag.id, tag: { id: tag.id, name: tag.name } }
+        ]);
       }
     }
   };
 
   const removeTag = (tagIdToRemove: string) => {
     setSelectedTagIds(
-      selectedTagIds.filter((tag) => tag.id !== tagIdToRemove),
+      selectedTagIds.filter((tag) => tag.tagId !== tagIdToRemove),
     );
   };
 
@@ -84,7 +88,7 @@ export function CreatePost() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() || !user?.id) {
+    if (!content.trim() || !user) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in content and ensure you are logged in',
@@ -114,7 +118,6 @@ export function CreatePost() {
     const postData: CreatePostRequest = {
       title: title || 'Untitled Post',
       content,
-      userId: user.id,
       postImages: postImages.length > 0 ? postImages : undefined,
       tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
     };
@@ -149,7 +152,7 @@ export function CreatePost() {
 
   if (!user) return null;
 
-  const fullName = `${user.profile.firstName} ${user.profile.lastName}`;
+  // const fullName = `${user.profile.firstName} ${user.profile.lastName}`;
 
   return isExpanded ? (
     <form
@@ -157,7 +160,7 @@ export function CreatePost() {
       className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
     >
       <PostFormHeader
-        fullName={fullName}
+        // fullName={fullName}
         user={user}
         setIsExpanded={setIsExpanded}
       />
@@ -168,7 +171,7 @@ export function CreatePost() {
         setContent={setContent}
       />
       <PostTagsInput
-        tags={selectedTagIds.map((tag) => tag.id)}
+        tags={selectedTagIds.map((tag) => tag.tagId)}
         availableTags={tags}
         handleTagSelect={handleTagSelect}
         removeTag={removeTag}
@@ -202,7 +205,7 @@ export function CreatePost() {
   ) : (
     <CompactPostView
       user={user}
-      fullName={fullName}
+      // fullName={fullName}
       setIsExpanded={setIsExpanded}
     />
   );

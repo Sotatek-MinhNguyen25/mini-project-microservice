@@ -157,14 +157,11 @@ export class PostService implements OnModuleInit {
     const userIds = [
       ...new Set(
         posts.map((post) => [
-          ...post.userId,
+          post.userId,
           ...post.comments.map((comment) => comment.userId),
         ]),
       ),
     ].flat();
-
-    console.log('debug here');
-    console.log('userIds', userIds);
 
     const users: User[] = (
       await firstValueFrom(

@@ -22,11 +22,8 @@ import { Camera, Loader2 } from "lucide-react"
 
 export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProps) {
   const [formData, setFormData] = useState({
-    firstName: user.profile.firstName,
-    lastName: user.profile.lastName,
     username: user.username,
     email: user.email,
-    bio: user.profile.bio,
   })
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -82,8 +79,7 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
     })
   }
 
-  const fullName = `${formData.firstName} ${formData.lastName}`
-  const initials = `${formData.firstName[0]}${formData.lastName[0]}`
+  const initials = `${formData.username[0]}${formData.username[1]}`
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -102,7 +98,7 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <Avatar className="w-24 h-24 border-4 border-primary/20">
-                <AvatarImage src={avatarPreview || user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} />
+                {/* <AvatarImage src={avatarPreview || user.profile.avatarUrl || "/placeholder.svg"} alt={fullName} /> */}
                 <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-xl">
                   {initials}
                 </AvatarFallback>
@@ -124,7 +120,7 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
           </div>
 
           {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name *</Label>
               <Input
@@ -148,7 +144,7 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
                 className="border-border/40 focus:border-primary/50"
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="username">Username *</Label>
@@ -176,7 +172,7 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
             />
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="bio">Bio</Label>
             <Textarea
               id="bio"
@@ -188,7 +184,7 @@ export function EditProfileModal({ user, isOpen, onClose }: EditProfileModalProp
               className="border-border/40 focus:border-primary/50 resize-none"
             />
             <p className="text-xs text-muted-foreground">{formData.bio.length}/500 characters</p>
-          </div>
+          </div> */}
 
           {/* Account Info Display */}
           <div className="bg-muted/30 rounded-lg p-4 space-y-2">

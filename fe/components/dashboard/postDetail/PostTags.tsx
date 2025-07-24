@@ -9,11 +9,11 @@ export function PostTags({ tags }: { tags: Post['tags'] }) {
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
           <Badge
-            key={tag.id}
+            key={tag.tagId}
             variant="outline"
             className="border-primary/30 text-primary hover:bg-primary/10 transition-colors"
           >
-            #{tag.name}
+            #{tag.tag.name}
           </Badge>
         ))}
       </div>

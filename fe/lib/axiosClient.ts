@@ -71,9 +71,40 @@ axiosClient.interceptors.response.use(
     if (error.response) {
       const { status } = error.response;
 
+      console.log('Response error:', error.response);
       // Handle Unauthorized (401) errors
       if (originalRequest && status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
+
+        try {
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (refreshToken) {
+            // Attempt to refresh token
+            const response = await axios.post(`${baseURL}auth/refresh-token`, {
+              refreshToken,
+            });
+
+            const newAccessToken = response.data.data.accessToken;
+            if (newAccessToken) {
+              // Store new access token
+              localStorage.setItem('accessToken', newAccessToken);
+              
+              // Update original request with new token
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+              
+              // Retry the original request
+              return axiosClient(originalRequest);
+            }
+          }
+        } catch (refreshError) {
+          // Handle refresh token failure
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('profile');
+          window.location.href = '/';
+          console.error('Refresh token failed:', refreshError);
+          return Promise.reject(refreshError);
+        }
       }
 
       // Handle Forbidden (403) errors
@@ -92,8 +123,8 @@ axiosClient.interceptors.response.use(
 
           // Clear tokens and redirect to log in
           localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           localStorage.removeItem('profile');
-
           window.location.href = '/';
         }, 2000);
       }
