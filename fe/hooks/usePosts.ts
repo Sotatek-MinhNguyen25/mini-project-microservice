@@ -155,11 +155,9 @@ export const useNewReaction = () => {
       type: ReactionType;
     }) => {
       const response = await postService.addReaction(postId, type);
-      if (response.status !== 200) {
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error('Failed to update reaction');
       }
-
-      return await response.data.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
