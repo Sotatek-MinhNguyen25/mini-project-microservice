@@ -9,7 +9,7 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-const baseURL = 'http://127.0.0.1:8000/';
+const baseURL = 'http://127.0.0.1:8081/';
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
@@ -88,10 +88,10 @@ axiosClient.interceptors.response.use(
             if (newAccessToken) {
               // Store new access token
               localStorage.setItem('accessToken', newAccessToken);
-              
+
               // Update original request with new token
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-              
+
               // Retry the original request
               return axiosClient(originalRequest);
             }

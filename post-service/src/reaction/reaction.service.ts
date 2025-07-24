@@ -27,6 +27,7 @@ export class ReactionService {
     const reactions = await this.prismaService.reaction.findMany({
       where: {
         postId: postId,
+        deletedAt: null,
       },
     });
     // should we show the name of user who reacted?
@@ -55,6 +56,7 @@ export class ReactionService {
     const count = await this.prismaService.reaction.count({
       where: {
         postId: postId,
+        deletedAt: null,
       },
     });
     const summary = await this.prismaService.reaction.groupBy({
