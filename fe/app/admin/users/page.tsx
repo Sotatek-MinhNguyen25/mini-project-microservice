@@ -8,6 +8,14 @@ import { UserForm } from '@/components/admin/users/user-form';
 import { Modal } from '@/components/admin/ui/modal';
 import { Pagination } from '@/components/admin/ui/pagination';
 import { AUser } from '@/types/admin';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@radix-ui/react-dialog';
+import { DialogFooter, DialogHeader } from '@/components/ui/dialog';
 
 export default function UsersPage() {
   const {
@@ -22,19 +30,22 @@ export default function UsersPage() {
   } = useUsers();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AUser | null>(null);
   const [filters, setFilters] = useState<UserFilters>({
     search: '',
     page: 1,
     limit: 10,
     sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortOrder: 'DESC',
   });
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    ).matches;
     const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
@@ -57,10 +68,11 @@ export default function UsersPage() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      await deleteUser(id);
-    }
+  const handleDeleteUser = async () => {
+    await deleteUser(editingUser?.id!);
+    setIsDeleteDialogOpen(false);
+    setEditingUser(null);
+    toast.success('User deleted successfully!');
   };
 
   const handleSubmit = async (
@@ -74,6 +86,7 @@ export default function UsersPage() {
       }
       setIsModalOpen(false);
       setEditingUser(null);
+      toast.success('User saved successfully!');
     } catch (error) {
       console.error('Error saving user:', error);
     }
@@ -95,7 +108,11 @@ export default function UsersPage() {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-8 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-100`}>
+    <div
+      className={`container mx-auto px-4 py-8 ${
+        theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+      } transition-colors duration-100`}
+    >
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
           User Management
@@ -104,7 +121,9 @@ export default function UsersPage() {
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            aria-label={`Switch to ${
+              theme === 'light' ? 'dark' : 'light'
+            } theme`}
           >
             {theme === 'light' ? (
               <Moon className="w-5 h-5" />
@@ -170,8 +189,8 @@ export default function UsersPage() {
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleFilterChange('sortOrder', e.target.value),
               options: [
-                { value: 'desc', label: 'Descending' },
-                { value: 'asc', label: 'Ascending' },
+                { value: 'DESC', label: 'Descending' },
+                { value: 'ASC', label: 'Ascending' },
               ],
               label: 'Order',
             },
@@ -250,7 +269,7 @@ export default function UsersPage() {
         <UserTable
           users={users}
           onEdit={handleEditUser}
-          onDelete={handleDeleteUser}
+          onDelete={() => setIsDeleteDialogOpen(true)}
           loading={loading}
         />
 
@@ -277,6 +296,34 @@ export default function UsersPage() {
           loading={loading}
         />
       </Modal>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa người dùng</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa người dùng này không? Hành động này
+              không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteUser}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            >
+              Xóa
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
