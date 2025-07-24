@@ -262,8 +262,6 @@ export class PostService implements OnModuleInit {
       )
     ).data;
 
-    console.log('author', author);
-
     const tagDetail = post.tags.map((tag) => {
       return {
         id: tag.tag.id,

@@ -3,7 +3,7 @@ import { RpcException } from '@nestjs/microservices';
 export class RpcNotFoundException extends RpcException {
   constructor(message: string = 'Not Found') {
     super({
-      status: 404,
+      statusCode: 404,
       error: 'Not Found',
       message,
     });
@@ -13,7 +13,7 @@ export class RpcNotFoundException extends RpcException {
 export class RpcConflictException extends RpcException {
   constructor(message: string = 'Conflict') {
     super({
-      status: 409,
+      statusCode: 409,
       error: 'Conflict',
       message,
     });
