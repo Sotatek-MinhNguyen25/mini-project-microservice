@@ -30,6 +30,7 @@ export default function UsersPage() {
   } = useUsers();
 
   const { toast } = useToast();
+  const [deletingUserId, setDeletingUserId] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AUser | null>(null);
@@ -69,8 +70,13 @@ export default function UsersPage() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = async () => {
-    await deleteUser(editingUser?.id!);
+  const handleDeleteUser = (userId: string) => {
+    setDeletingUserId(userId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    await deleteUser(deletingUserId);
     setIsDeleteDialogOpen(false);
     setEditingUser(null);
     toast({
@@ -276,7 +282,7 @@ export default function UsersPage() {
         <UserTable
           users={users}
           onEdit={handleEditUser}
-          onDelete={() => setIsDeleteDialogOpen(true)}
+          onDelete={handleDeleteUser}
           loading={loading}
         />
 
@@ -323,7 +329,7 @@ export default function UsersPage() {
             </button>
             <button
               type="button"
-              onClick={handleDeleteUser}
+              onClick={handleDelete}
               className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
             >
               Xóa
