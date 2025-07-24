@@ -38,17 +38,17 @@ export function CreatePost() {
   const tags: Tag[] = tagsResponse?.data || [];
 
   const handleTagSelect = (tagId: string) => {
-    if (!selectedTagIds.some((tag) => tag.tag.id === tagId)) {
+    if (!selectedTagIds.some((tag) => tag.id === tagId)) {
       const tag = tags.find((tag) => tag.id === tagId);
       if (tag) {
-        setSelectedTagIds([...selectedTagIds, { tag }]);
+        setSelectedTagIds([...selectedTagIds, tag]);
       }
     }
   };
 
   const removeTag = (tagIdToRemove: string) => {
     setSelectedTagIds(
-      selectedTagIds.filter((tag) => tag.tag.id !== tagIdToRemove),
+      selectedTagIds.filter((tag) => tag.id !== tagIdToRemove),
     );
   };
 
@@ -168,7 +168,7 @@ export function CreatePost() {
         setContent={setContent}
       />
       <PostTagsInput
-        tags={selectedTagIds.map((tag) => tag.tag.id)}
+        tags={selectedTagIds.map((tag) => tag.id)}
         availableTags={tags}
         handleTagSelect={handleTagSelect}
         removeTag={removeTag}

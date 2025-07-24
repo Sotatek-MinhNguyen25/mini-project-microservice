@@ -36,16 +36,15 @@ const postService = {
     return response.data;
   },
 
-  addReaction: async (userId: string, postId: string, type: ReactionType) => {
-    console.log('type in here:', type);
+  addReaction: async (postId: string, type: ReactionType) => {
     const response: AxiosResponse = await post(
       `${PostPrefix}/reaction`,
-      { userId, postId, type },
+      { postId, type },
       {
         headers: getAuthorizationHeader(),
       },
     );
-    return response.data;
+    return response;
   },
 
   createComment: async (postId: string, content: string, parentId?: string) => {

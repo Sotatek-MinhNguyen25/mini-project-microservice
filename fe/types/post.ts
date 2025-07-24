@@ -105,19 +105,9 @@ export interface CreatePostResponse {
 }
 
 export interface TagId {
-  tag: {
-    id: string;
-    name: string;
-  };
+  id: string;
+  name: string;
 }
-
-// export interface Category {
-//   id: string
-//   name: string
-//   createdAt: Date
-//   updatedAt: Date
-//   deletedAt: Date | null
-// }
 
 export interface Reaction {
   summary: {

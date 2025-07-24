@@ -9,7 +9,7 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-const baseURL = 'http://127.0.0.1:8081/';
+const baseURL = 'http://127.0.0.1:8000/';
 
 const defaultHeaders = {
   'Content-Type': 'application/json',

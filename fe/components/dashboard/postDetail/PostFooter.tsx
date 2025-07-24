@@ -41,8 +41,23 @@ export function PostFooter({ post }: { post: Post }) {
     [ReactionType.ANGRY]: '😣',
   };
 
-  const userReaction = post.reaction.summary.find((r) => {
-    return r.type === ReactionType.LIKE
+  const userReaction = post.reaction.summary.find((r:any) => {
+    switch (r.type) {
+      case ReactionType.LIKE:
+        return r.userId === user.id;
+      case ReactionType.LOVE:
+        return r.userId === user.id;
+      case ReactionType.HAHA:
+        return r.userId === user.id;
+      case ReactionType.WOW:
+        return r.userId === user.id;
+      case ReactionType.SAD:
+        return r.userId === user.id;
+      case ReactionType.ANGRY:
+        return r.userId === user.id;
+      default:
+        return false;
+    }
   });
 
   return (
@@ -55,7 +70,7 @@ export function PostFooter({ post }: { post: Post }) {
             onMouseLeave={handleReactionLeave}
             className="relative"
           >
-            {/* <Button
+            <Button
               variant={userReaction ? 'default' : 'ghost'}
               size="sm"
               disabled={reactionMutation.isPending}
@@ -69,7 +84,7 @@ export function PostFooter({ post }: { post: Post }) {
                 className={`h-4 w-4 mr-2 transition-all ${userReaction ? 'fill-current scale-110' : ''}`}
               />
               {post.reaction.count}
-            </Button> */}
+            </Button>
 
             {showReactions && (
               <div
