@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, JWT_CONSTANTS.STRATE
     });
   }
 
-  async validate(payload: IUser): Promise<IUser> {
+  validate(payload: IUser): IUser {
     if (!payload.userId || !payload.email) {
       throw new UnauthorizedException('Invalid token payload');
     }

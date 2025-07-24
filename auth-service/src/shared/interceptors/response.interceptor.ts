@@ -80,9 +80,14 @@ export class KafkaResponseInterceptor<T>
       RESPONSE_METADATA_KEY,
       context.getHandler(),
     );
-    console.log('responseOptions:', responseOptions);
-    return next
-      .handle()
-      .pipe(map((data) => formatResponse<T>(data, responseOptions)));
+    console.log('[AUTH-SERVICE] responseOptions:', responseOptions);
+    return next.handle().pipe(
+      map((data) => {
+        console.log('[AUTH-SERVICE] Raw handler data:', data);
+        const formatted = formatResponse<T>(data, responseOptions);
+        console.log('[AUTH-SERVICE] Formatted responseg', formatted);
+        return formatted;
+      }),
+    );
   }
 }
