@@ -55,33 +55,41 @@ export function useLogin() {
           const decodedUser: DecodedToken = jwtDecode(accessToken);
           console.log('Decoded user:', decodedUser.roles[0]);
 
-          const userProfile = await authService.me();
-
-          if (!userProfile || !userProfile.roles || userProfile.roles.length === 0) {
-            throw new Error('User profile is incomplete or roles are missing');
-          }
-
-          localStorage.setItem('userProfile', JSON.stringify(userProfile));
-          const role = decodedUser.roles?.[0]?.trim().toUpperCase();
+          const role = decodedUser.roles?.[0]?.trim();
+          console.log('User role:', role);
           localStorage.setItem('userRole', role);
 
-          // navigate to the appropriate dashboard based on user role
+          // // navigate to the appropriate dashboard based on user role
           if (role === 'ADMIN') {
             console.log('User is an admin, redirecting to admin dashboard');
             router.push('/admin');
           } else if (role === 'USER') {
+            const userProfile = await authService.me();
+
+            if (
+              !userProfile ||
+              !userProfile.roles ||
+              userProfile.roles.length === 0
+            ) {
+              throw new Error(
+                'User profile is incomplete or roles are missing',
+              );
+            }
+
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
             router.push('/');
           }
         } catch (error) {
           console.error('Failed to decode JWT:', error);
           toast({
             title: 'Warning',
-            description: 'Unable to decode access token. Proceeding with login.',
+            description:
+              'Unable to decode access token. Proceeding with login.',
             variant: 'default',
           });
         }
 
-        router.push('/');
+        // router.push('/');
       } else {
         throw new Error(response.message || 'Login failed');
       }
@@ -89,7 +97,8 @@ export function useLogin() {
     onError: (error) => {
       toast({
         title: 'Error',
-        description: error.message || 'An error occurred. Please try again later.',
+        description:
+          error.message || 'An error occurred. Please try again later.',
         variant: 'destructive',
       });
     },

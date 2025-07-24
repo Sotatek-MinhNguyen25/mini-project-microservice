@@ -20,20 +20,19 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         }
 
         const decodedUser: DecodedToken = jwtDecode(token);
-        const role = decodedUser.roles?.[0]?.trim().toUpperCase();
+        console.log('Decoded user:', decodedUser);
+        const role = decodedUser.roles?.[0]?.trim();
 
         if (role === 'ADMIN') {
           router.push('/admin');
         } else if (role === 'USER') {
           router.push('/');
-        } else {
-          router.push('/auth/login');
-        }
+        } 
 
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Auth check failed:', error);
-        router.push('/auth/login');
+        // router.push('/auth/login');
       } finally {
         setIsLoading(false);
       }

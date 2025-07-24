@@ -11,12 +11,10 @@ import { User } from "@/types/auth"
 
 export function ProfilePage() {
   // const { user, isLoading } = useAuth()
-  const user :User =   {
+  const user :any =   {
     id: "user-1",
     email: "john.doe@example.com",
     username: "johndoe",
-    roles: "USER",
-    status: "ACTIVE",
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -26,7 +24,6 @@ export function ProfilePage() {
       id: "profile-1",
       firstName: "John",
       lastName: "Doe",
-      bio: "A software developer based in California.",
       avatarUrl: "https://example.com/avatar1.jpg",
       createdAt: new Date(),
       updatedAt: new Date(),
