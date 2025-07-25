@@ -8,5 +8,8 @@ export class CreateCommentDto {
   userId: string;
 
   @IsUUID()
-  postId: string;
+  postId?: string;
+
+  @IsUUID()
+  commentId?: string;
 }

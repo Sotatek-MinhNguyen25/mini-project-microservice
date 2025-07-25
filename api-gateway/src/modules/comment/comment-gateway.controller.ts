@@ -1,11 +1,12 @@
-import { Body, Controller, Inject, OnModuleInit, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, OnModuleInit, Param, Post, Query } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
-import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { AuthUser } from 'src/common/decorator/auth-user.decorator';
 import { JwtPayload } from 'src/common/type/jwt-payload.type';
+import { ChildCommentQueryDto } from './dto/comment.dto';
 
 @Controller('comment')
 export class CommentGatewayController implements OnModuleInit {
@@ -24,6 +25,22 @@ export class CommentGatewayController implements OnModuleInit {
       this.postClient.send(KAFKA_PATTERNS.POST.COMMENT.CREATE, {
         ...createCommentDto,
         userId: user.sub,
+      }),
+    );
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getChild(@AuthUser() user: JwtPayload, @Param('id') parentId: string, @Query() queryDto: ChildCommentQueryDto) {
+    return await firstValueFrom(
+      this.postClient.send(KAFKA_PATTERNS.POST.COMMENT.GET_CHILD, {
+        parentId: parentId,
+        paginateParams: {
+          page: queryDto.page,
+          limit: queryDto.limit,
+        },
       }),
     );
   }

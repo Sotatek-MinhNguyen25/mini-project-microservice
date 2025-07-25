@@ -28,13 +28,15 @@ export default function UsersPage() {
     page: 1,
     limit: 10,
     sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortOrder: 'DESC',
   });
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    ).matches;
     const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
@@ -95,7 +97,11 @@ export default function UsersPage() {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-8 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-100`}>
+    <div
+      className={`container mx-auto px-4 py-8 ${
+        theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+      } transition-colors duration-100`}
+    >
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
           User Management
@@ -104,7 +110,9 @@ export default function UsersPage() {
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-300"
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            aria-label={`Switch to ${
+              theme === 'light' ? 'dark' : 'light'
+            } theme`}
           >
             {theme === 'light' ? (
               <Moon className="w-5 h-5" />

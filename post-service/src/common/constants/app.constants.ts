@@ -12,6 +12,7 @@ export const CONSTANTS = {
       GET_BY_POST: 'comment.get_by_post',
       UPDATE: 'comment.update',
       DELETE: 'comment.delete',
+      GET_CHILD: 'comment.get-child',
     },
     REACTION: {
       GET_BY_POST: 'reaction.get_by_post',

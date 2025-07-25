@@ -18,7 +18,7 @@ export class TagService {
         deletedAt: null,
       },
     });
-    return { data: tags, meta: {} };
+    return { data: tags };
   }
 
   async createTag(createTagDto: CreateTagDto): Promise<ConsumerResult<Tag>> {
@@ -33,7 +33,7 @@ export class TagService {
     const createdTag = await this.prismaService.tag.create({
       data: createTagDto,
     });
-    return { data: createdTag, meta: {} };
+    return { data: createdTag };
   }
 
   async updateTag(updateTagDto: UpdateTagDto): Promise<ConsumerResult<Tag>> {
@@ -51,7 +51,7 @@ export class TagService {
       },
       data: updateTagDto,
     });
-    return { data: updatedTag, meta: {} };
+    return { data: updatedTag };
   }
 
   async deleteTag(id: string): Promise<ConsumerResult<Tag>> {
@@ -73,7 +73,7 @@ export class TagService {
       },
     });
 
-    return { data: deletedTag, meta: {} };
+    return { data: deletedTag };
   }
 
   async getTagsByPostId(postId: string): Promise<ConsumerResult<Tag[]>> {
@@ -90,7 +90,7 @@ export class TagService {
         deletedAt: null,
       },
     });
-    return { data: tags, meta: {} };
+    return { data: tags };
   }
 
   async createPostTag(
@@ -126,7 +126,7 @@ export class TagService {
       data: PostTagDto,
     });
 
-    return { data: createdPostTag, meta: {} };
+    return { data: createdPostTag };
   }
 
   async deletePostTag(
@@ -170,6 +170,6 @@ export class TagService {
       },
     });
 
-    return { data: deletedPostTag, meta: {} };
+    return { data: deletedPostTag };
   }
 }

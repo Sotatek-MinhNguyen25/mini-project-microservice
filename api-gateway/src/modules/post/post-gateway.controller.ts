@@ -24,6 +24,9 @@ export class PostGatewayController implements OnModuleInit {
     // Reaction
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.REACTION.CREATE);
 
+    // Comment
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.COMMENT.GET_CHILD);
+
     await this.postClient.connect();
   }
 

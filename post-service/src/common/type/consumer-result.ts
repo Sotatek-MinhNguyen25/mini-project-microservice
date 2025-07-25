@@ -1,4 +1,9 @@
 export type ConsumerResult<T> = {
   data: T;
-  meta?: any;
+  meta?: {
+    currentPage: number;
+    totalPage: number;
+    totalItem: number;
+    limit: number;
+  };
 };

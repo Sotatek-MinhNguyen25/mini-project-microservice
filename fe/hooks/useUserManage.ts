@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import adminService from "@/service/admin.service";
-import { AUser } from "@/types/admin";
-import { useState, useEffect } from "react";
+import adminService from '@/service/admin.service';
+import { AUser } from '@/types/admin';
+import { useState, useEffect } from 'react';
 
 export type UserFilters = {
   search?: string;
@@ -23,8 +23,8 @@ export function useUsers(initialFilters?: UserFilters) {
   const [filters, setFilters] = useState<UserFilters>({
     page: 1,
     limit: 10,
-    sortBy: "createdAt",
-    sortOrder: "desc",
+    sortBy: 'createdAt',
+    sortOrder: 'DESC',
     ...initialFilters,
   });
 
@@ -46,7 +46,7 @@ export function useUsers(initialFilters?: UserFilters) {
 
     try {
       const response = await adminService.getUsers(appliedFilters);
-      console.log("Fetched users:", response);
+      console.log('Fetched users:', response);
       if (response.statusCode === 200) {
         setUsers(response.data);
         setPagination({
@@ -57,22 +57,24 @@ export function useUsers(initialFilters?: UserFilters) {
         });
         setFilters(appliedFilters);
       } else {
-        throw new Error("Failed to fetch users");
+        throw new Error('Failed to fetch users');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const createUser = async (userData: Omit<AUser, "id" | "createdAt" | "updatedAt">) => {
+  const createUser = async (
+    userData: Omit<AUser, 'id' | 'createdAt' | 'updatedAt'>,
+  ) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
 
@@ -82,10 +84,10 @@ export function useUsers(initialFilters?: UserFilters) {
         await fetchUsers();
         return result.data;
       } else {
-        throw new Error(result.message || "Failed to create user");
+        throw new Error(result.message || 'Failed to create user');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     } finally {
       setLoading(false);
@@ -97,8 +99,8 @@ export function useUsers(initialFilters?: UserFilters) {
     setError(null);
     try {
       const response = await fetch(`/api/users/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
 
@@ -108,10 +110,10 @@ export function useUsers(initialFilters?: UserFilters) {
         await fetchUsers();
         return result.data;
       } else {
-        throw new Error(result.message || "Failed to update user");
+        throw new Error(result.message || 'Failed to update user');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     } finally {
       setLoading(false);
@@ -123,16 +125,16 @@ export function useUsers(initialFilters?: UserFilters) {
     setError(null);
     try {
       const response = await fetch(`/api/users/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (response.ok) {
         await fetchUsers();
       } else {
-        throw new Error("Failed to delete user");
+        throw new Error('Failed to delete user');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
     } finally {
       setLoading(false);

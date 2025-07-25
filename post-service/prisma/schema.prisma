@@ -34,32 +34,38 @@ model Tag {
 model PostTag {
   postId    String
   tagId     String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime  @updatedAt @default(now())
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   @@id([postId, tagId])
 }
 
 model Comment {
-  id        String    @id @default(uuid())
-  content   String    @db.Text
-  postId    String
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId    String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id           String     @id @default(uuid())
+  content      String     @db.Text
+  postId       String?
+  parentId     String?
+  parent       Comment?   @relation("ParentComment", fields: [parentId], references: [id])
+  childComment Comment[]  @relation("ParentComment")
+  post         Post?      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId       String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+  Reaction     Reaction[]
 }
 
 model Reaction {
   id        String       @id @default(uuid())
   userId    String
   postId    String?
-  type      ReactionType
   post      Post?        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  type      ReactionType
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
   deletedAt DateTime?

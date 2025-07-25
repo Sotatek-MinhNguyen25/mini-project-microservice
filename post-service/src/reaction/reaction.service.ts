@@ -47,7 +47,7 @@ export class ReactionService {
         user: _.pick(userReaction, ['id', 'email', 'username']),
       };
     });
-    return { data: result, meta: {} };
+    return { data: result };
   }
 
   async getReactionsSummaryByPostId(
@@ -72,7 +72,7 @@ export class ReactionService {
       type: item.type,
       count: item._count._all,
     }));
-    return { data: { count: count, summary: formattedSummary }, meta: {} };
+    return { data: { count: count, summary: formattedSummary } };
   }
 
   async createReaction(
@@ -142,7 +142,7 @@ export class ReactionService {
       },
       data: updateReactionDto,
     });
-    return { data: updatedReaction, meta: {} };
+    return { data: updatedReaction };
   }
 
   async deleteReaction(id: string): Promise<ConsumerResult<Reaction>> {
@@ -164,6 +164,6 @@ export class ReactionService {
         deletedAt: new Date(),
       },
     });
-    return { data: deletedReaction, meta: {} };
+    return { data: deletedReaction };
   }
 }

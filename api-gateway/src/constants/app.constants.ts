@@ -48,6 +48,7 @@ export const KAFKA_PATTERNS = {
       GET_BY_POST: 'comment.get_by_post',
       UPDATE: 'comment.update',
       DELETE: 'comment.delete',
+      GET_CHILD: 'comment.get-child',
     },
     TAG: {
       CREATE: 'tag.create',
