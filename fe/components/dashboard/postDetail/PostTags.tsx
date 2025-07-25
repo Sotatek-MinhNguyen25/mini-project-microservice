@@ -7,13 +7,13 @@ export function PostTags({ tags }: { tags: Post['tags'] }) {
   return (
     <div>
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
+        {tags.map((tag:any) => (
           <Badge
-            key={tag.tagId}
+            key={tag.id}
             variant="outline"
             className="border-primary/30 text-primary hover:bg-primary/10 transition-colors"
           >
-            #{tag.tag.name}
+            #{tag.name}
           </Badge>
         ))} 
       </div>

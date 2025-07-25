@@ -28,7 +28,7 @@ const postService = {
     return response.data;
   },
 
-  getTags : async () => {
+  getTags: async () => {
     const response: AxiosResponse = await get(`/tag`, {
       headers: getAuthorizationHeader(),
     });
@@ -53,14 +53,14 @@ const postService = {
     return response;
   },
 
-  createComment: async (postId: string, content: string) => {
-    const response: AxiosResponse = await post(
-      `/comment`,
-      { postId, content },
-      {
-        headers: getAuthorizationHeader(),
-      },
-    );
+  createComment: async (postId: string, content: string, commentId: string) => {
+    const payload =
+      commentId !== '' ? { content, commentId } : { postId, content };
+
+    const response: AxiosResponse = await post(`/comment`, payload, {
+      headers: getAuthorizationHeader(),
+    });
+
     return response.data;
   },
 
@@ -134,7 +134,7 @@ const postService = {
           'Content-Type': 'multipart/form-data',
           ...getAuthorizationHeader(),
         },
-      }
+      },
     );
 
     return response.data;
@@ -150,6 +150,21 @@ const postService = {
       params: { page, limit },
     });
     return response;
+  },
+
+  getSubComments: async (
+    parentCommentId: string,
+    page: number = 1,
+    limit: number = 10,
+    enabled: boolean = true,
+  ) => { 
+    const response: AxiosResponse = await get(
+      `/comment/${parentCommentId}?page=${page}&limit=${limit}`,
+      {
+        headers: getAuthorizationHeader(),
+      },
+    );
+    return response.data;
   },
 };
 
