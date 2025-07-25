@@ -135,6 +135,7 @@ export interface Comment {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  childComment: number;
   user: {
     id: string;
     username: string;
@@ -211,4 +212,36 @@ export interface GetTagsResponse {
   data: Tag[];
   meta: Record<string, any>;
   timestamp: string;
+}
+
+export interface SubComment {
+  id: string;
+  content: string;
+  parentId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  user: {
+    id: string;
+    username: string;
+    email: string;
+  };
+}
+
+export interface UseSubCommentsParams {
+  parentCommentId: string;
+  page: number;
+  limit: number;
+  enabled?: boolean;
+}
+
+export interface SubCommentsResponse {
+  comments: SubComment[];
+  total: number;
+  hasMore: boolean;
+  nextPage?: number;
+}
+export interface ReplyCommentData {
+  content: string;
+  parentCommentId: string;
 }

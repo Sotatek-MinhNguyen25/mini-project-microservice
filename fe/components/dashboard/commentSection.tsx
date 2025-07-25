@@ -10,6 +10,7 @@ import { DEFAULT_USER } from '@/const/user';
 import { useComment } from '@/hooks/usePosts';
 import type { CommentSectionProps } from '@/types/post';
 import { useTheme } from 'next-themes';
+import { CommentItem } from './CommentItem';
 
 export function CommentSection({ comments, postId }: CommentSectionProps) {
   const { newComment, setNewComment, commentMutation, handleSubmitComment } =
@@ -53,36 +54,9 @@ export function CommentSection({ comments, postId }: CommentSectionProps) {
 
       {/* Comments list */}
       <div className="space-y-4">
-        {comments.map((comment) => {
-          const commentInitials = `${comment.user.username[0]}${comment.user.username[1]}`;
-
-          return (
-            <div key={comment.id} className="space-y-2">
-              <div className="flex space-x-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>{commentInitials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div
-                    className={`${
-                      theme === 'light' ? 'bg-gray-50' : 'bg-gray-800'
-                    } rounded-lg p-3`}
-                  >
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium text-sm">
-                        {comment.user.username}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(comment.createdAt)} ago
-                      </span>
-                    </div>
-                    <p className="text-sm">{comment.content}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {comments.map((comment) => (
+          <CommentItem key={comment.id} comment={comment} />
+        ))}
       </div>
     </div>
   );

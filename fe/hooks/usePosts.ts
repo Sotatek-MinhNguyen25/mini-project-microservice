@@ -5,9 +5,17 @@ import {
   useInfiniteQuery,
 } from '@tanstack/react-query';
 import postService from '@/service/post.service';
-import { GetTagsResponse, Post, ReactionType } from '@/types/post';
+import {
+  GetTagsResponse,
+  Post,
+  ReactionType,
+  ReplyCommentData,
+  SubCommentsResponse,
+  UseSubCommentsParams,
+} from '@/types/post';
 import { useToast } from './useToast';
 import { useState } from 'react';
+import { post } from '@/lib/axiosClient';
 
 interface UseGetPostsOptions {
   limit?: number;
@@ -172,6 +180,87 @@ export function useAddReaction() {
   });
 }
 
+
+export function useSubComments({
+  parentCommentId,
+  limit = 5,
+  enabled = true,
+}: UseSubCommentsParams) {
+  return useInfiniteQuery({
+    queryKey: ['subComments', parentCommentId],
+    queryFn: async ({ pageParam = 1 }) => {
+      try {
+        const response = await postService.getSubComments(
+          parentCommentId,
+          pageParam,
+          limit,
+        );
+        // Validate response structure
+        if (!response?.data) {
+          throw new Error('Invalid response structure');
+        }
+        return {
+          subComments: Array.isArray(response.data.subComments)
+            ? response.data.subComments
+            : [],
+          page: pageParam,
+          totalCount: Number(response.data.totalCount) || 0,
+        };
+      } catch (err) {
+        // Wrap errors to ensure consistent error handling
+        throw new Error(
+          err instanceof Error ? err.message : 'Failed to fetch subcomments',
+        );
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      if (
+        !lastPage.subComments?.length ||
+        lastPage.subComments.length < limit
+      ) {
+        return undefined;
+      }
+      return lastPage.page + 1;
+    },
+    initialPageParam: 1,
+    enabled,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Garbage collect after 10 minutes
+    retry: 2, // Retry failed requests twice
+  });
+}
+
+export function useReplyComment(commentId: string, content: string) {
+  const queryClient = useQueryClient();
+
+  const replyMutation = useMutation({
+    mutationFn: async (content: string) => {
+      const response = await postService.createComment('', content, commentId);
+
+      if (!response.ok) {
+        throw new Error('Failed to submit reply');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate sub-comments query để refresh danh sách
+      queryClient.invalidateQueries({
+        queryKey: ['subComments', commentId],
+      });
+    },
+  });
+
+  const handleSubmitReply = async (content: string) => {
+    return replyMutation.mutateAsync(content);
+  };
+
+  return {
+    replyMutation,
+    handleSubmitReply,
+  };
+}
+
 export const useComment = (postId: string) => {
   const [newComment, setNewComment] = useState('');
   const { toast } = useToast();
@@ -179,7 +268,7 @@ export const useComment = (postId: string) => {
 
   const commentMutation = useMutation({
     mutationFn: async ({ content }: { content: string }) => {
-      return postService.createComment(postId, content);
+      return postService.createComment(postId, content, '');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
