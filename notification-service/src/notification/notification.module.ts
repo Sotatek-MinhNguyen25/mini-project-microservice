@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { KafkaConsumerService } from './notification.controller';
+
 import { ConfigModule } from '@nestjs/config';
 import mailConfig from '../config/mail.config';
 import kafkaConfig from '../config/kafka.config';
 import { KafkaModule } from '../kafka/kafka.module';
 import * as path from 'path';
 import * as Joi from 'joi';
+import { NotificationController } from './notification.controller';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import * as Joi from 'joi';
     KafkaModule.register(['notification']),
   ],
   providers: [NotificationService],
-  controllers: [KafkaConsumerService],
+  controllers: [NotificationController],
   exports: [NotificationService],
 })
-export class NotificationModule { }
+export class NotificationModule {}

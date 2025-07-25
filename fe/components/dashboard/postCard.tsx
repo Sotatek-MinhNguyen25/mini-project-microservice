@@ -2,7 +2,6 @@
 
 import { Card } from '@/components/ui/card';
 import { Post } from '@/types/post';
-import { PostTags } from './postDetail/PostTags';
 import { PostHeader } from './postDetail/PostHeader';
 import { PostContent } from './postDetail/PostContent';
 import { PostFooter } from './postDetail/PostFooter';

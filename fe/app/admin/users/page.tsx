@@ -8,6 +8,14 @@ import { UserForm } from '@/components/admin/users/user-form';
 import { Modal } from '@/components/admin/ui/modal';
 import { Pagination } from '@/components/admin/ui/pagination';
 import { AUser } from '@/types/admin';
+import { useToast } from '@/components/admin/ui/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/admin/ui/dialog';
+import { DialogFooter, DialogHeader } from '@/components/ui/dialog';
 
 export default function UsersPage() {
   const {
@@ -21,7 +29,10 @@ export default function UsersPage() {
     deleteUser,
   } = useUsers();
 
+  const { toast } = useToast();
+  const [deletingUserId, setDeletingUserId] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AUser | null>(null);
   const [filters, setFilters] = useState<UserFilters>({
     search: '',
@@ -59,10 +70,19 @@ export default function UsersPage() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      await deleteUser(id);
-    }
+  const handleDeleteUser = (userId: string) => {
+    setDeletingUserId(userId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    await deleteUser(deletingUserId);
+    setIsDeleteDialogOpen(false);
+    setEditingUser(null);
+    toast({
+      title: 'User deleted',
+      description: 'The user has been deleted successfully.',
+    });
   };
 
   const handleSubmit = async (
@@ -76,6 +96,10 @@ export default function UsersPage() {
       }
       setIsModalOpen(false);
       setEditingUser(null);
+      toast({
+        title: 'User saved',
+        description: 'The user has been saved successfully.',
+      });
     } catch (error) {
       console.error('Error saving user:', error);
     }
@@ -178,8 +202,8 @@ export default function UsersPage() {
               onChange: (e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleFilterChange('sortOrder', e.target.value),
               options: [
-                { value: 'desc', label: 'Descending' },
-                { value: 'asc', label: 'Ascending' },
+                { value: 'DESC', label: 'Descending' },
+                { value: 'ASC', label: 'Ascending' },
               ],
               label: 'Order',
             },
@@ -285,6 +309,34 @@ export default function UsersPage() {
           loading={loading}
         />
       </Modal>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa người dùng</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa người dùng này không? Hành động này
+              không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Hủy
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            >
+              Xóa
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

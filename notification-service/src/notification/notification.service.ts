@@ -61,11 +61,11 @@ export class NotificationService {
     await this.sendEmail(to, subject, { html });
   }
 
-  async sendPasswordResetEmail(to: string, resetToken: string): Promise<void> {
+  async sendPasswordResetEmail(to: string, otp: string): Promise<void> {
     const subject = 'Password Reset Request';
     const html = this.loadTemplate('password-reset', {
-      resetUrl: `${this.configService.get<string>('app.frontendUrl')}/reset-password?token=${resetToken}`,
-      resetToken,
+      resetUrl: `${this.configService.get<string>('app.frontendUrl')}/reset-password?otp=${otp}`,
+      otp,
     });
     await this.sendEmail(to, subject, { html });
   }

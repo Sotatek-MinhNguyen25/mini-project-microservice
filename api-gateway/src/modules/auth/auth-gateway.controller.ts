@@ -5,9 +5,12 @@ import { RegisterDto } from './dto/register.dto';
 import { CompleteRegisterDto } from './dto/complete-register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { Public } from '../../common/jwt';
+import { Public, Protected } from '../../common/jwt';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
+import { AuthUser } from '../../common/decorator/auth-user.decorator';
+import { JwtPayload } from '../../common/type/jwt-payload.type';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Public()
 @Controller('auth')
@@ -112,20 +115,11 @@ export class AuthGatewayController implements OnModuleInit {
     return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.UPDATE_PASSWORD, { ...body }));
   }
 
+  @ApiBearerAuth()
+  @Protected()
   @Post('logout')
-  @ApiOperation({ summary: 'Logout from the current session' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        accessToken: {
-          type: 'string',
-          example: 'your-access-token',
-        },
-      },
-    },
-  })
-  async logout(@Body() body: { accessToken: string }) {
-    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGOUT, { ...body }));
+  @ApiOperation({ summary: 'Logout from all sessions' })
+  async logout(@AuthUser() user: JwtPayload) {
+    return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGOUT, { userId: user.sub }));
   }
 }

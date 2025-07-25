@@ -48,12 +48,12 @@ export function useUsers(initialFilters?: UserFilters) {
       const response = await adminService.getUsers(appliedFilters);
       console.log('Fetched users:', response);
       if (response.statusCode === 200) {
-        setUsers(response.data);
+        setUsers(response.data.data);
         setPagination({
-          page: response.meta.currentPage,
-          limit: response.meta.pageSize,
-          total: response.meta.totalItems,
-          totalPages: response.meta.totalPages,
+          page: response.data.meta.currentPage,
+          limit: response.data.meta.pageSize,
+          total: response.data.meta.totalItems,
+          totalPages: response.data.meta.totalPages,
         });
         setFilters(appliedFilters);
       } else {
@@ -72,15 +72,11 @@ export function useUsers(initialFilters?: UserFilters) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
+      const response = await adminService.createUser(userData);
+      console.log(response);
+      const result: any = await response.data.data;
 
-      const result: any = await response.json();
-
-      if (response.ok) {
+      if (response.status === 201) {
         await fetchUsers();
         return result.data;
       } else {
@@ -98,15 +94,13 @@ export function useUsers(initialFilters?: UserFilters) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/users/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
+      const { password, ...rest } = userData;
+      const response = await adminService.updateUser(id, rest);
+      // const response = await adminService.updateUser(id, userData);
 
-      const result: any = await response.json();
+      const result: any = await response.data.data;
 
-      if (response.ok) {
+      if (response.status === 200) {
         await fetchUsers();
         return result.data;
       } else {
@@ -124,11 +118,9 @@ export function useUsers(initialFilters?: UserFilters) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/users/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
+      const response = await adminService.deleteUser(id);
+      console.log(response);
+      if (response.status === 200) {
         await fetchUsers();
       } else {
         throw new Error('Failed to delete user');

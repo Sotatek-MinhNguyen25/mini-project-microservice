@@ -29,3 +29,33 @@ export interface GetUsersResponse {
   meta: PaginationMeta;
   timestamp: string;
 }
+
+export interface UpdateUserResponse {
+  status: string; // "success"
+  statusCode: number; // 200
+  message: string;
+  code: number; // 200
+  data: AUser;
+  meta: any;
+  timestamp: string;
+}
+
+export interface CreateUserResponse {
+  status: string; // "success"
+  statusCode: number; // 200
+  message: string;
+  code: number; // 200
+  data: AUser;
+  meta: any;
+  timestamp: string;
+}
+
+export interface DeleteUserResponse {
+  status: string; // "success"
+  statusCode: number; // 200
+  message: string;
+  code: number; // 200
+  data: AUser;
+  meta: any;
+  timestamp: string;
+}

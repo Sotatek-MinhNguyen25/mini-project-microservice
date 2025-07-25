@@ -45,8 +45,8 @@ export class AuthKafkaController {
 
   @MessagePattern(KAFKA_PATTERNS.LOGOUT)
   @ApiResponseOk(RESPONSE_MESSAGE.LOGOUT_SUCCESS)
-  async logout(@Payload() data: { accessToken: string }) {
-    return this.authService.logout(data.accessToken);
+  async logout(@Payload() data: { userId: string }) {
+    return this.authService.logoutAllByUserId(data.userId);
   }
 
   /**

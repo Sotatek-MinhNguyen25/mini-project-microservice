@@ -303,7 +303,7 @@ export function CreatePost() {
 
       <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button
-          type="default"
+          type="primary"
           onClick={() => {
             form.resetFields();
             setIsExpanded(false);
