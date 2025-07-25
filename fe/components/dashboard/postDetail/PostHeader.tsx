@@ -16,7 +16,9 @@ export function PostHeader({ post }: { post: Post }) {
   const displayUser: PUser = user ? user : DEFAULT_USER;
   displayUser.initials =
     displayUser.initials ||
-    `${displayUser.username[0]}${displayUser.username[1]}`.toUpperCase();
+    (displayUser.username?.length >= 2
+      ? `${displayUser.username[0]}${displayUser.username[1]}`.toUpperCase()
+      : displayUser.username?.[0]?.toUpperCase() || 'NA'); // fallback
 
   return (
     <div className="pb-3 px-6 py-4">

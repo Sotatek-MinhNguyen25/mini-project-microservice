@@ -17,15 +17,25 @@ interface CommentItemProps {
   comment: Comment;
 }
 
+function getInitials(username?: string): string {
+  if (!username) return 'NA';
+  const trimmed = username.trim();
+  return trimmed.slice(0, 2).toUpperCase().padEnd(2, 'A');
+}
+
 export function CommentItem({ comment }: CommentItemProps) {
   const { theme } = useTheme();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  const commentInitials = `${comment.user.username[0]}${comment.user.username[1]}`;
-  const userInitials = DEFAULT_USER.username[0].toUpperCase() + 
-                       DEFAULT_USER.username[1].toUpperCase();
+
+  const [showSubComments, setShowSubComments] = useState(comment.childComment > 0);
+  const [localChildCount, setLocalChildCount] = useState(comment.childComment);
+
+  const username = comment.user?.username || 'Unknown User';
+  const commentInitials = getInitials(username);
+
+
 
   const { replyMutation, handleSubmitReply } = useReplyComment(comment.id, replyContent);
 
@@ -50,6 +60,8 @@ export function CommentItem({ comment }: CommentItemProps) {
       await handleSubmitReply(replyContent);
       setReplyContent('');
       setShowReplyForm(false);
+      setShowSubComments(true);
+      setLocalChildCount((prev) => prev + 1);
     } catch (error) {
       console.error('Failed to submit reply:', error);
     }
@@ -68,9 +80,8 @@ export function CommentItem({ comment }: CommentItemProps) {
         </Avatar>
         <div className="flex-1">
           <div
-            className={`${
-              theme === 'light' ? 'bg-gray-50' : 'bg-gray-800'
-            } rounded-lg p-3`}
+            className={`${theme === 'light' ? 'bg-gray-50' : 'bg-gray-800'
+              } rounded-lg p-3`}
           >
             <div className="flex items-center space-x-2 mb-1">
               <span className="font-medium text-sm">
@@ -82,7 +93,7 @@ export function CommentItem({ comment }: CommentItemProps) {
             </div>
             <p className="text-sm">{comment.content}</p>
           </div>
-          
+
           {/* Reply button */}
           <div className="mt-2 ml-3">
             <Button
@@ -104,12 +115,12 @@ export function CommentItem({ comment }: CommentItemProps) {
           <form onSubmit={handleReplySubmit} className="space-y-2">
             <div className="flex space-x-2">
               <Avatar className="h-6 w-6 mt-1">
-                <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+                <AvatarFallback className="text-xs">{commentInitials}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <Textarea
                   ref={textareaRef}
-                  placeholder={`Reply to ${comment.user.username}...`}
+                  placeholder={`Reply to ${username}...`}
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   rows={2}
@@ -142,12 +153,12 @@ export function CommentItem({ comment }: CommentItemProps) {
           </form>
         </div>
       )}
-      
+
       {/* Sub-comments section - ✅ Sửa: Chỉ hiển thị khi có sub-comments */}
-      {comment.childComment > 0 && (
-        <SubComments 
-          parentCommentId={comment.id} 
-          totalCount={comment.childComment} 
+      {showSubComments && localChildCount > 0 && (
+        <SubComments
+          parentCommentId={comment.id}
+          totalCount={localChildCount}
         />
       )}
     </div>
