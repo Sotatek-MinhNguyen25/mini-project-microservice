@@ -157,14 +157,14 @@ const postService = {
     page: number = 1,
     limit: number = 10,
     enabled: boolean = true,
-  ) => { 
-    const response: AxiosResponse = await get(
+  ) => {
+    const response: any = await get(
       `/comment/${parentCommentId}?page=${page}&limit=${limit}`,
       {
         headers: getAuthorizationHeader(),
       },
     );
-    return response.data;
+    return { ...response };
   },
 };
 

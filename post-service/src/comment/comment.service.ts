@@ -87,13 +87,24 @@ export class CommentService implements OnModuleInit {
   }
 
   async countCommentsByPostId(postId: string): Promise<ConsumerResult<number>> {
-    const count = await this.prismaService.comment.count({
+    // Lấy tất cả comment gốc (có postId)
+    const rootComments = await this.prismaService.comment.findMany({
+      where: { postId, deletedAt: null },
+      select: { id: true },
+    });
+
+    const rootIds = rootComments.map((c) => c.id);
+
+    // Đếm số lượng reply có parentId thuộc danh sách rootIds
+    const replyCount = await this.prismaService.comment.count({
       where: {
-        postId: postId,
+        parentId: { in: rootIds },
         deletedAt: null,
       },
     });
-    return { data: count };
+
+    const total = rootComments.length + replyCount;
+    return { data: total };
   }
 
   async getCommentsByPostId(postId: string): Promise<ConsumerResult<any[]>> {

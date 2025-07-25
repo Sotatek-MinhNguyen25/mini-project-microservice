@@ -45,7 +45,7 @@ export function SubComments({ parentCommentId, totalCount }: SubCommentsProps) {
   });
 
   // Safely extract subComments, defaulting to empty array if data or pages are undefined
-  const subComments = data?.pages[0] || [];
+  const subComments = data?.pages[0].data || [];
   console.log(subComments);
 
   const handleToggle = () => {

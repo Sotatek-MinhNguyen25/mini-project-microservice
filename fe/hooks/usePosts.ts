@@ -194,18 +194,11 @@ export function useSubComments({
           pageParam,
           limit,
         );
+        let hasNextPage = false;
+        if (response.currentPage < response.totalPage) {
+          hasNextPage = true;
+        }
         return response;
-        // Validate response structure
-        // if (!response?.data) {
-        //   throw new Error('Invalid response structure');
-        // }
-        return {
-          subComments: Array.isArray(response.data.subComments)
-            ? response.data.subComments
-            : [],
-          page: pageParam,
-          totalCount: Number(response.data.totalCount) || 0,
-        };
       } catch (err) {
         // Wrap errors to ensure consistent error handling
         throw new Error(
@@ -213,14 +206,13 @@ export function useSubComments({
         );
       }
     },
-    getNextPageParam: (lastPage) => {
-      if (
-        !lastPage.subComments?.length ||
-        lastPage.subComments.length < limit
-      ) {
-        return undefined;
+    getNextPageParam: (data) => {
+      const currentPage = data.meta.currentPage;
+      const totalPage = data.meta.totalPage;
+      if (currentPage < totalPage) {
+        return currentPage + 1;
       }
-      return lastPage.page + 1;
+      return undefined;
     },
     initialPageParam: 1,
     enabled,

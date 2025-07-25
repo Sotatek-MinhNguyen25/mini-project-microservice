@@ -11,7 +11,6 @@ interface SubCommentItemProps {
 }
 
 export function SubCommentItem({ subComment }: SubCommentItemProps) {
-  console.log(subComment);
   const { theme } = useTheme();
   const subCommentInitials = `${subComment.user.username}`;
 
