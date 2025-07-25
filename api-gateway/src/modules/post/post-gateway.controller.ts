@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, OnModuleInit, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, OnModuleInit, Param, Post, Query } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -15,6 +15,7 @@ export class PostGatewayController implements OnModuleInit {
 
   async onModuleInit() {
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET);
+    this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.DELETE);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.CREATE);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.GET_DETAIL);
     this.postClient.subscribeToResponseOf(KAFKA_PATTERNS.POST.COMMENT.CREATE);
@@ -66,5 +67,11 @@ export class PostGatewayController implements OnModuleInit {
     return await firstValueFrom(
       this.postClient.send(KAFKA_PATTERNS.POST.REACTION.CREATE, { ...createReactionDto, userId: user.sub }),
     );
+  }
+
+  @Delete(':id')
+  @ApiBearerAuth()
+  async deletePost(@Param('id') id: string) {
+    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.DELETE, id));
   }
 }

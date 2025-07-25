@@ -5,18 +5,11 @@ import { Edit, Trash2 } from 'lucide-react';
 
 interface PostTableProps {
   posts: any;
-  onEdit: (post: Post) => void;
   onDelete: (id: string) => void;
   loading?: boolean;
 }
 
-export function PostTable({
-  posts,
-  onEdit,
-  onDelete,
-  loading,
-}: PostTableProps) {
-
+export function PostTable({ posts, onDelete, loading }: PostTableProps) {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -67,7 +60,7 @@ export function PostTable({
                 <div className="flex flex-wrap gap-1">
                   {post.tags.map((tag: any) => (
                     <span
-                      key={tag.id}
+                      key={tag.tagId}
                       className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
                     >
                       {tag.name}
@@ -85,12 +78,6 @@ export function PostTable({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex space-x-2">
-                  <button
-                    onClick={() => onEdit(post)}
-                    className="text-blue-600 hover:text-blue-900 p-1"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
                   <button
                     onClick={() => onDelete(post.id)}
                     className="text-red-600 hover:text-red-900 p-1"

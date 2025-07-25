@@ -157,7 +157,7 @@ export class PostService implements OnModuleInit {
         orderBy: {
           createdAt: 'desc',
         },
-        where: searchConditon,
+        where: { ...searchConditon, deletedAt: null },
         ...paginateCondition,
       }),
       this.prisma.post.count({ where: searchConditon }),
@@ -172,7 +172,7 @@ export class PostService implements OnModuleInit {
         ]),
       ),
     ].flat();
-
+    console.time('asc');
     const users: User[] = (
       await firstValueFrom(
         this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, {
@@ -180,6 +180,7 @@ export class PostService implements OnModuleInit {
         }),
       )
     ).data;
+    console.timeEnd('asc');
 
     // Anh xa lai response
     const result = await Promise.all(

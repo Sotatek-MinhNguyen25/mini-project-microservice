@@ -23,6 +23,8 @@ export default function UsersPage() {
     loading,
     error,
     pagination,
+    filters,
+    setFilters,
     fetchUsers,
     createUser,
     updateUser,
@@ -34,13 +36,13 @@ export default function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AUser | null>(null);
-  const [filters, setFilters] = useState<UserFilters>({
-    search: '',
-    page: 1,
-    limit: 10,
-    sortBy: 'createdAt',
-    sortOrder: 'DESC',
-  });
+  // const [filters, setFilters] = useState<UserFilters>({
+  //   search: '',
+  //   page: 1,
+  //   limit: 10,
+  //   sortBy: 'createdAt',
+  //   sortOrder: 'DESC',
+  // });
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function UsersPage() {
   ) => {
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, userData);
+        await updateUser({ id: editingUser.id, userData: userData });
       } else {
         await createUser(userData);
       }
@@ -108,7 +110,7 @@ export default function UsersPage() {
   const handlePageChange = (page: number) => {
     const newFilters = { ...filters, page };
     setFilters(newFilters);
-    fetchUsers(newFilters);
+    fetchUsers();
   };
 
   const handleFilterChange = (
@@ -116,8 +118,8 @@ export default function UsersPage() {
     value: string | number,
   ) => {
     const newFilters = { ...filters, [key]: value, page: 1 };
+    console.log('newFilters', newFilters);
     setFilters(newFilters);
-    fetchUsers(newFilters);
   };
 
   return (
@@ -163,7 +165,6 @@ export default function UsersPage() {
             onChange={(e) => {
               const search = e.target.value;
               setFilters((prev) => ({ ...prev, search, page: 1 }));
-              fetchUsers({ ...filters, search, page: 1 });
             }}
             placeholder="Search users by name or email..."
             className="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300"
@@ -192,7 +193,7 @@ export default function UsersPage() {
                 handleFilterChange('sortBy', e.target.value),
               options: [
                 { value: 'createdAt', label: 'Created At' },
-                { value: 'name', label: 'Name' },
+                { value: 'username', label: 'Username' },
                 { value: 'email', label: 'Email' },
               ],
               label: 'Sort By',
@@ -213,8 +214,8 @@ export default function UsersPage() {
                 handleFilterChange('roles', e.target.value),
               options: [
                 { value: '', label: 'All Roles' },
-                { value: 'admin', label: 'Admin' },
-                { value: 'user', label: 'User' },
+                { value: 'ADMIN', label: 'Admin' },
+                { value: 'USER', label: 'User' },
               ],
               label: 'Role',
             },
@@ -224,8 +225,8 @@ export default function UsersPage() {
                 handleFilterChange('status', e.target.value),
               options: [
                 { value: '', label: 'All Status' },
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' },
+                { value: 'VERIFIED', label: 'Verified' },
+                { value: 'UNVERIFIED', label: 'Unverified' },
               ],
               label: 'Status',
             },
@@ -274,7 +275,7 @@ export default function UsersPage() {
 
       {error && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-8 animate-pulse">
-          {error}
+          {error.message}
         </div>
       )}
 
@@ -286,11 +287,11 @@ export default function UsersPage() {
           loading={loading}
         />
 
-        {pagination.totalPages > 1 && (
+        {pagination?.totalPages > 1 && (
           <div className="p-4 border-t dark:border-gray-700">
             <Pagination
-              currentPage={pagination.page}
-              totalPages={pagination.totalPages}
+              currentPage={pagination?.page}
+              totalPages={pagination?.totalPages}
               onPageChange={handlePageChange}
             />
           </div>

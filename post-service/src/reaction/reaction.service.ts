@@ -7,10 +7,7 @@ import { CONSTANTS } from 'src/common/constants/app.constants';
 import { ReactionSummary } from './reaction.interface';
 import { ConsumerResult } from 'src/common/type/consumer-result';
 import { firstValueFrom } from 'rxjs';
-import {
-  RpcConflictException,
-  RpcNotFoundException,
-} from 'src/common/exception/rpc.exception';
+import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
 import { User } from 'src/common/type/user';
 import * as _ from 'lodash';
 

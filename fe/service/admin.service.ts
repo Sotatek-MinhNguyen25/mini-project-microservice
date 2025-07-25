@@ -9,7 +9,6 @@ import {
   UpdateUserResponse,
 } from '@/types/admin';
 import { UserFilters } from '@/hooks/useUserManage';
-import { Update } from 'next/dist/build/swc/types';
 
 const adminService = {
   getUsers: async (filter: UserFilters): Promise<any> => {
@@ -19,16 +18,25 @@ const adminService = {
       sortBy = 'createdAt',
       sortOrder = 'desc',
       search = '',
+      roles = '',
+      status = '',
     } = filter;
-    const response: AxiosResponse<GetUsersResponse> = await get(
-      `/users?search=${search}&page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
-      {
-        headers: getAuthorizationHeader(),
-      },
-    );
+    let url = `/users?search=${search}&page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+    if (roles === 'ADMIN' || roles === 'USER') {
+      console.log(roles);
+      url += `&roles=${roles}`;
+    }
+    if (status === 'UNVERIFIED' || status === 'VERIFIED') {
+      url += `&status=${status}`;
+    }
+    console.log(url);
+    const response: AxiosResponse<GetUsersResponse> = await get(url, {
+      headers: getAuthorizationHeader(),
+    });
 
     return response;
   },
+
   createUser: async (
     user: Omit<AUser, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<any> => {
@@ -42,6 +50,7 @@ const adminService = {
 
     return response;
   },
+
   updateUser: async (id: string, user: Partial<AUser>): Promise<any> => {
     const response: AxiosResponse<UpdateUserResponse> = await patch(
       `/users/${id}`,
