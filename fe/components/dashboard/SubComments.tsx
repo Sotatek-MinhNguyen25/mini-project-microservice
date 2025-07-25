@@ -45,7 +45,8 @@ export function SubComments({ parentCommentId, totalCount }: SubCommentsProps) {
   });
 
   // Safely extract subComments, defaulting to empty array if data or pages are undefined
-  const subComments = data?.pages?.flatMap((page) => page?.subComments || []) || [];
+  const subComments = data?.pages[0] || [];
+  console.log(subComments);
 
   const handleToggle = () => {
     setVisible((prev) => !prev);
@@ -69,7 +70,9 @@ export function SubComments({ parentCommentId, totalCount }: SubCommentsProps) {
           ) : (
             <>
               <MessageCircle className="h-3 w-3" />
-              <span>View {totalCount} {totalCount === 1 ? 'reply' : 'replies'}</span>
+              <span>
+                View {totalCount} {totalCount === 1 ? 'reply' : 'replies'}
+              </span>
             </>
           )}
         </button>
@@ -79,19 +82,21 @@ export function SubComments({ parentCommentId, totalCount }: SubCommentsProps) {
         <div className="space-y-3">
           {isInitialLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: Math.min(totalCount, 3) }).map((_, index) => (
-                <SubCommentSkeleton key={index} />
-              ))}
+              {Array.from({ length: Math.min(totalCount, 3) }).map(
+                (_, index) => (
+                  <SubCommentSkeleton key={index} />
+                ),
+              )}
             </div>
           ) : isError ? (
             <div className="text-xs text-red-500 ml-2">
               Failed to load replies: {error?.message || 'Please try again.'}
             </div>
           ) : subComments.length > 0 ? (
-            subComments.map((subComment) => (
+            subComments.map((value: any) => (
               <SubCommentItem
-                key={subComment?.id || `temp-${Math.random()}`}
-                subComment={subComment}
+                key={value?.id || `temp-${Math.random()}`}
+                subComment={value}
               />
             ))
           ) : (

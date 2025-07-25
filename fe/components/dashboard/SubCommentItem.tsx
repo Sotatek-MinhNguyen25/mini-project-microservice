@@ -11,19 +11,22 @@ interface SubCommentItemProps {
 }
 
 export function SubCommentItem({ subComment }: SubCommentItemProps) {
+  console.log(subComment);
   const { theme } = useTheme();
-  const subCommentInitials = `${subComment.user.username[0]}${subComment.user.username[1]}`;
+  const subCommentInitials = `${subComment.user.username}`;
 
   return (
     <div className="flex space-x-2">
       <Avatar className="h-6 w-6 mt-1">
-        <AvatarFallback className="text-xs">{subCommentInitials}</AvatarFallback>
+        <AvatarFallback className="text-xs">
+          {subCommentInitials}
+        </AvatarFallback>
       </Avatar>
       <div className="flex-1">
         <div
           className={`${
-            theme === 'light' 
-              ? 'bg-gray-100 border border-gray-200' 
+            theme === 'light'
+              ? 'bg-gray-100 border border-gray-200'
               : 'bg-gray-700 border border-gray-600'
           } rounded-lg p-2`}
         >

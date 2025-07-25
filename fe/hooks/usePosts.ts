@@ -180,7 +180,6 @@ export function useAddReaction() {
   });
 }
 
-
 export function useSubComments({
   parentCommentId,
   limit = 5,
@@ -195,10 +194,11 @@ export function useSubComments({
           pageParam,
           limit,
         );
+        return response;
         // Validate response structure
-        if (!response?.data) {
-          throw new Error('Invalid response structure');
-        }
+        // if (!response?.data) {
+        //   throw new Error('Invalid response structure');
+        // }
         return {
           subComments: Array.isArray(response.data.subComments)
             ? response.data.subComments
@@ -236,12 +236,12 @@ export function useReplyComment(commentId: string, content: string) {
   const replyMutation = useMutation({
     mutationFn: async (content: string) => {
       const response = await postService.createComment('', content, commentId);
-
-      if (!response.ok) {
-        throw new Error('Failed to submit reply');
+      console.log(response);
+      if (response.status === 'success') {
+        return response.data;
+      } else {
+        throw new Error();
       }
-
-      return response.json();
     },
     onSuccess: () => {
       // Invalidate sub-comments query để refresh danh sách
