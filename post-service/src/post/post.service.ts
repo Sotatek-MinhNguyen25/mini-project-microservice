@@ -11,7 +11,11 @@ import { firstValueFrom } from 'rxjs';
 import { ReactionService } from 'src/reaction/reaction.service';
 import { CONSTANTS } from 'src/common/constants/app.constants';
 import { User } from 'src/common/type/user';
-import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
+import {
+  RpcConflictException,
+  RpcNotFoundException,
+  RpcUnauthorizedException,
+} from 'src/common/exception/rpc.exception';
 import * as _ from 'lodash';
 
 @Injectable()
@@ -41,11 +45,7 @@ export class PostService implements OnModuleInit {
       ),
     );
     if (!user) {
-      throw new RpcException({
-        statusCode: 401,
-        message: 'Unauthorized',
-        error: 'Unauthorized',
-      });
+      throw new RpcUnauthorizedException('Unauthorized');
     }
 
     await Promise.all(
@@ -56,11 +56,7 @@ export class PostService implements OnModuleInit {
           },
         });
         if (!tag) {
-          throw new RpcException({
-            statusCode: 409,
-            message: `Không tồn tại tagId: ${tagId.tagId}`,
-            error: 'Conflick database',
-          });
+          throw new RpcConflictException(`Không tồn tại TagId: ${tagId.tagId}`);
         }
       }),
     );
@@ -97,7 +93,6 @@ export class PostService implements OnModuleInit {
   }
 
   async findAll(postQueryDto: PostQueryDto) {
-    console.log(postQueryDto);
     const paginateCondition = paginate(postQueryDto.page, postQueryDto.limit);
 
     const searchConditon = postQueryDto.search
@@ -112,7 +107,7 @@ export class PostService implements OnModuleInit {
         }
       : {};
 
-    const [posts, totalItem] = await this.prisma.$transaction([
+    const [posts, totalItem] = await Promise.all([
       this.prisma.post.findMany({
         omit: {
           updatedAt: true,
@@ -120,20 +115,34 @@ export class PostService implements OnModuleInit {
         },
         include: {
           comments: {
-            omit: {
-              deletedAt: true,
-              updatedAt: true,
+            take: 2,
+            select: {
+              id: true,
+              content: true,
+              userId: true,
+              createdAt: true,
+              _count: {
+                select: {
+                  childComment: true,
+                },
+              },
             },
           },
           image: {
             omit: {
               updatedAt: true,
               deletedAt: true,
+              postId: true,
             },
           },
           tags: {
             include: {
-              tag: true,
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
             },
           },
           ...(postQueryDto.userId && {
@@ -182,7 +191,8 @@ export class PostService implements OnModuleInit {
         const commentMapper = post.comments.map((comment) => {
           const commentUser = users.find((user) => user.id === comment.userId);
           return {
-            ..._.omit(comment, ['userId']),
+            ..._.omit(comment, ['userId', 'postId', 'parentId', '_count']),
+            childComment: comment._count.childComment,
             user: _.pick(commentUser, ['id', 'email', 'username']),
           };
         });
@@ -201,8 +211,8 @@ export class PostService implements OnModuleInit {
           };
         });
         return {
-          ..._.omit(post, ['userId']),
-          tag: tagDetail,
+          ..._.omit(post, ['userId', 'tags']),
+          tags: tagDetail,
           user: _.pick(author, ['id', 'username', 'email']),
           comments: commentMapper,
           totalComment: totalComment.data,
