@@ -15,5 +15,6 @@ export const CONSTANTS = {
   },
   WS_MESSAGE_PATTERN: {
     COMMENT_REPLY: 'comment.reply',
+    REACTION: 'reaction',
   },
 } as const;

@@ -17,6 +17,8 @@ export class ReactionService {
     private readonly prismaService: PrismaService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
+    @Inject(CONSTANTS.KAFKA_SERVICE.NOTI)
+    private readonly notiClient: ClientKafka,
   ) {}
 
   //get all reactions of a post
@@ -84,10 +86,24 @@ export class ReactionService {
     });
     let reactionRes: Reaction;
     // Neu user chua tung reaction
-    if (!reaction) {
+    if (!reaction || reaction.deletedAt) {
       reactionRes = await this.prismaService.reaction.create({
         data: createReactionDto,
       });
+
+      const post = await this.prismaService.post.findFirst({
+        where: {
+          id: createReactionDto.postId,
+          deletedAt: null,
+        },
+      });
+      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.REACTION, {
+        from: createReactionDto.userId,
+        to: post?.userId,
+        postId: createReactionDto.postId,
+        type: 'reaction',
+      });
+
       return { data: reactionRes };
     }
 

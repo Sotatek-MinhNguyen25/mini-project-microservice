@@ -5,6 +5,7 @@ export const CONSTANTS = {
         COMMENT_REPLY: 'comment.reply',
         COMMENT_POST: 'comment.post',
       },
+      REACTION: 'reaction',
     },
     POST: {
       GET: 'post.get',
