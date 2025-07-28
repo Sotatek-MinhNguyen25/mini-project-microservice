@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class ResponseMessageInterceptor implements NestInterceptor {
-  constructor(private reflect: Reflector) {}
+  constructor(private reflect: Reflector) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> | Promise<Observable<any>> {
     const responseMessage = this.reflect.get<string>('response_message', context.getHandler());
@@ -12,7 +12,6 @@ export class ResponseMessageInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((response) => {
-        console.log('[Gateway] Raw response from service:', response);
         const transformed = {
           status: 'success',
           statusCode: statusCode || 200,
@@ -21,7 +20,6 @@ export class ResponseMessageInterceptor implements NestInterceptor {
           meta: response.meta || {},
           timestamp: new Date().toISOString(),
         };
-        console.log('[Gateway] Transformed response:', transformed);
         return transformed;
       }),
     );
