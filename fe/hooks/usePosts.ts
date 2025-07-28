@@ -7,20 +7,12 @@ import {
 import postService from '@/service/post.service';
 import {
   GetTagsResponse,
-  Post,
   ReactionType,
-  ReplyCommentData,
-  SubCommentsResponse,
+  UseGetPostsOptions,
   UseSubCommentsParams,
 } from '@/types/post';
 import { useToast } from './useToast';
 import { useState } from 'react';
-import { post } from '@/lib/axiosClient';
-
-interface UseGetPostsOptions {
-  limit?: number;
-  page?: number;
-}
 
 export function useGetPosts({ page = 1, limit = 10 }: UseGetPostsOptions = {}) {
   return useInfiniteQuery({
@@ -200,7 +192,6 @@ export function useSubComments({
         }
         return response;
       } catch (err) {
-        // Wrap errors to ensure consistent error handling
         throw new Error(
           err instanceof Error ? err.message : 'Failed to fetch subcomments',
         );
