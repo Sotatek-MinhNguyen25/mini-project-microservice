@@ -1,5 +1,11 @@
 export const CONSTANTS = {
   MESSAGE_PATTERN: {
+    NOTI: {
+      COMMENT: {
+        COMMENT_REPLY: 'comment.reply',
+        COMMENT_POST: 'comment.post',
+      },
+    },
     POST: {
       GET: 'post.get',
       CREATE: 'post.create',

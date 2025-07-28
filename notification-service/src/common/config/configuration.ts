@@ -7,4 +7,7 @@ export default (): Configuration => ({
   redis: {
     url: process.env.REDIS_URL || 'localhost:6379',
   },
+  kafka: {
+    url: process.env.KAFKA_URL || 'localhost:9092',
+  },
 });

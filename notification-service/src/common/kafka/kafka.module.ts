@@ -1,23 +1,32 @@
 import { Module } from '@nestjs/common';
-import { KafkaService } from './kafka.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { CONSTANTS } from '../constant';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: CONSTANTS.KAFKA_PATTERN.AUTH,
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: [process.env.KAFKA_URL || 'localhost:9092'],
-          },
-          producerOnlyMode: true,
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => {
+          const kafkaUrl = configService.get('kafka.url');
+          return {
+            transport: Transport.KAFKA,
+            options: {
+              client: {
+                clientId: 'auth-client',
+                brokers: [kafkaUrl],
+              },
+              consumer: {
+                groupId: 'auth-group',
+              },
+            },
+          };
         },
       },
     ]),
   ],
-  providers: [KafkaService],
+  exports: [ClientsModule],
 })
 export class KafkaModule {}

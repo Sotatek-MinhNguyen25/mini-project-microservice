@@ -8,7 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SocketService } from './socket.service';
-import { ReplyCommentDto } from 'src/notification/dto/comment.dto';
+import { CommentEventDto } from 'src/notification/dto/comment.dto';
 
 @Injectable()
 @WebSocketGateway({
@@ -34,8 +34,8 @@ export class SocketGateway
     return this.socketService.handleConnection(client);
   }
 
-  replyComment(data: ReplyCommentDto) {
-    return this.socketService.replyComment(this.server, data);
+  commentEvent(data: CommentEventDto) {
+    return this.socketService.commentEvent(this.server, data);
   }
 
   handleDisconnect(client: Socket) {

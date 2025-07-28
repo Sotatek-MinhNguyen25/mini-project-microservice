@@ -5,4 +5,7 @@ export interface Configuration {
   redis: {
     url: string;
   };
+  kafka: {
+    url: string;
+  };
 }

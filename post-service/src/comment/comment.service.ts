@@ -48,7 +48,7 @@ export class CommentService implements OnModuleInit {
 
     // Neu co postId
     if (createCommentDto.postId) {
-      const post = this.prismaService.post.findUnique({
+      const post = await this.prismaService.post.findUnique({
         where: {
           id: postId,
         },
@@ -56,7 +56,15 @@ export class CommentService implements OnModuleInit {
       if (!post) {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
-
+      // Notification
+      this.notiClient.emit(
+        CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT.COMMENT_POST,
+        {
+          from: createCommentDto.userId,
+          to: post.userId,
+          postId: post.id,
+        },
+      );
       return {
         data: await this.prismaService.comment.create({
           data: {
@@ -80,11 +88,13 @@ export class CommentService implements OnModuleInit {
     if (parentComment?.parentId) {
       throw new RpcBadRequestException('Comment chỉ nên có 2 cấp');
     }
-    this.notiClient.emit('comment.reply', {
-      userId: createCommentDto.userId,
+    // Notification
+    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT.COMMENT_REPLY, {
+      from: createCommentDto.userId,
       to: parentComment.userId,
-      commentId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
+      commentId: parentComment.id,
     });
+
     return {
       data: await this.prismaService.comment.create({
         data: {

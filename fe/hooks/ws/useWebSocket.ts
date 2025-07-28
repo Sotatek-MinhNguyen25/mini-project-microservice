@@ -117,7 +117,7 @@ export const useWebSocket = ({
     });
 
     // Notification event listeners
-    socket.on('emitMessage', handleNewNotification);
+    socket.on('comment.reply', handleNewNotification);
     socket.on('bulk_notifications', handleBulkNotifications);
     socket.on('notification_read', handleNotificationRead);
     socket.on('notification_deleted', handleNotificationDeleted);

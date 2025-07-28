@@ -3,7 +3,7 @@ import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Socket, Server } from 'socket.io';
 import { CONSTANTS } from 'src/common/constant';
-import { ReplyCommentDto } from 'src/notification/dto/comment.dto';
+import { CommentEventDto } from 'src/notification/dto/comment.dto';
 
 @Injectable()
 export class SocketService implements OnModuleInit {
@@ -31,8 +31,8 @@ export class SocketService implements OnModuleInit {
     }
   }
 
-  replyComment(server: Server, data: ReplyCommentDto) {
-    server.to(`${data.to}`).emit(CONSTANTS.WS_MESSAGE_PATTERN.REPLY_COMMENT, {
+  commentEvent(server: Server, data: CommentEventDto) {
+    server.to(`${data.to}`).emit(CONSTANTS.WS_MESSAGE_PATTERN.COMMENT_REPLY, {
       message: 'This is message',
       ...data,
     });

@@ -3,6 +3,7 @@ export const CONSTANTS = {
     NOTIFICATION: {
       COMMENT: {
         REPLY: 'comment.reply',
+        POST: 'comment.post',
       },
     },
     AUTH: {
@@ -13,6 +14,6 @@ export const CONSTANTS = {
     AUTH: 'KAFKA_AUTH_SERVICE',
   },
   WS_MESSAGE_PATTERN: {
-    REPLY_COMMENT: 'emitMessage',
+    COMMENT_REPLY: 'comment.reply',
   },
 } as const;
