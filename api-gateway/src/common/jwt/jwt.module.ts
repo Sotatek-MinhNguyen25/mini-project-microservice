@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { JwtModule as NestJwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { KafkaModule } from '../kafka/kafka.module';
 
 @Module({
   imports: [
+    KafkaModule,
     ConfigModule,
     NestJwtModule.registerAsync({
       imports: [ConfigModule],
@@ -15,4 +17,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   exports: [NestJwtModule],
 })
-export class JwtModule {}
+export class JwtModule { }

@@ -2,7 +2,6 @@
 
 import type React from 'react';
 
-import { User } from '@/types/auth';
 import { AUser } from '@/types/admin';
 import { useForm, UseFormReturn } from 'react-hook-form';
 
@@ -24,7 +23,7 @@ export function UserForm({ user, onSubmit, onCancel, loading }: UserFormProps) {
         password: '',
         email: user?.email || '',
         status: user?.status || 'UNVERIFIED', // Default status as 'UNVERIFIED'
-        // role: user?.role || 'user', // Uncomment if role is used
+        roles: user?.roles || ['USER'], // Uncomment if role is used
       },
     });
 
@@ -109,6 +108,32 @@ export function UserForm({ user, onSubmit, onCancel, loading }: UserFormProps) {
         )}
       </div>
 
+      <div>
+        <label
+          htmlFor="roles"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Roles
+        </label>
+        {['USER', 'ADMIN'].map((role) => (
+          <label key={role} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              value={role}
+              {...userForm.register('roles', {
+                validate: (value) =>
+                  value.length > 0 || 'Please select at least one role',
+              })}
+            />
+            <span>{role}</span>
+          </label>
+        ))}
+        {userForm.formState.errors.roles && (
+          <p className="text-red-500 text-xs mt-1">
+            {userForm.formState.errors.roles.message}
+          </p>
+        )}
+      </div>
       <div>
         <label
           htmlFor="status"

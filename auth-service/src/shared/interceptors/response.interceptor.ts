@@ -37,9 +37,8 @@ export function formatResponse<T>(
 
 @Injectable()
 export class ResponseInterceptor<T>
-  implements NestInterceptor<T, ResponseData<T>>
-{
-  constructor(private reflector: Reflector) {}
+  implements NestInterceptor<T, ResponseData<T>> {
+  constructor(private reflector: Reflector) { }
 
   intercept(
     context: ExecutionContext,
@@ -68,9 +67,8 @@ export class ResponseInterceptor<T>
 // Không lặp lại import các symbol đã có ở đầu file
 
 export class KafkaResponseInterceptor<T>
-  implements NestInterceptor<T, ResponseData<T>>
-{
-  constructor(private reflector: Reflector) {}
+  implements NestInterceptor<T, ResponseData<T>> {
+  constructor(private reflector: Reflector) { }
 
   intercept(
     context: ExecutionContext,
@@ -80,12 +78,9 @@ export class KafkaResponseInterceptor<T>
       RESPONSE_METADATA_KEY,
       context.getHandler(),
     );
-    console.log('[AUTH-SERVICE] responseOptions:', responseOptions);
     return next.handle().pipe(
       map((data) => {
-        console.log('[AUTH-SERVICE] Raw handler data:', data);
         const formatted = formatResponse<T>(data, responseOptions);
-        console.log('[AUTH-SERVICE] Formatted responseg', formatted);
         return formatted;
       }),
     );

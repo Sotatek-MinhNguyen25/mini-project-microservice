@@ -9,7 +9,7 @@ export class CustomJwtService {
   constructor(
     private readonly nestJwtService: NestJwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   createAT(payload: JwtPayload): {
     accessToken: string;
@@ -43,5 +43,9 @@ export class CustomJwtService {
 
   verify<T extends object = any>(token: string): T {
     return this.nestJwtService.verify<T>(token);
+  }
+
+  decode<T extends object = any>(token: string): T {
+    return this.nestJwtService.decode<T>(token);
   }
 }

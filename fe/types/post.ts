@@ -1,4 +1,4 @@
-import { User } from "./auth";
+import { User } from './auth';
 
 export interface Post {
   id: string;
@@ -244,4 +244,9 @@ export interface SubCommentsResponse {
 export interface ReplyCommentData {
   content: string;
   parentCommentId: string;
+}
+
+export interface UseGetPostsOptions {
+  limit?: number;
+  page?: number;
 }

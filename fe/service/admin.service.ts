@@ -29,11 +29,15 @@ const adminService = {
     if (status === 'UNVERIFIED' || status === 'VERIFIED') {
       url += `&status=${status}`;
     }
-    console.log(url);
     const response: AxiosResponse<GetUsersResponse> = await get(url, {
       headers: getAuthorizationHeader(),
     });
-
+    if (response.status && (response.status < 200 || response.status >= 300)) {
+      throw new Error(
+        response.data.message ||
+          `Server responded with status ${response.status}`,
+      );
+    }
     return response;
   },
 
@@ -47,7 +51,12 @@ const adminService = {
         headers: getAuthorizationHeader(),
       },
     );
-
+    if (response.status && (response.status < 200 || response.status >= 300)) {
+      throw new Error(
+        response.data.message ||
+          `Server responded with status ${response.status}`,
+      );
+    }
     return response;
   },
 
@@ -59,7 +68,12 @@ const adminService = {
         headers: getAuthorizationHeader(),
       },
     );
-
+    if (response.status && (response.status < 200 || response.status >= 300)) {
+      throw new Error(
+        response.data.message ||
+          `Server responded with status ${response.status}`,
+      );
+    }
     return response;
   },
   deleteUser: async (id: string): Promise<any> => {
@@ -69,7 +83,12 @@ const adminService = {
         headers: getAuthorizationHeader(),
       },
     );
-
+    if (response.status && (response.status < 200 || response.status >= 300)) {
+      throw new Error(
+        response.data.message ||
+          `Server responded with status ${response.status}`,
+      );
+    }
     return response;
   },
 };

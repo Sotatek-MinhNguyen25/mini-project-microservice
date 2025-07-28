@@ -136,4 +136,10 @@ export class RedisService implements OnModuleDestroy {
   async onModuleDestroy() {
     await this.redisClient.quit();
   }
+
+  async isJtiValid(jti: string): Promise<boolean> {
+    const exists = await this.redisClient.exists(jti);
+    return !!exists;
+  }
+
 }

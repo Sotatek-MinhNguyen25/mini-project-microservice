@@ -9,7 +9,6 @@ import { NotificationGatewayModule } from './modules/notification/notification-g
 import { KafkaModule } from './common/kafka/kafka.module';
 import { UserGatewayModule } from './modules/user/user-gateway.module';
 import { JwtModule } from './common/jwt/jwt.module';
-import { RedisModule } from './common/redis/redis.module';
 import { TagGatewayModule } from './modules/tag/tag-gateway.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/jwt';
@@ -28,7 +27,6 @@ import { CommentGatewayModule } from './modules/comment/comment-gateway.module';
     UserGatewayModule,
     KafkaModule,
     JwtModule,
-    RedisModule,
   ],
   providers: [
     {
@@ -41,4 +39,4 @@ import { CommentGatewayModule } from './modules/comment/comment-gateway.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

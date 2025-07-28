@@ -16,7 +16,7 @@ import { ValidationPipe } from '../shared/pipes/validation.pipe';
 @Controller()
 @UsePipes(new ValidationPipe())
 export class AuthKafkaController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @MessagePattern(KAFKA_PATTERNS.REGISTER)
   @ApiResponseOk(RESPONSE_MESSAGE.REGISTER_SUCCESS)
@@ -82,4 +82,10 @@ export class AuthKafkaController {
   // async checkUser(@Payload() data: { email: string }) {
   //   return this.authService.checkUser(data.email);
   // }
+
+  @MessagePattern(KAFKA_PATTERNS.VERIFY_TOKEN)
+  async verifyToken(@Payload() data: { token: string }) {
+    console.log(data)
+    return await this.authService.verifyToken(data.token)
+  }
 }

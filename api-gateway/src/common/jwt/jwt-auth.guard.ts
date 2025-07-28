@@ -1,11 +1,12 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { RedisService } from 'src/common/redis/redis.service';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Inject } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtPayload } from 'src/common/type/jwt-payload.type';
 import { MESSAGE } from 'src/constants/message.constants';
 import { IS_PUBLIC_KEY } from './jwt.decorator';
 import { Reflector } from '@nestjs/core';
+import { KAFKA_CLIENTS, KAFKA_PATTERNS } from 'src/constants/app.constants';
+import { ClientKafka } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 interface AuthRequest extends Request {
   user?: JwtPayload;
@@ -14,10 +15,9 @@ interface AuthRequest extends Request {
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly redisService: RedisService,
     private reflector: Reflector,
-  ) {}
+    @Inject(KAFKA_CLIENTS.AUTH) private client: ClientKafka
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -32,26 +32,16 @@ export class JwtAuthGuard implements CanActivate {
     if (!authHeader) throw new UnauthorizedException(MESSAGE.NO_TOKEN);
 
     const token = typeof authHeader === 'string' ? authHeader.replace('Bearer ', '') : '';
-    let payload: JwtPayload;
+    if (!token) throw new UnauthorizedException(MESSAGE.NO_TOKEN)
+    let payload: any;
     try {
-      payload = this.jwtService.decode(token);
+      payload = await firstValueFrom(this.client.send<JwtPayload>(KAFKA_PATTERNS.AUTH.VERIFY_TOKEN, { token }));
+      console.log(payload)
+      request.user = payload.data;
+      return true
     } catch {
       throw new UnauthorizedException(MESSAGE.INVALID_TOKEN);
     }
 
-    if (!payload || typeof payload !== 'object' || !payload.jti) {
-      throw new UnauthorizedException(MESSAGE.NO_JTI);
-    }
-
-    const isValid = await this.redisService.isJtiValid(payload.jti);
-    if (!isValid) throw new UnauthorizedException(MESSAGE.JTI_INVALID);
-
-    try {
-      const verified = this.jwtService.verify<JwtPayload>(token);
-      request.user = verified;
-      return true;
-    } catch {
-      throw new UnauthorizedException(MESSAGE.TOKEN_VERIFY_FAIL);
-    }
   }
 }

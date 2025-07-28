@@ -95,7 +95,12 @@ export function UserTable({
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {getRoleBadge(user.roles[0])}
+                <div className="flex flex-wrap gap-1">
+                  {user.roles.map((role: string) => (
+                    <div key={role}>{getRoleBadge(role)}</div>
+                  ))}
+                </div>
+                {/* {getRoleBadge(user.roles[0])} */}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {getStatusBadge(user.status)}
