@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import mailConfig from '../config/mail.config';
-import kafkaConfig from '../config/kafka.config';
-import { KafkaModule } from '../kafka/kafka.module';
 import * as path from 'path';
 import * as Joi from 'joi';
 import { MailService } from './mail.service';
 import { MailController } from './mail.controller';
+import mailConfig from 'src/config/mail.config';
+import kafkaConfig from 'src/config/kafka.config';
+import { KafkaModule } from 'src/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -32,4 +32,4 @@ import { MailController } from './mail.controller';
   controllers: [MailController],
   exports: [MailService],
 })
-export class MailModule {}
+export class MailModule { }

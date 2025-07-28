@@ -5,12 +5,14 @@ import { Transport, ClientOptions, MicroserviceOptions } from '@nestjs/microserv
 @Injectable()
 export class KafkaConfigHelper {
   createConfigKafka(serviceName: string): ClientOptions {
+    const kafkaBrokers = (process.env.KAFKA_BROKER || process.env.KAFKA_BROKERS || 'kafka:9092').split(',');
+
     return {
       transport: Transport.KAFKA,
       options: {
         client: {
           clientId: `${serviceName}-client`,
-          brokers: [process.env.KAFKA_BROKER || 'kafka:9093'],
+          brokers: kafkaBrokers,
         },
         consumer: {
           groupId: `${serviceName}-consumer-group`,

@@ -2,6 +2,7 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { ClientProxyFactory } from '@nestjs/microservices';
 import { KafkaConfigHelper } from './kafka-config.helper'; // Adjust the import path as necessary';
+import { KafkaService } from './kafka.service';
 
 @Global()
 @Module({})
@@ -18,8 +19,8 @@ export class KafkaModule {
 
     return {
       module: KafkaModule,
-      providers: [KafkaConfigHelper, ...kafkaProviders],
-      exports: kafkaProviders,
+      providers: [KafkaService, KafkaConfigHelper, ...kafkaProviders],
+      exports: [KafkaService, ...kafkaProviders],
       global: true,
     };
   }

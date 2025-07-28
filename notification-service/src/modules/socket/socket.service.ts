@@ -12,7 +12,7 @@ export class SocketService {
     }
 
     async sendNotiByUserId(data: Notification) {
-        this.io.to(data.receiverId).emit("notification-post", data)
+        this.io.to(data.receiverId).emit("notification", data)
         this.logger.log(`Notification sent to user ${data.receiverId}`);
     }
 }

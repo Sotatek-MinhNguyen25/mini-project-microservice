@@ -4,23 +4,29 @@ import { Logger } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const logger = new Logger();
-  const kafkaBrokers = process.env.KAFKA_BROKER || process.env.KAFKA_BROKERS || 'kafka:9092';
-  logger.log(`[NOTIFICATION-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+  const logger = new Logger('Main');
+  const port = Number(process.env.PORT) || 3007;
+  const kafkaBrokers = (process.env.KAFKA_BROKER || process.env.KAFKA_BROKERS || 'kafka:9092').split(',');
+
+  const app = await NestFactory.create(AppModule);
+
+  // Cấu hình microservice Kafka
+  app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
     options: {
       client: {
         clientId: 'notification-service-client',
-        brokers: [kafkaBrokers],
+        brokers: kafkaBrokers,
       },
       consumer: {
         groupId: 'notification-service-consumer-group',
       },
     },
   });
-  logger.log(`[NOTIFICATION-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
-  await app.listen();
-  logger.log(`🚀 App is running on port: ${process.env.PORT ?? 3007}`);
+
+  await app.startAllMicroservices();
+  await app.listen(port);
+  logger.log(`🚀 HTTP Server is running on http://localhost:${port}`);
 }
+
 bootstrap();
