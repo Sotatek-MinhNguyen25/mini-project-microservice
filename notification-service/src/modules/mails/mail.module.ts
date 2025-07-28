@@ -32,4 +32,4 @@ import { MailController } from './mail.controller';
   controllers: [MailController],
   exports: [MailService],
 })
-export class MailModule { }
+export class MailModule {}

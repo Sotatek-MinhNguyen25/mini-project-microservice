@@ -12,7 +12,7 @@ export class MailController {
   constructor(
     private readonly configService: ConfigService,
     private readonly notificationService: MailService,
-  ) { }
+  ) {}
 
   @EventPattern(KAFKA_MESSAGE_TYPES.VERIFY_REGISTER_EMAIL)
   async handleVerifyRegisterEmail(@Payload() payload: { email: string; otp: string }) {

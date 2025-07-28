@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MailModule } from './mails/mail.module';
-import { NotificationModule } from './notification/notification.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { SocketModule } from './modules/socket/socket.module';
+import { MailModule } from './modules/mails/mail.module';
 
 @Module({
-  imports: [MailModule, NotificationModule],
+  imports: [MailModule, NotificationModule, SocketModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
