@@ -8,6 +8,7 @@ export const ERROR_MESSAGE = {
   INVALID_OTP: 'The OTP is not correct',
   INVALID_REFRESH_TOKEN: 'Refresh token không hợp lệ',
   TOKEN_MISSING_JTI: 'Token không hợp lệ: thiếu jti. Vui lòng đăng nhập lại!',
+  TOKEN_EXPIRED_OR_REVOKED: 'Token đã hết hạn hoặc bị thu hồi',
   OTP_EXPIRED: 'OTP đã hết hạn',
   USERNAME_ALREADY_EXITST: 'USERNAME.ALREADY.EXISTS',
   INVALID_TOKEN: 'Token bị lỗi',
