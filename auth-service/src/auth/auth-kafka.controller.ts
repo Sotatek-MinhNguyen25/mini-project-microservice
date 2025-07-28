@@ -85,6 +85,7 @@ export class AuthKafkaController {
   // }
 
   @MessagePattern(KAFKA_PATTERNS.VERIFY_TOKEN)
+  @ApiResponseOk(RESPONSE_MESSAGE.VERIFY_TOKEN_SUCCESS)
   async verifyToken(@Payload() data: VerifyTokenDto) {
     return await this.authService.verifyToken(data.token);
   }

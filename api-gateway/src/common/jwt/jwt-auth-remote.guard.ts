@@ -40,7 +40,7 @@ export class JwtAuthRemoteGuard implements CanActivate {
       const userPayload = await firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.VERIFY_TOKEN, { token }));
 
       // Gán user vào request
-      request.user = userPayload;
+      request.user = userPayload.data;
       return true;
     } catch (error) {
       console.error('Token verification failed:', error);

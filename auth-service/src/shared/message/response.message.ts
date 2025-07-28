@@ -8,4 +8,5 @@ export const RESPONSE_MESSAGE = {
   VERIFY_FORGOT_PASSWORD_SUCCESS: 'Xác thực OTP quên mật khẩu thành công',
   UPDATE_PASSWORD_SUCCESS: 'Cập nhật mật khẩu thành công',
   SEND_OTP_SUCCESS: 'Gửi OTP thành công',
+  VERIFY_TOKEN_SUCCESS: 'Xác thực token thành công',
 };
