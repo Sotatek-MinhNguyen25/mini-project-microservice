@@ -8,6 +8,6 @@ export default (): Configuration => ({
     url: process.env.REDIS_URL || 'localhost:6379',
   },
   kafka: {
-    url: process.env.KAFKA_URL || 'localhost:9092',
+    brokers: process.env.KAFKA_BROKERS || 'localhost:9092',
   },
 });

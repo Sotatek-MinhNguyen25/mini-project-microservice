@@ -6,6 +6,6 @@ export interface Configuration {
     url: string;
   };
   kafka: {
-    url: string;
+    brokers: string;
   };
 }
