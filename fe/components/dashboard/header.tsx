@@ -48,37 +48,13 @@ export function Header() {
     unreadCount,
     isConnected,
     connectionStatus,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
+    getNotificationMessage,
   } = useAuthenticatedWebSocket({
     options: {
       shouldReconnect: true,
       reconnectAttempts: 5,
-      enableAutoMarkRead: false,
-      maxNotifications: 50,
     },
   });
-
-  const getNotificationMessage = useCallback(
-    (notification: Notification): string => {
-      switch (notification.type) {
-        case 'like':
-          return `${notification.data.actorName} đã thích bài viết của bạn`;
-        case 'comment':
-          return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
-        case 'friend_request':
-          return `${notification.data.actorName} đã gửi lời mời kết bạn`;
-        case 'message':
-          return `${notification.data.senderName}: ${notification.data.messagePreview}`;
-        case 'mention':
-          return `${notification.data.actorName} đã nhắc đến bạn trong một bài viết`;
-        default:
-          return 'Bạn có thông báo mới';
-      }
-    },
-    [],
-  );
 
   // Close notification dropdown when clicking outside
   useEffect(() => {
@@ -105,11 +81,7 @@ export function Header() {
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    markAsRead(notification.id);
-    const url = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
-    if (url) {
-      window.location.href = url;
-    }
+    console.log('Clicked notification:', notification);
     setShowNotifications(false);
   };
 
@@ -232,7 +204,7 @@ export function Header() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={markAllAsRead}
+                            onClick={() => console.log('Mark all as read')}
                             className="text-xs hover:bg-primary/10"
                           >
                             <CheckOutlined className="h-3 w-3 mr-1" />
@@ -272,11 +244,10 @@ export function Header() {
                         notifications.map((notification: Notification) => (
                           <div
                             key={notification.id}
-                            className={`relative flex items-start space-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors ${
-                              !notification.isRead
-                                ? 'bg-blue-50 dark:bg-blue-900/20'
-                                : ''
-                            }`}
+                            className={`relative flex items-start space-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors ${!notification.isRead
+                              ? 'bg-blue-50 dark:bg-blue-900/20'
+                              : ''
+                              }`}
                             onClick={() =>
                               handleNotificationClick(notification)
                             }
@@ -312,7 +283,7 @@ export function Header() {
                                   className="h-6 w-6 hover:bg-blue-100 dark:hover:bg-blue-800"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    markAsRead(notification.id);
+                                    console.log('Mark as read:', notification.id);
                                   }}
                                 >
                                   <CheckOutlined className="h-3 w-3 text-blue-600" />
@@ -324,7 +295,7 @@ export function Header() {
                                 className="h-6 w-6 hover:bg-red-100 dark:hover:bg-red-800"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteNotification(notification.id);
+                                  console.log('Delete notification:', notification.id);
                                 }}
                               >
                                 <DeleteOutlined className="h-3 w-3 text-red-600" />

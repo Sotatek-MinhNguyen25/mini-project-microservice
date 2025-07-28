@@ -33,16 +33,6 @@ export interface UseWebSocketReturn {
   // Notifications
   notifications: Notification[];
   unreadCount: number;
-  summary: NotificationSummary;
-  isLoading: boolean;
-  preferences: NotificationPreferences;
-
-  // Actions
-  markAsRead: (notificationId: string) => void;
-  markAllAsRead: () => void;
-  deleteNotification: (notificationId: string) => void;
-  loadMore: () => void;
-  updatePreferences: (prefs: Partial<NotificationPreferences>) => void;
 }
 
 // Socket.IO Event interfaces

@@ -17,7 +17,7 @@ export class JwtAuthRemoteGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     @Inject(KAFKA_CLIENTS.AUTH) private readonly authClient: ClientKafka,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -40,7 +40,7 @@ export class JwtAuthRemoteGuard implements CanActivate {
       const userPayload = await firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.VERIFY_TOKEN, { token }));
 
       // Gán user vào request
-      request.user = userPayload;
+      request.user = userPayload.data;
       return true;
     } catch (error) {
       console.error('Token verification failed:', error);

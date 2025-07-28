@@ -11,19 +11,16 @@ interface UseAuthenticatedWebSocketConfig {
     reconnectAttempts?: number;
     reconnectInterval?: number;
     shouldReconnect?: boolean;
-    enableAutoMarkRead?: boolean;
-    maxNotifications?: number;
   };
 }
 
 export const useAuthenticatedWebSocket = ({
-  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001',
+  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:15000',
   options = {},
 }: UseAuthenticatedWebSocketConfig = {}): UseWebSocketReturn & {
   isAuthenticated: boolean;
   authUser: any;
   getNotificationMessage: (notification: Notification) => string;
-  getNotificationUrl: (notification: Notification) => string;
 } => {
   const { user, token, isAuthenticated, isLoading } = useAuth();
 
@@ -80,44 +77,12 @@ export const useAuthenticatedWebSocket = ({
           return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
         case 'friend_request':
           return `${notification.data.actorName} đã gửi lời mời kết bạn`;
-        // case 'friend_accept':
-        //   return `${notification.data.actorName} đã chấp nhận lời mời kết bạn`;
         case 'message':
           return `${notification.data.senderName}: ${notification.data.messagePreview}`;
         case 'mention':
           return `${notification.data.actorName} đã nhắc đến bạn trong một bài viết`;
-        // case 'share':
-        //   return `${notification.data.actorName} đã chia sẻ bài viết của bạn`;
-        // case 'post_update':
-        //   return `Có cập nhật mới từ bài viết bạn quan tâm`;
-        // case 'birthday':
-        //   return `Hôm nay là sinh nhật của ${notification.data.actorName}`;
-        // case 'event_reminder':
-        //   return `Nhắc nhở sự kiện: ${notification.data.eventName} sắp diễn ra`;
         default:
           return 'Bạn có thông báo mới';
-      }
-    },
-    [],
-  );
-
-  const getNotificationUrl = useCallback(
-    (notification: Notification): string => {
-      switch (notification.type) {
-        case 'like':
-        case 'comment':
-        case 'mention':
-        // case 'share':
-        //   return `/posts/${notification.data.postId}`;
-        case 'friend_request':
-        // case 'friend_accept':
-        //   return `/profile/${notification.data.actorId}`;
-        // case 'message':
-        //   return `/messages/${notification.data.conversationId}`;
-        // case 'post_update':
-        //   return `/posts/${notification.data.postId}`;
-        default:
-          return '/notifications';
       }
     },
     [],
@@ -128,6 +93,5 @@ export const useAuthenticatedWebSocket = ({
     isAuthenticated,
     authUser: user,
     getNotificationMessage,
-    getNotificationUrl,
   };
 };

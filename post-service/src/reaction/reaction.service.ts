@@ -7,7 +7,7 @@ import { CONSTANTS } from 'src/common/constants/app.constants';
 import { ReactionSummary } from './reaction.interface';
 import { ConsumerResult } from 'src/common/type/consumer-result';
 import { firstValueFrom } from 'rxjs';
-import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
+import { RpcBadRequestException, RpcNotFoundException } from 'src/common/exception/rpc.exception';
 import { User } from 'src/common/type/user';
 import * as _ from 'lodash';
 
@@ -17,7 +17,9 @@ export class ReactionService {
     private readonly prismaService: PrismaService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
-  ) {}
+    @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
+    private readonly notiClient: ClientKafka,
+  ) { }
 
   //get all reactions of a post
   async getReactionsByPostId(postId: string): Promise<ConsumerResult<any[]>> {
@@ -82,12 +84,24 @@ export class ReactionService {
         userId: createReactionDto.userId,
       },
     });
+
+    const post = await this.prismaService.post.findUnique({ where: { id: createReactionDto.postId } })
+    if (!post) throw new RpcBadRequestException("POST.NOT_FOUND")
+
     let reactionRes: Reaction;
     // Neu user chua tung reaction
     if (!reaction) {
       reactionRes = await this.prismaService.reaction.create({
         data: createReactionDto,
       });
+
+      await this.notiClient.emit('notification.create', {
+        senderId: reactionRes.userId,
+        postId: reactionRes.postId,
+        type: "REACTION",
+        receiverId: post?.userId
+      });
+
       return { data: reactionRes };
     }
 

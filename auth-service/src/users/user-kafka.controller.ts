@@ -9,7 +9,7 @@ import { FindUserByIdsDto } from './dto/find-user-ids.dto';
 
 @Controller()
 export class UserKafkaController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @MessagePattern(KAFKA_PATTERNS.USER_CREATE)
   async createUser(@Payload() data: CreateUserDto) {
