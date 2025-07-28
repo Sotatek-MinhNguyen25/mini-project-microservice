@@ -12,19 +12,6 @@ const configuration = () => ({
     clientId: process.env.KAFKA_CLIENT_ID || 'api-gateway',
     groupId: process.env.KAFKA_GROUP_ID || 'api-gateway-group',
   },
-
-  jwt: {
-    secret: process.env.JWT_SECRET || 'my_secret_key',
-    accessTokenExpired: process.env.AC_TOKEN_EXPIRED || '15m',
-    refreshTokenExpired: process.env.RF_TOKEN_EXPIRED || '30d',
-  },
-
-  redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    url: process.env.REDIS_URL || 'localhost:6379',
-    // password: process.env.REDIS_PASSWORD || undefined,
-  },
 });
 
 export default configuration;

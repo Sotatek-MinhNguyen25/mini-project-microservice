@@ -26,8 +26,6 @@ import {
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_PATTERNS } from './kafka.patterns';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { MESSAGES } from '@nestjs/core/constants';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -38,7 +36,7 @@ export class AuthService implements OnModuleInit {
     @Inject('KAFKA_NOTIFICATION_SERVICE')
     private readonly notificationClient: ClientKafka,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.notificationClient.subscribeToResponseOf(
@@ -377,9 +375,10 @@ export class AuthService implements OnModuleInit {
   async verifyToken(token: string) {
     let payload: JwtPayload;
     try {
-      payload = await this.customJwtService.decode(token) as JwtPayload;
+      payload = await this.customJwtService.decode(token);
     } catch (error) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN)
+      console.log(error);
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN);
     }
 
     if (!payload || typeof payload !== 'object' || !payload.jti) {
@@ -390,11 +389,11 @@ export class AuthService implements OnModuleInit {
     if (!isValid) throw new RpcUnauthorizedException(ERROR_MESSAGE.JTI_VALID);
 
     try {
-      const verifyToken = await this.customJwtService.verify<JwtPayload>(token)
+      const verifyToken = this.customJwtService.verify<JwtPayload>(token);
       return verifyToken;
     } catch (error) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_VERIFY_FAIL)
+      console.log(error);
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_VERIFY_FAIL);
     }
-
   }
 }

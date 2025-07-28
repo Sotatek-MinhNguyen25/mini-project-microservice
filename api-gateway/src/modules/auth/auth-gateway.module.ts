@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AuthGatewayController } from './auth-gateway.controller';
-import { JwtStrategy } from '../../common/jwt';
 import { KafkaModule } from 'src/common/kafka/kafka.module';
 
 @Module({
   imports: [KafkaModule],
   controllers: [AuthGatewayController],
-  providers: [JwtStrategy],
+  providers: [],
 })
 export class AuthGatewayModule {}
