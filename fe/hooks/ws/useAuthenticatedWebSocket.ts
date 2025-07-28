@@ -37,7 +37,7 @@ export const useAuthenticatedWebSocket = ({
       const socketOptions = {
         ...options,
         auth: {
-          token,
+          accessToken: token,
           userId: user?.id?.toString(),
           userEmail: user?.email,
         },

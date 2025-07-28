@@ -9,4 +9,10 @@ export const CONSTANTS = {
       VERIFY_TOKEN: 'auth.verify-token',
     },
   },
+  KAFKA_PATTERN: {
+    AUTH: 'KAFKA_AUTH_SERVICE',
+  },
+  WS_MESSAGE_PATTERN: {
+    REPLY_COMMENT: 'emitMessage',
+  },
 } as const;

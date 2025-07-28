@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { KafkaService } from './kafka.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { CONSTANTS } from '../constant';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'KAFKA_AUTH_SERVICE',
+        name: CONSTANTS.KAFKA_PATTERN.AUTH,
         transport: Transport.KAFKA,
         options: {
           client: {

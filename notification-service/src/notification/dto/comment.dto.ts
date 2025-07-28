@@ -6,4 +6,7 @@ export class ReplyCommentDto {
 
   @IsUUID()
   userId: string;
+
+  @IsUUID()
+  to: string;
 }

@@ -1,5 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -7,9 +6,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { firstValueFrom } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { SocketService } from './socket.service';
+import { ReplyCommentDto } from 'src/notification/dto/comment.dto';
 
 @Injectable()
 @WebSocketGateway({
@@ -35,9 +34,11 @@ export class SocketGateway
     return this.socketService.handleConnection(client);
   }
 
-  replyComment(data: any) {
+  replyComment(data: ReplyCommentDto) {
     return this.socketService.replyComment(this.server, data);
   }
 
-  handleDisconnect(client: Socket) {}
+  handleDisconnect(client: Socket) {
+    return this.socketService.handleDisconnect(client);
+  }
 }
