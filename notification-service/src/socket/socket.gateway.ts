@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -6,7 +7,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { firstValueFrom } from 'rxjs';
 import { Server, Socket } from 'socket.io';
+import { SocketService } from './socket.service';
 
 @Injectable()
 @WebSocketGateway({
@@ -17,28 +20,24 @@ import { Server, Socket } from 'socket.io';
 export class SocketGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
+  constructor(private socketService: SocketService) {}
+
   @WebSocketServer()
   server: Server;
 
   private logger = new Logger();
-  constructor() {}
 
   afterInit(server: Server) {
     this.logger.log('Websocket initialized');
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
-    const token = client.handshake.auth.accessToken || 'token';
-    if (token) {
-      client.join('room1');
-    }
-    this.logger.log(`Client ${client.id} conecting...`);
+  handleConnection(client: Socket) {
+    return this.socketService.handleConnection(client);
   }
 
-  sendMessage() {
-    console.log('Hello');
-    this.server.to('room1').emit('emitMessage', 'hello');
+  replyComment(data: any) {
+    return this.socketService.replyComment(this.server, data);
   }
 
-  handleDisconnect(client: any) {}
+  handleDisconnect(client: Socket) {}
 }

@@ -5,5 +5,8 @@ export const CONSTANTS = {
         REPLY: 'comment.reply',
       },
     },
+    AUTH: {
+      VERIFY_TOKEN: 'auth.verify-token',
+    },
   },
 } as const;

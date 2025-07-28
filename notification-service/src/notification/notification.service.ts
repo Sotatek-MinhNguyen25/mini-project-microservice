@@ -3,9 +3,9 @@ import { ReplyCommentDto } from './dto/comment.dto';
 import { SocketGateway } from 'src/socket/socket.gateway';
 @Injectable()
 export class NotificationService {
-  constructor(private socket: SocketGateway) {}
+  constructor(private socketGatway: SocketGateway) {}
   replyComment(replyCommentDto: ReplyCommentDto) {
     const { commentId, userId } = replyCommentDto;
-    this.socket.sendMessage();
+    this.socketGatway.replyComment({ commentId, userId });
   }
 }

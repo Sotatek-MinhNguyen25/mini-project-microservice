@@ -10,7 +10,6 @@ export class NotificationController {
 
   @EventPattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.COMMENT.REPLY)
   replyComment(@Payload() replyCommentDto: any) {
-    console.log('Hello');
     return this.notificationService.replyComment(replyCommentDto);
   }
 }

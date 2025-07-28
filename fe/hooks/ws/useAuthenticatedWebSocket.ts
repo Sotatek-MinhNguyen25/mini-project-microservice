@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useAuth } from '@/contexts/auth-context';
 import type { UseWebSocketReturn } from '@/types/websocket';
+import { io } from 'socket.io-client';
 
 interface UseAuthenticatedWebSocketConfig {
   baseUrl?: string;
@@ -16,10 +17,10 @@ interface UseAuthenticatedWebSocketConfig {
 }
 
 export const useAuthenticatedWebSocket = ({
-  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001',
+  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8086',
   protocols,
   options = {},
-}: UseAuthenticatedWebSocketConfig = {}): UseWebSocketReturn & {
+}: UseAuthenticatedWebSocketConfig = {}): any & {
   isAuthenticated: boolean;
   authUser: any;
 } => {
@@ -53,15 +54,16 @@ export const useAuthenticatedWebSocket = ({
   }, [baseUrl, isAuthenticated, token, user?.id, user?.email, isLoading]);
 
   // Sử dụng hook WebSocket với URL conditional
-  const websocketResult = useWebSocket({
-    url: wsUrl || '',
-    protocols,
-    options: {
-      ...options,
-      // Chỉ reconnect nếu vẫn còn authenticated
-      shouldReconnect: isAuthenticated && Boolean(wsUrl),
-    },
-  });
+  // const websocketResult = useWebSocket({
+  //   url: wsUrl || '',
+  //   protocols,
+  //   options: {
+  //     ...options,
+  //     // Chỉ reconnect nếu vẫn còn authenticated
+  //     shouldReconnect: isAuthenticated && Boolean(wsUrl),
+  //   },
+  // });
+  const websocketResult = io('http://localhost:8086');
 
   return {
     ...websocketResult,
