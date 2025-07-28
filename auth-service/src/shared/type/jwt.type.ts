@@ -6,7 +6,8 @@ export type JwtPayload = {
   username: string;
   roles?: Role[];
   jti?: string; // Unique token id
-  // Thêm các trường khác nếu cần
+  iat?: number; // Issued at
+  exp?: number; // Expiration time
 };
 
 export type JwtResponse = {

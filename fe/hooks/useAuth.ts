@@ -6,7 +6,6 @@ import { LoginCredentials } from '@/types';
 import { jwtDecode } from 'jwt-decode';
 import authService from '@/service/auth.service';
 import {
-  ApiResponse,
   DecodedToken,
   RegisterData,
   RegisterResponse,
@@ -41,27 +40,26 @@ export function useLogin() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const mutation = useMutation<ApiResponse, Error, LoginCredentials>({
-    mutationFn: async ({ email, password }) => {
+  const mutation = useMutation({
+    mutationFn: async ({ email, password }: LoginCredentials) => {
       return await authService.login(email, password);
     },
+
     onSuccess: async (response) => {
       if (response.statusCode === 200 || response.statusCode === 201) {
         const { accessToken, refreshToken } = response.data!;
+
+        // Lưu tokens
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
 
         try {
           const decodedUser: DecodedToken = jwtDecode(accessToken);
-          console.log('Decoded user:', decodedUser.roles[0]);
-
           const role = decodedUser.roles?.[0]?.trim();
-          console.log('User role:', role);
+
           localStorage.setItem('userRole', role);
 
-          // // navigate to the appropriate dashboard based on user role
           if (role === 'ADMIN') {
-            console.log('User is an admin, redirecting to admin dashboard');
             router.push('/admin');
           } else if (role === 'USER') {
             const userProfile = await authService.me();
@@ -77,6 +75,21 @@ export function useLogin() {
             }
 
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+            window.dispatchEvent(
+              new StorageEvent('storage', {
+                key: 'userProfile',
+                newValue: JSON.stringify(userProfile),
+              }),
+            );
+
+            window.dispatchEvent(
+              new StorageEvent('storage', {
+                key: 'accessToken',
+                newValue: accessToken,
+              }),
+            );
+
             router.push('/');
           }
         } catch (error) {
@@ -88,12 +101,11 @@ export function useLogin() {
             variant: 'default',
           });
         }
-
-        // router.push('/');
       } else {
         throw new Error(response.message || 'Login failed');
       }
     },
+
     onError: (error) => {
       toast({
         title: 'Error',
@@ -233,8 +245,15 @@ export function useSendResetPassword() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ({ email, otp, password }: { email: string; otp: string; password: string }) =>
-      authService.sendNewPassword(email, password, otp),
+    mutationFn: ({
+      email,
+      otp,
+      password,
+    }: {
+      email: string;
+      otp: string;
+      password: string;
+    }) => authService.sendNewPassword(email, password, otp),
     onSuccess: () => {
       toast({
         title: 'Success',
