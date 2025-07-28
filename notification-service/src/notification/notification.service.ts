@@ -5,7 +5,7 @@ import { SocketGateway } from 'src/socket/socket.gateway';
 export class NotificationService {
   constructor(private socketGatway: SocketGateway) {}
   replyComment(replyCommentDto: ReplyCommentDto) {
-    const { commentId, userId } = replyCommentDto;
-    this.socketGatway.replyComment({ commentId, userId });
+    const { commentId, userId, to } = replyCommentDto;
+    this.socketGatway.replyComment({ commentId, userId, to });
   }
 }

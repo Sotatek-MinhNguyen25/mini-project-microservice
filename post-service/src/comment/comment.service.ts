@@ -82,6 +82,7 @@ export class CommentService implements OnModuleInit {
     }
     this.notiClient.emit('comment.reply', {
       userId: createCommentDto.userId,
+      to: parentComment.userId,
       commentId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
     });
     return {

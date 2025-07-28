@@ -54,7 +54,7 @@ export function useLogin() {
         localStorage.setItem('refreshToken', refreshToken);
 
         try {
-          const decodedUser: DecodedToken = jwtDecode(accessToken);
+          const decodedUser: any = jwtDecode(accessToken);
           const role = decodedUser.roles?.[0]?.trim();
 
           localStorage.setItem('userRole', role);
