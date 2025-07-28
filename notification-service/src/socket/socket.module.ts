@@ -11,9 +11,12 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: [process.env.KAFKA_URL || 'localhost:9092'],
+            clientId: 'auth',
+            brokers: ['localhost:9092'],
           },
-          producerOnlyMode: true,
+          consumer: {
+            groupId: 'auth-consumer',
+          },
         },
       },
     ]),

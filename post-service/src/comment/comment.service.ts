@@ -45,10 +45,7 @@ export class CommentService implements OnModuleInit {
     if (!commentId && !postId) {
       throw new RpcBadRequestException('Phải có ít nhất commentId hoặc postId');
     }
-    this.notiClient.emit('comment.reply', {
-      userId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
-      commentId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
-    });
+
     // Neu co postId
     if (createCommentDto.postId) {
       const post = this.prismaService.post.findUnique({
@@ -83,6 +80,10 @@ export class CommentService implements OnModuleInit {
     if (parentComment?.parentId) {
       throw new RpcBadRequestException('Comment chỉ nên có 2 cấp');
     }
+    this.notiClient.emit('comment.reply', {
+      userId: createCommentDto.userId,
+      commentId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
+    });
     return {
       data: await this.prismaService.comment.create({
         data: {
