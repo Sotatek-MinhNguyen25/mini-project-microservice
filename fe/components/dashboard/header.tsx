@@ -66,7 +66,7 @@ export function Header() {
         case 'like':
           return `${notification.data.actorName} đã thích bài viết của bạn`;
         case 'comment':
-          return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
+          return `${notification.from.username} đã bình luận về bài viết của bạn`;
         case 'friend_request':
           return `${notification.data.actorName} đã gửi lời mời kết bạn`;
         case 'message':
@@ -104,9 +104,9 @@ export function Header() {
     }
   };
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = (notification: any) => {
     markAsRead(notification.id);
-    const url = process.env.NEXT_PUBLIC_WS_URL || 'http:localhost:8086';
+    const url = `/post/${notification.postId}`;
     if (url) {
       window.location.href = url;
     }

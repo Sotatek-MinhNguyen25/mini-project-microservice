@@ -1,11 +1,11 @@
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsObject, IsUUID } from 'class-validator';
 
 export class CommentEventDto {
   @IsUUID()
   postId: string;
 
-  @IsUUID()
-  from: string;
+  @IsObject()
+  from: any;
 
   @IsUUID()
   to: string;

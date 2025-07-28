@@ -71,35 +71,32 @@ export const useAuthenticatedWebSocket = ({
     options: socketOptions,
   });
 
-  const getNotificationMessage = useCallback(
-    (notification: Notification): string => {
-      switch (notification.type) {
-        case 'like':
-          return `${notification.data.actorName} đã thích bài viết của bạn`;
-        case 'comment':
-          return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
-        case 'friend_request':
-          return `${notification.data.actorName} đã gửi lời mời kết bạn`;
-        // case 'friend_accept':
-        //   return `${notification.data.actorName} đã chấp nhận lời mời kết bạn`;
-        case 'message':
-          return `${notification.data.senderName}: ${notification.data.messagePreview}`;
-        case 'mention':
-          return `${notification.data.actorName} đã nhắc đến bạn trong một bài viết`;
-        // case 'share':
-        //   return `${notification.data.actorName} đã chia sẻ bài viết của bạn`;
-        // case 'post_update':
-        //   return `Có cập nhật mới từ bài viết bạn quan tâm`;
-        // case 'birthday':
-        //   return `Hôm nay là sinh nhật của ${notification.data.actorName}`;
-        // case 'event_reminder':
-        //   return `Nhắc nhở sự kiện: ${notification.data.eventName} sắp diễn ra`;
-        default:
-          return 'Bạn có thông báo mới';
-      }
-    },
-    [],
-  );
+  const getNotificationMessage = useCallback((notification: any): string => {
+    switch (notification.type) {
+      case 'reaction':
+        return `${notification.data.actorName} đã thích bài viết của bạn`;
+      case 'comment':
+        return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
+      case 'friend_request':
+        return `${notification.data.actorName} đã gửi lời mời kết bạn`;
+      // case 'friend_accept':
+      //   return `${notification.data.actorName} đã chấp nhận lời mời kết bạn`;
+      case 'message':
+        return `${notification.data.senderName}: ${notification.data.messagePreview}`;
+      case 'mention':
+        return `${notification.data.actorName} đã nhắc đến bạn trong một bài viết`;
+      // case 'share':
+      //   return `${notification.data.actorName} đã chia sẻ bài viết của bạn`;
+      // case 'post_update':
+      //   return `Có cập nhật mới từ bài viết bạn quan tâm`;
+      // case 'birthday':
+      //   return `Hôm nay là sinh nhật của ${notification.data.actorName}`;
+      // case 'event_reminder':
+      //   return `Nhắc nhở sự kiện: ${notification.data.eventName} sắp diễn ra`;
+      default:
+        return 'Bạn có thông báo mới';
+    }
+  }, []);
 
   const getNotificationUrl = useCallback(
     (notification: Notification): string => {

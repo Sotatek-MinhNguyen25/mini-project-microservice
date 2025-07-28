@@ -86,7 +86,7 @@ export class ReactionService {
     });
     let reactionRes: Reaction;
     // Neu user chua tung reaction
-    if (!reaction || reaction.deletedAt) {
+    if (!reaction) {
       reactionRes = await this.prismaService.reaction.create({
         data: createReactionDto,
       });

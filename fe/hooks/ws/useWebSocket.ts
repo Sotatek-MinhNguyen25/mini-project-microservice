@@ -118,7 +118,7 @@ export const useWebSocket = ({
 
     // Notification event listeners
     socket.on('comment.reply', handleNewNotification);
-    socket.on('bulk_notifications', handleBulkNotifications);
+    socket.on('reaction', handleNewNotification);
     socket.on('notification_read', handleNotificationRead);
     socket.on('notification_deleted', handleNotificationDeleted);
     socket.on('notification_count_update', handleCountUpdate);

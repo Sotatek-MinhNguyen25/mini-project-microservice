@@ -9,12 +9,12 @@ import { ReactionDto } from './dto/reaction.dto';
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.COMMENT.REPLY)
+  @EventPattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.COMMENT)
   commentEvent(@Payload() replyCommentDto: CommentEventDto) {
     return this.notificationService.replyComment(replyCommentDto);
   }
 
-  @EventPattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.COMMENT.REPLY)
+  @EventPattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.REACTION)
   reactionEvent(@Payload() reactionDto: ReactionDto) {
     return this.notificationService.reaction(reactionDto);
   }

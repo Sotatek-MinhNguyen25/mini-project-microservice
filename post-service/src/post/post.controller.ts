@@ -21,8 +21,8 @@ export class PostController {
   }
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.GET_DETAIL)
-  async findOne(@Payload() id: string) {
-    return await this.postService.findOne(id);
+  async findOne(@Payload() dto: { id: string; userId: string }) {
+    return await this.postService.findOne(dto.id, dto.userId);
   }
 
   @MessagePattern(CONSTANTS.MESSAGE_PATTERN.POST.UPDATE)
