@@ -106,7 +106,7 @@ export function Header() {
 
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
-    const url = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
+    const url = process.env.NEXT_PUBLIC_WS_URL || 'http:localhost:8086';
     if (url) {
       window.location.href = url;
     }

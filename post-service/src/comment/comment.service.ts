@@ -23,6 +23,9 @@ export class CommentService implements OnModuleInit {
     private prismaService: PrismaService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
+
+    @Inject(CONSTANTS.KAFKA_SERVICE.NOTI)
+    private readonly notiClient: ClientKafka,
   ) {}
 
   onModuleInit() {
@@ -42,9 +45,10 @@ export class CommentService implements OnModuleInit {
     if (!commentId && !postId) {
       throw new RpcBadRequestException('Phải có ít nhất commentId hoặc postId');
     }
+
     // Neu co postId
     if (createCommentDto.postId) {
-      const post = this.prismaService.post.findUnique({
+      const post = await this.prismaService.post.findUnique({
         where: {
           id: postId,
         },
@@ -52,6 +56,15 @@ export class CommentService implements OnModuleInit {
       if (!post) {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
+      // Notification
+      this.notiClient.emit(
+        CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT.COMMENT_POST,
+        {
+          from: createCommentDto.userId,
+          to: post.userId,
+          postId: post.id,
+        },
+      );
       return {
         data: await this.prismaService.comment.create({
           data: {
@@ -75,6 +88,13 @@ export class CommentService implements OnModuleInit {
     if (parentComment?.parentId) {
       throw new RpcBadRequestException('Comment chỉ nên có 2 cấp');
     }
+    // Notification
+    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT.COMMENT_REPLY, {
+      from: createCommentDto.userId,
+      to: parentComment.userId,
+      commentId: parentComment.id,
+    });
+
     return {
       data: await this.prismaService.comment.create({
         data: {

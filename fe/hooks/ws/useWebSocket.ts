@@ -72,6 +72,12 @@ export const useWebSocket = ({
       console.log('Socket.IO connected with ID:', socket.id);
       setIsConnected(true);
       setConnectionStatus('Connected');
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        socket.auth = {
+          accessToken,
+        };
+      }
       reconnectAttemptsRef.current = 0;
       startHeartbeat();
       loadNotifications();
@@ -111,7 +117,7 @@ export const useWebSocket = ({
     });
 
     // Notification event listeners
-    socket.on('notification', handleNewNotification);
+    socket.on('comment.reply', handleNewNotification);
     socket.on('bulk_notifications', handleBulkNotifications);
     socket.on('notification_read', handleNotificationRead);
     socket.on('notification_deleted', handleNotificationDeleted);
@@ -125,7 +131,7 @@ export const useWebSocket = ({
       autoReadTimeouts.current.forEach((timeout) => clearTimeout(timeout));
       socket.disconnect();
     };
-  }, [url, options.auth, options.query]);
+  }, []);
 
   // Initialize preferences
   useEffect(() => {

@@ -1,9 +1,9 @@
 // hooks/useAuthenticatedWebSocket.ts
 import { useMemo, useCallback } from 'react';
-import { useWebSocket } from './useWebSocket';
 import { useAuth } from '@/contexts/auth-context';
-import type { UseWebSocketReturn } from '@/types/websocket';
+import { io } from 'socket.io-client';
 import type { Notification } from '@/types/notification';
+import { useWebSocket } from './useWebSocket';
 
 interface UseAuthenticatedWebSocketConfig {
   baseUrl?: string;
@@ -17,9 +17,9 @@ interface UseAuthenticatedWebSocketConfig {
 }
 
 export const useAuthenticatedWebSocket = ({
-  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001',
+  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8086',
   options = {},
-}: UseAuthenticatedWebSocketConfig = {}): UseWebSocketReturn & {
+}: UseAuthenticatedWebSocketConfig = {}): any & {
   isAuthenticated: boolean;
   authUser: any;
   getNotificationMessage: (notification: Notification) => string;
@@ -37,7 +37,7 @@ export const useAuthenticatedWebSocket = ({
       const socketOptions = {
         ...options,
         auth: {
-          token,
+          accessToken: token,
           userId: user?.id?.toString(),
           userEmail: user?.email,
         },

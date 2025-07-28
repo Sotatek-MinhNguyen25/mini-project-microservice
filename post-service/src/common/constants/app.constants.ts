@@ -1,5 +1,12 @@
 export const CONSTANTS = {
   MESSAGE_PATTERN: {
+    NOTI: {
+      COMMENT: {
+        COMMENT_REPLY: 'comment.reply',
+        COMMENT_POST: 'comment.post',
+      },
+      REACTION: 'reaction',
+    },
     POST: {
       GET: 'post.get',
       CREATE: 'post.create',
@@ -38,5 +45,6 @@ export const CONSTANTS = {
 
   KAFKA_SERVICE: {
     AUTH: 'KAFKA_AUTH_SERVICE',
+    NOTI: 'KAFKA_NOTI_SERVICE',
   },
 } as const;

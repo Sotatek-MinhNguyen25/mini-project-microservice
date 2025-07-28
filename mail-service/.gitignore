@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+.env.kafka
+.env.app
+
 # Logs
 logs
 *.log

@@ -1,26 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
-
+import { CommentEventDto } from './dto/comment.dto';
+import { SocketGateway } from 'src/socket/socket.gateway';
+import { ReactionDto } from './dto/reaction.dto';
 @Injectable()
 export class NotificationService {
-  create(createNotificationDto: CreateNotificationDto) {
-    return 'This action adds a new notification';
+  constructor(private socketGatway: SocketGateway) {}
+
+  replyComment(commentEventDto: CommentEventDto) {
+    const { postId, from, to } = commentEventDto;
+    return this.socketGatway.commentEvent({ postId, from, to });
   }
 
-  findAll() {
-    return `This action returns all notification`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
-  }
-
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  reaction(reactionDto: ReactionDto) {
+    return this.socketGatway.reactionEvent(reactionDto);
   }
 }
