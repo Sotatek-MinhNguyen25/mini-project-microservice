@@ -5,22 +5,22 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger = new Logger();
-  const kafkaBrokers = process.env.KAFKA_BROKER || process.env.KAFKA_BROKERS || 'kafka:9092';
-  logger.log(`[NOTIFICATION-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+  const app = await NestFactory.create(AppModule);
+  app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
     options: {
       client: {
-        clientId: 'notification-service-client',
-        brokers: [kafkaBrokers],
+        brokers: [process.env.KAKFA_URL ?? 'localhost:9092'],
       },
       consumer: {
-        groupId: 'notification-service-consumer-group',
+        groupId: 'noti-comsumer-group',
+        allowAutoTopicCreation: true,
       },
     },
   });
-  logger.log(`[NOTIFICATION-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
-  await app.listen();
-  logger.log(`🚀 App is running on port: ${process.env.PORT ?? 3007}`);
+  app.startAllMicroservices();
+  app.listen(process.env.PORT ?? 8080, () => {
+    logger.log(`Server listen on PORT: ${process.env.PORT}`);
+  });
 }
 bootstrap();

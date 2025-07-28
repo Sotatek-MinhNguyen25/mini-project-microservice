@@ -23,6 +23,9 @@ export class CommentService implements OnModuleInit {
     private prismaService: PrismaService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
+
+    @Inject(CONSTANTS.KAFKA_SERVICE.NOTI)
+    private readonly notiClient: ClientKafka,
   ) {}
 
   onModuleInit() {
@@ -42,6 +45,10 @@ export class CommentService implements OnModuleInit {
     if (!commentId && !postId) {
       throw new RpcBadRequestException('Phải có ít nhất commentId hoặc postId');
     }
+    this.notiClient.emit('comment.reply', {
+      userId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
+      commentId: '1f231a97-1e4b-4660-846a-af6967c3ec4b',
+    });
     // Neu co postId
     if (createCommentDto.postId) {
       const post = this.prismaService.post.findUnique({
@@ -52,6 +59,7 @@ export class CommentService implements OnModuleInit {
       if (!post) {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
+
       return {
         data: await this.prismaService.comment.create({
           data: {

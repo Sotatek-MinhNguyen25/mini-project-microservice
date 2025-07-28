@@ -8,7 +8,7 @@ import { CommentService } from 'src/comment/comment.service';
 import { ReactionService } from 'src/reaction/reaction.service';
 
 @Module({
-  imports: [KafkaModule.register(['comment'])],
+  imports: [KafkaModule.register(['noti'])],
   controllers: [PostController],
   providers: [PostService, PrismaClient, CommentService, ReactionService],
 })

@@ -38,5 +38,6 @@ export const CONSTANTS = {
 
   KAFKA_SERVICE: {
     AUTH: 'KAFKA_AUTH_SERVICE',
+    NOTI: 'KAFKA_NOTI_SERVICE',
   },
 } as const;
