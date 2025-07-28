@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
+// hooks/useAuthenticatedWebSocket.ts
+import { useMemo, useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useAuth } from '@/contexts/auth-context';
 import type { UseWebSocketReturn } from '@/types/websocket';
-import { io } from 'socket.io-client';
+import type { Notification } from '@/types/notification';
 
 interface UseAuthenticatedWebSocketConfig {
   baseUrl?: string;
-  protocols?: string | string[];
   options?: {
     reconnectAttempts?: number;
     reconnectInterval?: number;
@@ -23,51 +23,112 @@ export const useAuthenticatedWebSocket = ({
 }: UseAuthenticatedWebSocketConfig = {}): any & {
   isAuthenticated: boolean;
   authUser: any;
+  getNotificationMessage: (notification: Notification) => string;
+  getNotificationUrl: (notification: Notification) => string;
 } => {
   const { user, token, isAuthenticated, isLoading } = useAuth();
 
-  // 🔑 Chỉ tạo WebSocket URL khi user đã authenticated
-  const wsUrl = useMemo(() => {
+  const { wsUrl, socketOptions } = useMemo(() => {
     if (!isAuthenticated || !token || isLoading) {
-      return null; // Không kết nối nếu chưa login hoặc đang loading
+      return { wsUrl: null, socketOptions: {} };
     }
 
     try {
-      const url = new URL(baseUrl);
+      // Cho Socket.IO, chúng ta pass auth qua options thay vì URL params
+      const socketOptions = {
+        ...options,
+        auth: {
+          token,
+          userId: user?.id?.toString(),
+          userEmail: user?.email,
+        },
+        query: {
+          version: '1.0',
+        },
+        transports: ['websocket', 'polling'], // Fallback transports
+      };
 
-      // Thêm authentication parameters
-      url.searchParams.append('token', token);
-
-      if (user?.id) {
-        url.searchParams.append('userId', user.id.toString());
-      }
-
-      if (user?.email) {
-        url.searchParams.append('userEmail', user.email);
-      }
-
-      return url.toString();
+      return {
+        wsUrl: baseUrl,
+        socketOptions,
+      };
     } catch (error) {
-      console.error('Error creating WebSocket URL:', error);
-      return null;
+      console.error('Error creating Socket.IO config:', error);
+      return { wsUrl: null, socketOptions: {} };
     }
-  }, [baseUrl, isAuthenticated, token, user?.id, user?.email, isLoading]);
+  }, [
+    baseUrl,
+    isAuthenticated,
+    token,
+    user?.id,
+    user?.email,
+    isLoading,
+    options,
+  ]);
 
-  // Sử dụng hook WebSocket với URL conditional
-  // const websocketResult = useWebSocket({
-  //   url: wsUrl || '',
-  //   protocols,
-  //   options: {
-  //     ...options,
-  //     // Chỉ reconnect nếu vẫn còn authenticated
-  //     shouldReconnect: isAuthenticated && Boolean(wsUrl),
-  //   },
-  // });
-  const websocketResult = io('http://localhost:8086');
+  // Sử dụng hook WebSocket với Socket.IO config
+  const websocketResult = useWebSocket({
+    url: wsUrl || '',
+    options: socketOptions,
+  });
+
+  const getNotificationMessage = useCallback(
+    (notification: Notification): string => {
+      switch (notification.type) {
+        case 'like':
+          return `${notification.data.actorName} đã thích bài viết của bạn`;
+        case 'comment':
+          return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
+        case 'friend_request':
+          return `${notification.data.actorName} đã gửi lời mời kết bạn`;
+        // case 'friend_accept':
+        //   return `${notification.data.actorName} đã chấp nhận lời mời kết bạn`;
+        case 'message':
+          return `${notification.data.senderName}: ${notification.data.messagePreview}`;
+        case 'mention':
+          return `${notification.data.actorName} đã nhắc đến bạn trong một bài viết`;
+        // case 'share':
+        //   return `${notification.data.actorName} đã chia sẻ bài viết của bạn`;
+        // case 'post_update':
+        //   return `Có cập nhật mới từ bài viết bạn quan tâm`;
+        // case 'birthday':
+        //   return `Hôm nay là sinh nhật của ${notification.data.actorName}`;
+        // case 'event_reminder':
+        //   return `Nhắc nhở sự kiện: ${notification.data.eventName} sắp diễn ra`;
+        default:
+          return 'Bạn có thông báo mới';
+      }
+    },
+    [],
+  );
+
+  const getNotificationUrl = useCallback(
+    (notification: Notification): string => {
+      switch (notification.type) {
+        case 'like':
+        case 'comment':
+        case 'mention':
+        // case 'share':
+        //   return `/posts/${notification.data.postId}`;
+        case 'friend_request':
+        // case 'friend_accept':
+        //   return `/profile/${notification.data.actorId}`;
+        // case 'message':
+        //   return `/messages/${notification.data.conversationId}`;
+        // case 'post_update':
+        //   return `/posts/${notification.data.postId}`;
+        default:
+          return '/notifications';
+      }
+    },
+    [],
+  );
 
   return {
     ...websocketResult,
     isAuthenticated,
     authUser: user,
+    getNotificationMessage,
+    getNotificationUrl,
   };
 };
