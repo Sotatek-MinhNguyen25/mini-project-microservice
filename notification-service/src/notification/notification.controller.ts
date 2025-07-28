@@ -8,7 +8,7 @@ import { CommentEventDto } from './dto/comment.dto';
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.COMMENT.REPLY)
+  @EventPattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.COMMENT)
   commentEvent(@Payload() replyCommentDto: CommentEventDto) {
     return this.notificationService.replyComment(replyCommentDto);
   }

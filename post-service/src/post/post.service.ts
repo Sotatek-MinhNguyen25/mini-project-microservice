@@ -233,7 +233,7 @@ export class PostService implements OnModuleInit {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
     const post = await this.prisma.post.findUnique({
       where: { id },
       omit: {
@@ -245,6 +245,11 @@ export class PostService implements OnModuleInit {
           omit: {
             updatedAt: true,
             deletedAt: true,
+          },
+        },
+        reactions: {
+          where: {
+            userId: userId,
           },
         },
         tags: {
@@ -291,7 +296,14 @@ export class PostService implements OnModuleInit {
 
     return {
       data: {
-        ..._.pick(post, ['id', 'title', 'content', 'createdAt', 'images']),
+        ..._.pick(post, [
+          'id',
+          'title',
+          'reactions',
+          'content',
+          'createdAt',
+          'image',
+        ]),
         tags: tagDetail,
         user: _.pick(author.data, ['id', 'email', 'username']),
         comments: comments.data,

@@ -1,10 +1,7 @@
 export const CONSTANTS = {
   MESSAGE_PATTERN: {
     NOTIFICATION: {
-      COMMENT: {
-        REPLY: 'comment.reply',
-        POST: 'comment.post',
-      },
+      COMMENT: 'comment',
     },
     AUTH: {
       VERIFY_TOKEN: 'auth.verify-token',

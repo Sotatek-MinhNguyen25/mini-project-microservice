@@ -31,14 +31,10 @@ export interface LikeNotification extends BaseNotification {
 
 export interface CommentNotification extends BaseNotification {
   type: 'comment';
-  data: {
-    actorName: string;
-    actorAvatar?: string;
-    postId: string;
-    postTitle: string;
-    commentText: string;
-    commentId: string;
-  };
+  message: string;
+  from: any;
+  to: string;
+  postId: string;
 }
 
 export interface FriendRequestNotification extends BaseNotification {

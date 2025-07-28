@@ -55,8 +55,8 @@ export class PostGatewayController implements OnModuleInit {
 
   @ApiBearerAuth()
   @Get(':id')
-  async getDetailPost(@Param('id') id: string) {
-    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, id));
+  async getDetailPost(@AuthUser() user: JwtPayload, @Param('id') id: string) {
+    return await firstValueFrom(this.postClient.send(KAFKA_PATTERNS.POST.GET_DETAIL, { id: id, userId: user.sub }));
   }
 
   // Reaction

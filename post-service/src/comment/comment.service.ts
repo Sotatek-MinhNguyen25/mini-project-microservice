@@ -37,11 +37,18 @@ export class CommentService implements OnModuleInit {
   async create(
     createCommentDto: CreateCommentDto,
   ): Promise<ConsumerResult<Comment>> {
-    const { commentId, postId } = createCommentDto;
+    const { commentId, postId, userId } = createCommentDto;
 
     if (!createCommentDto.userId) {
       throw new RpcUnauthorizedException('Unauthorized');
     }
+
+    const user = (
+      await firstValueFrom(
+        this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER, userId),
+      )
+    ).data;
+
     if (!commentId && !postId) {
       throw new RpcBadRequestException('Phải có ít nhất commentId hoặc postId');
     }
@@ -57,14 +64,11 @@ export class CommentService implements OnModuleInit {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
       // Notification
-      this.notiClient.emit(
-        CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT.COMMENT_POST,
-        {
-          from: createCommentDto.userId,
-          to: post.userId,
-          postId: post.id,
-        },
-      );
+      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT, {
+        from: user,
+        to: post.userId,
+        postId: post.id,
+      });
       return {
         data: await this.prismaService.comment.create({
           data: {
@@ -89,10 +93,10 @@ export class CommentService implements OnModuleInit {
       throw new RpcBadRequestException('Comment chỉ nên có 2 cấp');
     }
     // Notification
-    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT.COMMENT_REPLY, {
-      from: createCommentDto.userId,
+    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT, {
+      from: user,
       to: parentComment.userId,
-      commentId: parentComment.id,
+      postId: parentComment.postId,
     });
 
     return {
