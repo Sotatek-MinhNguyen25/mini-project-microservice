@@ -8,6 +8,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { VerifyForgotPasswordDto } from './dto/verify-forgot-password.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { VerifyTokenDto } from './dto/verify-token.dto';
 import { ApiResponseOk } from '../shared/decorators/response.decorator';
 import { RESPONSE_MESSAGE } from '../shared/message/response.message';
 import { KAFKA_PATTERNS } from './kafka.patterns';
@@ -16,7 +17,7 @@ import { ValidationPipe } from '../shared/pipes/validation.pipe';
 @Controller()
 @UsePipes(new ValidationPipe())
 export class AuthKafkaController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @MessagePattern(KAFKA_PATTERNS.REGISTER)
   @ApiResponseOk(RESPONSE_MESSAGE.REGISTER_SUCCESS)
@@ -85,7 +86,7 @@ export class AuthKafkaController {
 
   @MessagePattern(KAFKA_PATTERNS.VERIFY_TOKEN)
   async verifyToken(@Payload() data: { token: string }) {
-    console.log(data)
-    return await this.authService.verifyToken(data.token)
+    console.log(data);
+    return await this.authService.verifyToken(data.token);
   }
 }

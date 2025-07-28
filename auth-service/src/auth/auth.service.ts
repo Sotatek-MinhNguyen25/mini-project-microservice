@@ -26,8 +26,6 @@ import {
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_PATTERNS } from './kafka.patterns';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { MESSAGES } from '@nestjs/core/constants';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -38,7 +36,7 @@ export class AuthService implements OnModuleInit {
     @Inject('KAFKA_NOTIFICATION_SERVICE')
     private readonly notificationClient: ClientKafka,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.notificationClient.subscribeToResponseOf(
@@ -374,27 +372,63 @@ export class AuthService implements OnModuleInit {
     return parseInt(str);
   }
 
+  /**
+   * Verify token và trả về user payload
+   * Được gọi từ API Gateway để verify token
+   */
   async verifyToken(token: string) {
+    if (!token || typeof token !== 'string') {
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN);
+    }
+
     let payload: JwtPayload;
-    try {
-      payload = await this.customJwtService.decode(token) as JwtPayload;
-    } catch (error) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN)
-    }
-
-    if (!payload || typeof payload !== 'object' || !payload.jti) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.NO_JTI);
-    }
-
-    const isValid = await this.redisService.isJtiValid(payload.jti);
-    if (!isValid) throw new RpcUnauthorizedException(ERROR_MESSAGE.JTI_VALID);
 
     try {
-      const verifyToken = await this.customJwtService.verify<JwtPayload>(token)
-      return verifyToken;
+      // Verify token với secret key trước
+      payload = this.customJwtService.verify<JwtPayload>(token);
     } catch (error) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_VERIFY_FAIL)
+      console.error('Token verification failed:', error);
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN);
     }
 
+    // Kiểm tra payload có hợp lệ không
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      !payload.jti ||
+      !payload.sub
+    ) {
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_MISSING_JTI);
+    }
+
+    // Kiểm tra JTI trong Redis (token có bị revoke không)
+    const isJtiValid = await this.redisService.isJtiValid(payload.jti);
+    if (!isJtiValid) {
+      throw new RpcUnauthorizedException(
+        ERROR_MESSAGE.TOKEN_EXPIRED_OR_REVOKED,
+      );
+    }
+
+    // Kiểm tra user có tồn tại và active không
+    const user = await this.authRepository.findUserById(payload.sub);
+    if (!user) {
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_FOUND);
+    }
+
+    // Kiểm tra user status
+    if (user.status !== USER_STATUS.VERIFIED) {
+      throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
+    }
+
+    // Trả về payload đã được verify và enriched với thông tin user
+    return {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+      roles: user.roles,
+      jti: payload.jti,
+      iat: payload.iat,
+      exp: payload.exp,
+    };
   }
 }

@@ -19,7 +19,7 @@ export const KAFKA_PATTERNS = {
     VERIFY_FORGOT_PASSWORD: 'auth.verify-forgot-password',
     UPDATE_PASSWORD: 'auth.update-password',
     COMPLETE_REGISTER: 'auth.complete-register',
-    VERIFY_TOKEN: 'auth.verify-token'
+    VERIFY_TOKEN: 'auth.verify-token',
   },
 
   USER: {

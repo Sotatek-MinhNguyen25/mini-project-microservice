@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class ResponseMessageInterceptor implements NestInterceptor {
-  constructor(private reflect: Reflector) { }
+  constructor(private reflect: Reflector) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> | Promise<Observable<any>> {
     const responseMessage = this.reflect.get<string>('response_message', context.getHandler());
