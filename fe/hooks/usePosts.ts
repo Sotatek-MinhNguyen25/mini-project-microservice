@@ -13,6 +13,8 @@ import {
 } from '@/types/post';
 import { useToast } from './useToast';
 import { useRef, useState } from 'react';
+import notificationService from '@/service/notification.service';
+import type { Notification } from '@/types/notification';
 
 export function useGetPosts({ page = 1, limit = 10 }: UseGetPostsOptions = {}) {
   return useInfiniteQuery({
@@ -281,5 +283,155 @@ export const useComment = (postId: string) => {
     setNewComment,
     commentMutation,
     handleSubmitComment,
+  };
+};
+
+export const useNotification = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const { toast } = useToast();
+  const [hasMorePages, setHasMorePages] = useState<boolean>(true);
+  const queryClient = useQueryClient();
+
+  const fetchNotifications = async (resetPage = true) => {
+    try {
+      setIsLoadingNotifications(true);
+      const currentPage = resetPage ? 1 : page;
+      const response: any = await notificationService.getNotification(
+        currentPage,
+      );
+
+      if (response?.data && response.meta) {
+        if (resetPage) {
+          setNotifications(response.data);
+          setPage(response.meta.currentPage);
+          const isLastPage =
+            response.meta.currentPage >= response.meta.totalPage;
+          console.log('Is last page:', isLastPage);
+          setHasMorePages(!isLastPage);
+        } else {
+          setNotifications((prev) => [...prev, ...response.data]);
+        }
+        setTotalPages(response.meta.totalPage);
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to fetch notifications',
+      });
+    } finally {
+      setIsLoadingNotifications(false);
+    }
+  };
+
+  const loadMoreNotifications = async () => {
+    if (page >= totalPages || isLoadingMore) return;
+
+    try {
+      setIsLoadingMore(true);
+      const nextPage = page + 1;
+      const response: any = await notificationService.getNotification(nextPage);
+
+      if (response.status !== 200) {
+        throw new Error('Failed to load more notifications');
+      }
+
+      if (response?.data && response.meta) {
+        // Append new notifications to existing list
+        setNotifications((prev) => [...prev, ...response.data]);
+        setPage(response.meta.currentPage);
+        setTotalPages(response.meta.totalPage);
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load more notifications',
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const markOneAsRead = async (notificationId: string) => {
+    const previousNotifications = notifications;
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
+    );
+
+    try {
+      const response = await notificationService.markAsReadID(notificationId);
+      if (response.status !== 200) {
+        throw new Error('Failed to mark notification as read');
+      }
+
+      // 3. Success toast (optional)
+      toast({
+        title: 'Success',
+        description: 'Notification marked as read',
+      });
+
+      return response.data;
+    } catch (error) {
+      setNotifications(previousNotifications);
+
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to mark notification as read',
+      });
+      throw error;
+    }
+  };
+
+  const markAllAsRead = async () => {
+    const previousNotifications = notifications;
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+
+    try {
+      const response = await notificationService.markAllAsRead();
+      if (response.status !== 200) {
+        throw new Error('Failed to mark all notifications as read');
+      }
+
+      toast({
+        title: 'Success',
+        description: 'All notifications marked as read',
+      });
+
+      return response.data;
+    } catch (error) {
+      setNotifications(previousNotifications);
+
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to mark all notifications as read',
+      });
+      throw error;
+    }
+  };
+
+  return {
+    markOneAsRead,
+    markAllAsRead,
+    notifications,
+    isLoadingNotifications,
+    isLoadingMore,
+    setNotifications,
+    setIsLoadingNotifications,
+    fetchNotifications,
+    loadMoreNotifications,
+    toast,
+    page,
+    setPage,
+    totalPages,
+    setTotalPages,
+    queryClient,
+    hasMorePages: hasMorePages,
   };
 };
