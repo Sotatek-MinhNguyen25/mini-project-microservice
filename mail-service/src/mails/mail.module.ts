@@ -15,9 +15,6 @@ import { MailController } from './mail.controller';
       load: [mailConfig, kafkaConfig],
       validationSchema: Joi.object({
         KAFKA_BROKERS: Joi.string().required(),
-        KAFKA_CLIENT_ID: Joi.string().required(),
-        KAFKA_GROUP_ID: Joi.string().required(),
-        KAFKA_TOPIC: Joi.string().required(),
 
         MAILTRAP_HOST: Joi.string().required(),
         MAILTRAP_PORT: Joi.number().required(),
