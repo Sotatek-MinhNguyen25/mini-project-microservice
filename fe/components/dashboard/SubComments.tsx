@@ -45,8 +45,8 @@ export function SubComments({ parentCommentId, totalCount }: SubCommentsProps) {
   });
 
   // Safely extract subComments, defaulting to empty array if data or pages are undefined
-  const subComments = data?.pages[0].data || [];
-  console.log(subComments);
+  const subComments = data?.pages.flatMap((page) => page.data) || [];
+  console.log('subComments', subComments);
 
   const handleToggle = () => {
     setVisible((prev) => !prev);

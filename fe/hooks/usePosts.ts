@@ -198,6 +198,7 @@ export function useSubComments({
       }
     },
     getNextPageParam: (data) => {
+      console.log('getNextPageParam', data);
       const currentPage = data.meta.currentPage;
       const totalPage = data.meta.totalPage;
       if (currentPage < totalPage) {

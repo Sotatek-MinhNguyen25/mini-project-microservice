@@ -220,6 +220,9 @@ export class CommentService implements OnModuleInit {
           parentId: parent.id,
           deletedAt: null,
         },
+        orderBy: {
+          createdAt: 'desc', // hoặc 'desc'
+        },
         skip,
         take,
       }),
