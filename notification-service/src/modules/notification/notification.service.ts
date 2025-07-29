@@ -26,6 +26,9 @@ export class NotificationService {
         },
         take: findAllQueryDto.limit,
         skip: skip,
+        orderBy: {
+          createdAt: 'desc',
+        },
       }),
       this.prisma.notification.count({
         where: {
@@ -37,7 +40,7 @@ export class NotificationService {
       data: notifications,
       meta: {
         currentPage: findAllQueryDto.page,
-        totalPage: totalItem / findAllQueryDto.limit,
+        totalPage: Math.ceil(totalItem / findAllQueryDto.limit),
         totalItem: totalItem,
       },
     };

@@ -44,7 +44,7 @@ export class CommentService implements OnModuleInit {
       throw new RpcUnauthorizedException('Unauthorized');
     }
 
-    const user = (
+    const user: User = (
       await firstValueFrom(
         this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER, userId),
       )
@@ -64,15 +64,22 @@ export class CommentService implements OnModuleInit {
       if (!post) {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
+
       // Notification
-      const notiPayload: CreateNotiDto = {
-        content: `Tài khoản ${createCommentDto.userId} đã bình luận về bài viết của bạn`,
-        postId: post.id,
-        receiverId: post.userId,
-        senderId: createCommentDto.userId,
-        type: 'Comment',
-      };
-      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
+      if (createCommentDto.userId !== post.userId) {
+        const notiPayload: CreateNotiDto = {
+          content: `Tài khoản ${user.username} đã bình luận về bài viết của bạn`,
+          postId: post.id,
+          receiverId: post.userId,
+          senderId: createCommentDto.userId,
+          type: 'Comment',
+        };
+        this.notiClient.emit(
+          CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE,
+          notiPayload,
+        );
+      }
+
       return {
         data: await this.prismaService.comment.create({
           data: {
@@ -90,26 +97,39 @@ export class CommentService implements OnModuleInit {
         id: createCommentDto.commentId,
       },
     });
+
     if (!parentComment) {
       throw new RpcNotFoundException('Không tồn tại comment');
     }
+
     if (parentComment?.parentId) {
       throw new RpcBadRequestException('Comment chỉ nên có 2 cấp');
     }
+
+    const parentCommentUser = (
+      await firstValueFrom(
+        this.authClient.send(
+          CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+          parentComment.userId,
+        ),
+      )
+    ).data;
     // Notification
-    const notiPayload: CreateNotiDto = {
-      content: `Tài khoản ${createCommentDto.userId} đã phản hồi bình luận của bạn`,
-      postId: parentComment.postId || '',
-      receiverId: parentComment.userId,
-      senderId: createCommentDto.userId,
-      type: 'Comment',
-    };
-    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
+    if (createCommentDto.userId !== parentComment.userId) {
+      const notiPayload: CreateNotiDto = {
+        content: `Tài khoản ${user.username} đã phản hồi bình luận của bạn`,
+        postId: parentComment.postId || '',
+        receiverId: parentComment.userId,
+        senderId: createCommentDto.userId,
+        type: 'Comment',
+      };
+      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
+    }
 
     return {
       data: await this.prismaService.comment.create({
         data: {
-          content: createCommentDto.content,
+          content: `@${parentCommentUser.username} ${createCommentDto.content}`,
           userId: createCommentDto.userId,
           parentId: createCommentDto.commentId,
         },

@@ -85,6 +85,16 @@ export class ReactionService {
         userId: createReactionDto.userId,
       },
     });
+    // Lay thong tin user
+    const user: User = (
+      await firstValueFrom(
+        this.authClient.send(
+          CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
+          createReactionDto.userId,
+        ),
+      )
+    ).data;
+
     let reactionRes: Reaction;
     // Neu user chua tung reaction
     if (!reaction) {
@@ -98,17 +108,24 @@ export class ReactionService {
           deletedAt: null,
         },
       });
+
       if (!post) {
         throw new RpcNotFoundException('Không tồn tại post');
       }
-      const notiPayload: CreateNotiDto = {
-        content: `Tài khoản ${createReactionDto.userId} đã bày tỏ cảm xúc về bài viết của bạn`,
-        postId: post?.id,
-        receiverId: post?.userId,
-        senderId: createReactionDto.userId,
-        type: 'Reaction',
-      };
-      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
+
+      if (createReactionDto.userId !== post.userId) {
+        const notiPayload: CreateNotiDto = {
+          content: `Tài khoản ${user.username} đã bày tỏ cảm xúc về bài viết của bạn`,
+          postId: post?.id,
+          receiverId: post?.userId,
+          senderId: createReactionDto.userId,
+          type: 'Reaction',
+        };
+        this.notiClient.emit(
+          CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE,
+          notiPayload,
+        );
+      }
 
       return { data: reactionRes };
     }
