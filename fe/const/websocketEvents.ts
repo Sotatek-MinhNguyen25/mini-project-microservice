@@ -4,12 +4,8 @@ import { NotificationType } from '@/types/notification';
 export const WEBSOCKET_EVENTS = {
   // Socket.IO events (khác với WebSocket events)
   INCOMING: {
-    NOTIFICATION: 'notification',
-    NOTIFICATION_READ: 'notification_read',
-    NOTIFICATION_DELETED: 'notification_deleted',
-    BULK_NOTIFICATIONS: 'bulk_notifications',
-    COUNT_UPDATE: 'notification_count_update',
-    ERROR: 'error',
+    NOTIFICATION_TRIGGER: 'event.noti-trigger',
+
     // Socket.IO built-in events
     CONNECT: 'connect',
     DISCONNECT: 'disconnect',

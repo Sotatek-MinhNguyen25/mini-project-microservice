@@ -18,6 +18,7 @@ import {
   NOTIFICATION_CONFIG,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from '@/const/websocketEvents';
+import notificationService from '@/service/notification.service';
 
 export const useWebSocket = ({
   url,
@@ -79,7 +80,6 @@ export const useWebSocket = ({
         };
       }
       reconnectAttemptsRef.current = 0;
-      startHeartbeat();
       loadNotifications();
     });
 
@@ -87,7 +87,6 @@ export const useWebSocket = ({
       console.log('Socket.IO disconnected:', reason);
       setIsConnected(false);
       setConnectionStatus('Disconnected');
-      stopHeartbeat();
     });
 
     socket.on('connect_error', (error) => {
@@ -117,20 +116,16 @@ export const useWebSocket = ({
     });
 
     // Notification event listeners
-    socket.on('event.noti-trigger', (data) => {
-      console.log(data);
-    });
-    socket.on('reaction', handleNewNotification);
-    socket.on('notification_read', handleNotificationRead);
-    socket.on('notification_deleted', handleNotificationDeleted);
-    socket.on('notification_count_update', handleCountUpdate);
+    socket.on(
+      WEBSOCKET_EVENTS.INCOMING.NOTIFICATION_TRIGGER,
+      handleNotificationTrigger,
+    );
+
     socket.on('error', handleError);
 
     // Cleanup function
     return () => {
       console.log('Cleaning up Socket.IO connection');
-      stopHeartbeat();
-      autoReadTimeouts.current.forEach((timeout) => clearTimeout(timeout));
       socket.disconnect();
     };
   }, []);
@@ -149,75 +144,12 @@ export const useWebSocket = ({
   }, []);
 
   // Event handlers
-  const handleNewNotification = useCallback(
-    (notification: Notification) => {
-      console.log('New notification received:', notification);
-
-      setNotifications((prev) => {
-        const filtered = prev.filter((n) => n.id !== notification.id);
-        const maxNotifications =
-          options.maxNotifications ?? NOTIFICATION_CONFIG.MAX_NOTIFICATIONS;
-        return [notification, ...filtered].slice(0, maxNotifications);
-      });
-
-      setSummary((prev) => ({
-        total: prev.total + 1,
-        unread: prev.unread + (notification.isRead ? 0 : 1),
-        byType: {
-          ...prev.byType,
-          [notification.type]: (prev.byType[notification.type] || 0) + 1,
-        },
-      }));
-
-      // Auto mark as read
-      const enableAutoMarkRead = options.enableAutoMarkRead ?? true;
-      if (enableAutoMarkRead && !notification.isRead) {
-        const timeout = setTimeout(() => {
-          markAsRead(notification.id);
-        }, NOTIFICATION_CONFIG.AUTO_MARK_READ_DELAY);
-
-        autoReadTimeouts.current.set(notification.id, timeout);
-      }
-    },
-    [options.maxNotifications, options.enableAutoMarkRead],
-  );
-
-  const handleBulkNotifications = useCallback(
-    (data: { notifications: Notification[]; summary: NotificationSummary }) => {
-      setNotifications(data.notifications);
-      setSummary(data.summary);
-      setIsLoading(false);
-    },
-    [],
-  );
-
-  const handleNotificationRead = useCallback(
-    (data: { notificationId: string }) => {
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === data.notificationId ? { ...n, isRead: true } : n,
-        ),
-      );
-      setSummary((prev) => ({ ...prev, unread: Math.max(0, prev.unread - 1) }));
-    },
-    [],
-  );
-
-  const handleNotificationDeleted = useCallback(
-    (data: { notificationId: string }) => {
-      setNotifications((prev) =>
-        prev.filter((n) => n.id !== data.notificationId),
-      );
-    },
-    [],
-  );
-
-  const handleCountUpdate = useCallback(
-    (data: Partial<NotificationSummary>) => {
-      setSummary((prev) => ({ ...prev, ...data }));
-    },
-    [],
-  );
+  const handleNotificationTrigger = useCallback(async () => {
+    const response: any = await notificationService.getNotification();
+    console.log('New notifications received:', response);
+    setNotifications(response.data);
+    setSummary(response.meta);
+  }, []);
 
   const handleError = useCallback(
     (data: { message: string; code?: number }) => {
@@ -225,26 +157,6 @@ export const useWebSocket = ({
     },
     [],
   );
-
-  // Heartbeat management
-  const startHeartbeat = useCallback(() => {
-    if (heartbeatIntervalRef.current) {
-      clearInterval(heartbeatIntervalRef.current);
-    }
-
-    heartbeatIntervalRef.current = setInterval(() => {
-      if (socketRef.current?.connected) {
-        socketRef.current.emit('heartbeat');
-      }
-    }, WEBSOCKET_CONFIG.HEARTBEAT_INTERVAL);
-  }, []);
-
-  const stopHeartbeat = useCallback(() => {
-    if (heartbeatIntervalRef.current) {
-      clearInterval(heartbeatIntervalRef.current);
-      heartbeatIntervalRef.current = null;
-    }
-  }, []);
 
   // Actions
   const loadNotifications = useCallback(() => {
@@ -256,58 +168,6 @@ export const useWebSocket = ({
       offset: 0,
     });
   }, []);
-
-  const markAsRead = useCallback((notificationId: string) => {
-    // Clear timeout
-    const timeout = autoReadTimeouts.current.get(notificationId);
-    if (timeout) {
-      clearTimeout(timeout);
-      autoReadTimeouts.current.delete(notificationId);
-    }
-
-    // Update local state
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
-    );
-
-    // Send to server
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('mark_read', { notificationId });
-    }
-  }, []);
-
-  const markAllAsRead = useCallback(() => {
-    // Clear all timeouts
-    autoReadTimeouts.current.forEach((timeout) => clearTimeout(timeout));
-    autoReadTimeouts.current.clear();
-
-    // Update local state
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    setSummary((prev) => ({ ...prev, unread: 0 }));
-
-    // Send to server
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('mark_all_read');
-    }
-  }, []);
-
-  const deleteNotification = useCallback((notificationId: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
-
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('delete', { notificationId });
-    }
-  }, []);
-
-  const loadMore = useCallback(() => {
-    if (!socketRef.current?.connected || isLoading) return;
-
-    setIsLoading(true);
-    socketRef.current.emit('get_notifications', {
-      limit: NOTIFICATION_CONFIG.FETCH_LIMIT,
-      offset: notifications.length,
-    });
-  }, [isLoading, notifications.length]);
 
   const updatePreferences = useCallback(
     (prefs: Partial<NotificationPreferences>) => {
@@ -351,10 +211,6 @@ export const useWebSocket = ({
     preferences,
 
     // Actions
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    loadMore,
     updatePreferences,
   };
 };
