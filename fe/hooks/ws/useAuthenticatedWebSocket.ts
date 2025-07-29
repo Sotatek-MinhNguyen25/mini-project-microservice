@@ -1,7 +1,5 @@
-// hooks/useAuthenticatedWebSocket.ts
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { io } from 'socket.io-client';
 import type { Notification } from '@/types/notification';
 import { useWebSocket } from './useWebSocket';
 
@@ -17,7 +15,7 @@ interface UseAuthenticatedWebSocketConfig {
 }
 
 export const useAuthenticatedWebSocket = ({
-  baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8086',
+  baseUrl = 'http://localhost:3002',
   options = {},
 }: UseAuthenticatedWebSocketConfig = {}): any & {
   isAuthenticated: boolean;
@@ -33,7 +31,6 @@ export const useAuthenticatedWebSocket = ({
     }
 
     try {
-      // Cho Socket.IO, chúng ta pass auth qua options thay vì URL params
       const socketOptions = {
         ...options,
         auth: {
@@ -44,7 +41,7 @@ export const useAuthenticatedWebSocket = ({
         query: {
           version: '1.0',
         },
-        transports: ['websocket', 'polling'], // Fallback transports
+        transports: ['websocket', 'polling'],
       };
 
       return {
@@ -71,51 +68,15 @@ export const useAuthenticatedWebSocket = ({
     options: socketOptions,
   });
 
-  const getNotificationMessage = useCallback((notification: any): string => {
-    switch (notification.type) {
-      case 'reaction':
-        return `${notification.data.actorName} đã thích bài viết của bạn`;
-      case 'comment':
-        return `${notification.data.actorName} đã bình luận: "${notification.data.commentText}"`;
-      case 'friend_request':
-        return `${notification.data.actorName} đã gửi lời mời kết bạn`;
-      // case 'friend_accept':
-      //   return `${notification.data.actorName} đã chấp nhận lời mời kết bạn`;
-      case 'message':
-        return `${notification.data.senderName}: ${notification.data.messagePreview}`;
-      case 'mention':
-        return `${notification.data.actorName} đã nhắc đến bạn trong một bài viết`;
-      // case 'share':
-      //   return `${notification.data.actorName} đã chia sẻ bài viết của bạn`;
-      // case 'post_update':
-      //   return `Có cập nhật mới từ bài viết bạn quan tâm`;
-      // case 'birthday':
-      //   return `Hôm nay là sinh nhật của ${notification.data.actorName}`;
-      // case 'event_reminder':
-      //   return `Nhắc nhở sự kiện: ${notification.data.eventName} sắp diễn ra`;
-      default:
-        return 'Bạn có thông báo mới';
-    }
-  }, []);
+  const { notifications } = websocketResult;
+
+  const getUnreadCount = useCallback(() => {
+    return notifications.filter((n: Notification) => !n.isRead).length;
+  }, [notifications]);
 
   const getNotificationUrl = useCallback(
     (notification: Notification): string => {
-      switch (notification.type) {
-        case 'like':
-        case 'comment':
-        case 'mention':
-        // case 'share':
-        //   return `/posts/${notification.data.postId}`;
-        case 'friend_request':
-        // case 'friend_accept':
-        //   return `/profile/${notification.data.actorId}`;
-        // case 'message':
-        //   return `/messages/${notification.data.conversationId}`;
-        // case 'post_update':
-        //   return `/posts/${notification.data.postId}`;
-        default:
-          return '/notifications';
-      }
+      return `/post/${notification.postId}`;
     },
     [],
   );
@@ -124,7 +85,7 @@ export const useAuthenticatedWebSocket = ({
     ...websocketResult,
     isAuthenticated,
     authUser: user,
-    getNotificationMessage,
     getNotificationUrl,
+    getUnreadCount,
   };
 };

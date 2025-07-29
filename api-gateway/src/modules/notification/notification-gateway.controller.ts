@@ -2,7 +2,7 @@ import { Controller, Get, Inject, OnModuleInit, Param, Put, Query } from '@nestj
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
 import { firstValueFrom } from 'rxjs';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthUser } from 'src/common/decorator/auth-user.decorator';
 import { JwtPayload } from 'src/common/type/jwt-payload.type';
 import { NotiQueryDto } from './dto/notification.dto';
@@ -21,6 +21,16 @@ export class NotificationGatewayController implements OnModuleInit {
 
   @Get()
   @ApiBearerAuth()
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+  })
   async getAll(@AuthUser() user: JwtPayload, @Query() notiQueryDto: NotiQueryDto) {
     return await firstValueFrom(
       this.notificationClient.send(KAFKA_PATTERNS.NOTIFICATION.LIST, { ...notiQueryDto, userId: user.sub }),
