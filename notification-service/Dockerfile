@@ -1,0 +1,14 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install -g pnpm && pnpm install --prod
+RUN npm install -g @nestjs/cli
+COPY . .
+
+RUN pnpm run build
+
+EXPOSE 8082
+CMD ["pnpm", "run", "start:prod"] 

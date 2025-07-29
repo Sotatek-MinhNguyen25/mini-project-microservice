@@ -1,14 +1,18 @@
+# Dockerfile cho mail-service
+
 FROM node:18-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+# Cài đặt pnpm global, sau đó cài đặt TẤT CẢ dependencies (bao gồm devDependencies)
+# Điều này đảm bảo @nestjs/cli có sẵn cho lệnh 'nest build'
+RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 EXPOSE 8082
-CMD ["npm", run", "start:prod"] 
+CMD ["pnpm", "run", "start:prod"]
