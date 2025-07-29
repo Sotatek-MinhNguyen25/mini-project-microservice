@@ -83,8 +83,8 @@ export const KAFKA_PATTERNS = {
   NOTIFICATION: {
     SEND: 'notification.send',
     LIST: 'noti.find-all',
-    MARK_READ: 'notification.mark-read',
-    MARK_ALL_READ: 'notification.mark-all-read',
+    MARK_READ: 'noti.update-one',
+    MARK_ALL_READ: 'noti.update-many',
     DELETE: 'notification.delete',
   },
 } as const;
