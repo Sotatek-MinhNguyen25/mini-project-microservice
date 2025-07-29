@@ -117,7 +117,9 @@ export const useWebSocket = ({
     });
 
     // Notification event listeners
-    socket.on('comment.reply', handleNewNotification);
+    socket.on('event.noti-trigger', (data) => {
+      console.log(data);
+    });
     socket.on('reaction', handleNewNotification);
     socket.on('notification_read', handleNotificationRead);
     socket.on('notification_deleted', handleNotificationDeleted);

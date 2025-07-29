@@ -13,7 +13,7 @@ import {
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.CREATE)
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.FIND_ALL)
   findAll(@Payload() findAllQueryDto: FindAllQueryDto) {
     return this.notificationService.findAll(findAllQueryDto);
   }
