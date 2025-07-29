@@ -19,10 +19,10 @@ export class MailService {
         pass: this.configService.get<string>('mail.pass'),
       },
     });
-    const distTemplateDir = path.join(process.cwd(), 'dist', 'notification', 'templates');
+    const distTemplateDir = path.join(process.cwd(), 'dist', 'mails', 'templates');
     this.templateDir = fs.existsSync(distTemplateDir)
       ? distTemplateDir
-      : path.join(process.cwd(), 'src', 'notification', 'templates');
+      : path.join(process.cwd(), 'src', 'mails', 'templates');
   }
 
   private loadTemplate(templateName: string, variables: Record<string, string>): string {

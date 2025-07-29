@@ -38,10 +38,6 @@ export interface UseWebSocketReturn {
   preferences: NotificationPreferences;
 
   // Actions
-  markAsRead: (notificationId: string) => void;
-  markAllAsRead: () => void;
-  deleteNotification: (notificationId: string) => void;
-  loadMore: () => void;
   updatePreferences: (prefs: Partial<NotificationPreferences>) => void;
 }
 

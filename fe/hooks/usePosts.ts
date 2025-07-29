@@ -12,7 +12,7 @@ import {
   UseSubCommentsParams,
 } from '@/types/post';
 import { useToast } from './useToast';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function useGetPosts({ page = 1, limit = 10 }: UseGetPostsOptions = {}) {
   return useInfiniteQuery({
@@ -198,6 +198,7 @@ export function useSubComments({
       }
     },
     getNextPageParam: (data) => {
+      console.log('getNextPageParam', data);
       const currentPage = data.meta.currentPage;
       const totalPage = data.meta.totalPage;
       if (currentPage < totalPage) {
@@ -219,7 +220,6 @@ export function useReplyComment(commentId: string, content: string) {
   const replyMutation = useMutation({
     mutationFn: async (content: string) => {
       const response = await postService.createComment('', content, commentId);
-      console.log(response);
       if (response.status === 'success') {
         return response.data;
       } else {

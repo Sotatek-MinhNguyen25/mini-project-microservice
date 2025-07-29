@@ -23,14 +23,19 @@ export class SocketGateway
   @WebSocketServer()
   server: Server;
 
-  private logger = new Logger();
+  private logger = new Logger(SocketGateway.name);
 
   afterInit(server: Server) {
     this.logger.log('Websocket initialized');
   }
 
   handleConnection(client: Socket) {
-    return this.socketService.handleConnection(client);
+    try {
+      this.socketService.handleConnection(client);
+      this.logger.log(`Client connected: ${client.id}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   sendTrigger(receiverId: string) {
@@ -38,6 +43,11 @@ export class SocketGateway
   }
 
   handleDisconnect(client: Socket) {
-    return this.socketService.handleDisconnect(client);
+    try {
+      this.socketService.handleDisconnect(client);
+      this.logger.log(`Client disconnected: ${client.id}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 }

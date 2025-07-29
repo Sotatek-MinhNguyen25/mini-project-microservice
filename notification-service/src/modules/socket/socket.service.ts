@@ -26,7 +26,12 @@ export class SocketService implements OnModuleInit {
           token: token,
         }),
       );
-      await client.join(`${payload.data.sub}`);
+      if (!payload) {
+        return client.disconnect();
+      }
+      return await client.join(`${payload.data.sub}`);
+    } else {
+      return client.disconnect();
     }
   }
 
