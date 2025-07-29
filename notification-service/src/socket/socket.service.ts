@@ -35,6 +35,7 @@ export class SocketService implements OnModuleInit {
   commentEvent(server: Server, data: CommentEventDto) {
     server.to(`${data.to}`).emit(CONSTANTS.WS_MESSAGE_PATTERN.COMMENT_REPLY, {
       message: 'This is message',
+      type: 'comment',
       ...data,
     });
   }
