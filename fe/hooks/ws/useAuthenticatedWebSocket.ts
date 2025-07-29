@@ -15,7 +15,7 @@ interface UseAuthenticatedWebSocketConfig {
 }
 
 export const useAuthenticatedWebSocket = ({
-  baseUrl = 'http://localhost:3002',
+  baseUrl = process.env.NEXT_PUBLIC_WS_URL,
   options = {},
 }: UseAuthenticatedWebSocketConfig = {}): any & {
   isAuthenticated: boolean;

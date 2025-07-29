@@ -23,7 +23,7 @@ import { Queue } from 'bullmq';
 
 @Injectable()
 export class PostService implements OnModuleInit {
-  private readonly logger = new Logger(PostService.name)
+  private readonly logger = new Logger(PostService.name);
   constructor(
     private prisma: PrismaService,
     private commentService: CommentService,
@@ -31,7 +31,7 @@ export class PostService implements OnModuleInit {
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
     @InjectQueue(postHideQueueName) private postHideQueue: Queue,
-  ) { }
+  ) {}
 
   async onModuleInit() {
     this.authClient.subscribeToResponseOf(
@@ -54,10 +54,9 @@ export class PostService implements OnModuleInit {
         {
           repeat: { pattern: cronPattern },
           removeOnComplete: true,
-          removeOnFail: true
+          removeOnFail: true,
         },
       );
-
     }
   }
 
@@ -99,13 +98,13 @@ export class PostService implements OnModuleInit {
 
         ...(createPostDto.postImages
           ? {
-            image: {
-              create: createPostDto.postImages.map((postImage) => ({
-                url: postImage.url,
-                altText: postImage.altText,
-              })),
-            },
-          }
+              image: {
+                create: createPostDto.postImages.map((postImage) => ({
+                  url: postImage.url,
+                  altText: postImage.altText,
+                })),
+              },
+            }
           : {}),
       },
       include: {
@@ -121,7 +120,7 @@ export class PostService implements OnModuleInit {
 
     const searchCondition: any = {
       isHidden: false,
-      deletedAt: null
+      deletedAt: null,
     };
 
     if (postQueryDto.search) {
@@ -133,7 +132,6 @@ export class PostService implements OnModuleInit {
         },
       ];
     }
-
 
     const [posts, totalItem] = await Promise.all([
       this.prisma.post.findMany({
@@ -200,7 +198,7 @@ export class PostService implements OnModuleInit {
         ]),
       ),
     ].flat();
-    console.time('asc');
+
     const users: User[] = (
       await firstValueFrom(
         this.authClient.send(CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS, {
@@ -208,7 +206,6 @@ export class PostService implements OnModuleInit {
         }),
       )
     ).data;
-    console.timeEnd('asc');
 
     // Anh xa lai response
     const result = await Promise.all(
@@ -278,6 +275,7 @@ export class PostService implements OnModuleInit {
         reactions: {
           where: {
             userId: userId,
+            deletedAt: null,
           },
         },
         tags: {
@@ -314,13 +312,11 @@ export class PostService implements OnModuleInit {
       };
     });
 
-    const [comments, reaction, reactionSummary, commentCount] =
-      await Promise.all([
-        this.commentService.getCommentsByPostId(post.id),
-        this.reactionService.getReactionsByPostId(post.id),
-        this.reactionService.getReactionsSummaryByPostId(post.id),
-        this.commentService.countCommentsByPostId(post.id),
-      ]);
+    const [comments, reaction, totalComment] = await Promise.all([
+      this.commentService.getCommentsByPostId(post.id),
+      this.reactionService.getReactionsSummaryByPostId(post.id),
+      this.commentService.countCommentsByPostId(post.id),
+    ]);
 
     return {
       data: {
@@ -333,11 +329,10 @@ export class PostService implements OnModuleInit {
           'image',
         ]),
         tags: tagDetail,
-        user: _.pick(author.data, ['id', 'email', 'username']),
+        user: _.pick(author, ['id', 'email', 'username']),
         comments: comments.data,
         reaction: reaction.data,
-        reactionSummary: reactionSummary.data,
-        totalComment: commentCount.data,
+        totalComment: totalComment.data,
       },
     };
   }
