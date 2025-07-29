@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentService } from 'src/comment/comment.service';
@@ -17,24 +17,48 @@ import {
   RpcUnauthorizedException,
 } from 'src/common/exception/rpc.exception';
 import * as _ from 'lodash';
+import { InjectQueue } from '@nestjs/bullmq';
+import { postHideJobName, postHideQueueName } from 'src/jobs/post-hide.job';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class PostService implements OnModuleInit {
+  private readonly logger = new Logger(PostService.name)
   constructor(
     private prisma: PrismaService,
     private commentService: CommentService,
     private reactionService: ReactionService,
     @Inject(CONSTANTS.KAFKA_SERVICE.AUTH)
     private readonly authClient: ClientKafka,
-  ) {}
+    @InjectQueue(postHideQueueName) private postHideQueue: Queue,
+  ) { }
 
-  onModuleInit() {
+  async onModuleInit() {
     this.authClient.subscribeToResponseOf(
       CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USER,
     );
     this.authClient.subscribeToResponseOf(
       CONSTANTS.MESSAGE_PATTERN.AUTH.GET_USERS,
     );
+
+    const cronPattern = '0 0 * * *';
+    const existing = await this.postHideQueue.getRepeatableJobs();
+    const hasJob = existing.some(
+      (job) => job.name === postHideJobName && job.pattern === cronPattern,
+    );
+
+    if (!hasJob) {
+      await this.postHideQueue.add(
+        postHideJobName,
+        {},
+        {
+          repeat: { pattern: cronPattern },
+          removeOnComplete: true,
+          removeOnFail: true
+        },
+      );
+
+    }
   }
 
   async create(createPostDto: CreatePostDto) {
@@ -75,13 +99,13 @@ export class PostService implements OnModuleInit {
 
         ...(createPostDto.postImages
           ? {
-              image: {
-                create: createPostDto.postImages.map((postImage) => ({
-                  url: postImage.url,
-                  altText: postImage.altText,
-                })),
-              },
-            }
+            image: {
+              create: createPostDto.postImages.map((postImage) => ({
+                url: postImage.url,
+                altText: postImage.altText,
+              })),
+            },
+          }
           : {}),
       },
       include: {
@@ -95,17 +119,21 @@ export class PostService implements OnModuleInit {
   async findAll(postQueryDto: PostQueryDto) {
     const paginateCondition = paginate(postQueryDto.page, postQueryDto.limit);
 
-    const searchConditon = postQueryDto.search
-      ? {
-          OR: [
-            {
-              content: {
-                contains: postQueryDto.search,
-              },
-            },
-          ],
-        }
-      : {};
+    const searchCondition: any = {
+      isHidden: false,
+      deletedAt: null
+    };
+
+    if (postQueryDto.search) {
+      searchCondition.OR = [
+        {
+          content: {
+            contains: postQueryDto.search,
+          },
+        },
+      ];
+    }
+
 
     const [posts, totalItem] = await Promise.all([
       this.prisma.post.findMany({
@@ -157,10 +185,10 @@ export class PostService implements OnModuleInit {
         orderBy: {
           createdAt: 'desc',
         },
-        where: { ...searchConditon, deletedAt: null },
+        where: { ...searchCondition },
         ...paginateCondition,
       }),
-      this.prisma.post.count({ where: searchConditon }),
+      this.prisma.post.count({ where: searchCondition }),
     ]);
 
     // Lay danh sach userIds tu cac post va comment

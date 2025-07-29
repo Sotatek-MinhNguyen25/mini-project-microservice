@@ -6,10 +6,28 @@ import { PrismaClient } from '@prisma/client';
 import { CommentModule } from 'src/comment/comment.module';
 import { CommentService } from 'src/comment/comment.service';
 import { ReactionService } from 'src/reaction/reaction.service';
+import { BullModule } from '@nestjs/bullmq';
+import { postHideQueueName } from 'src/jobs/post-hide.job';
+import { PostHideProcessor } from 'src/jobs/post-hide.processor';
 
 @Module({
-  imports: [KafkaModule.register(['noti'])],
+  imports: [
+    KafkaModule.register(['noti']),
+    BullModule.registerQueue({
+      name: postHideQueueName,
+      connection: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+      },
+    }),
+  ],
   controllers: [PostController],
-  providers: [PostService, PrismaClient, CommentService, ReactionService],
+  providers: [
+    PostService,
+    PrismaClient,
+    CommentService,
+    ReactionService,
+    PostHideProcessor,
+  ],
 })
-export class PostModule {}
+export class PostModule { }
