@@ -10,7 +10,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [process.env.KAKFA_URL ?? 'localhost:9092'],
+        brokers: [process.env.KAFKA_BROKERS ?? 'localhost:9092'],
       },
       consumer: {
         groupId: 'noti-comsumer-group',

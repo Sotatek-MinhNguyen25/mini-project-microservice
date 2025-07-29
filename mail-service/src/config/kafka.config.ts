@@ -1,8 +1,13 @@
-export default () => ({
+import { registerAs } from '@nestjs/config';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+export default registerAs('kafka', () => ({
   kafka: {
-    brokers: process.env.KAFKA_BROKERS?.split(',') || ['localhost:29092'],
-    clientId: process.env.KAFKA_CLIENT_ID || 'notification-service',
-    groupId: process.env.KAFKA_GROUP_ID || 'notification-group',
-    topic: process.env.KAFKA_TOPIC || 'notification-topic',
+    brokers: process.env.KAFKA_BROKERS,
+    clientId: 'mail-service',
+    groupId: 'mail-group',
+    topic: 'mail-topic',
   },
-});
+}));
