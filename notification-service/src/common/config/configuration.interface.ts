@@ -8,4 +8,7 @@ export interface Configuration {
   kafka: {
     brokers: string;
   };
+  database: {
+    url: string;
+  };
 }

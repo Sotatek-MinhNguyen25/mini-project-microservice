@@ -16,6 +16,7 @@ import {
 import * as _ from 'lodash';
 import { GetChildByParentId } from './dto/comment.dto';
 import { paginate } from 'src/common/pagination';
+import { CreateNotiDto } from './dto/notification.dto';
 
 @Injectable()
 export class CommentService implements OnModuleInit {
@@ -64,11 +65,14 @@ export class CommentService implements OnModuleInit {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
       // Notification
-      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT, {
-        from: user,
-        to: post.userId,
+      const notiPayload: CreateNotiDto = {
+        content: `Tài khoản ${createCommentDto.userId} đã bình luận về bài viết của bạn`,
         postId: post.id,
-      });
+        receiverId: post.userId,
+        senderId: createCommentDto.userId,
+        type: 'Comment',
+      };
+      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
       return {
         data: await this.prismaService.comment.create({
           data: {
@@ -93,11 +97,14 @@ export class CommentService implements OnModuleInit {
       throw new RpcBadRequestException('Comment chỉ nên có 2 cấp');
     }
     // Notification
-    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.COMMENT, {
-      from: user,
-      to: parentComment.userId,
-      postId: parentComment.postId,
-    });
+    const notiPayload: CreateNotiDto = {
+      content: `Tài khoản ${createCommentDto.userId} đã phản hồi bình luận của bạn`,
+      postId: parentComment.postId || '',
+      receiverId: parentComment.userId,
+      senderId: createCommentDto.userId,
+      type: 'Comment',
+    };
+    this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
 
     return {
       data: await this.prismaService.comment.create({

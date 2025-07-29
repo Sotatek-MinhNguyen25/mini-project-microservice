@@ -10,4 +10,9 @@ export default (): Configuration => ({
   kafka: {
     brokers: process.env.KAFKA_BROKERS || 'localhost:9092',
   },
+  database: {
+    url:
+      process.env.DATABASE_URL ||
+      'postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?schema=public',
+  },
 });

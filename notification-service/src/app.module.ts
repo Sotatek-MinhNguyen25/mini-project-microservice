@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './common/config/configuration';
 import { KafkaModule } from './common/kafka/kafka.module';
-import { NotificationModule } from './notification/notification.module';
-import { SocketModule } from './socket/socket.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { SocketModule } from './modules/socket/socket.module';
+import { PrismaModule } from './common/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SocketModule } from './socket/socket.module';
     KafkaModule,
     NotificationModule,
     SocketModule,
+    PrismaModule,
   ],
   controllers: [],
   providers: [],

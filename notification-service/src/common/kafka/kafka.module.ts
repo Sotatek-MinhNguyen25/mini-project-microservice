@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
         name: CONSTANTS.KAFKA_PATTERN.AUTH,
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => {
-          const kafkaUrl = configService.get('kafka.url');
+          const kafkaUrl = configService.get('kafka.brokers');
           return {
             transport: Transport.KAFKA,
             options: {

@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { RpcNotFoundException } from 'src/common/exception/rpc.exception';
 import { User } from 'src/common/type/user';
 import * as _ from 'lodash';
+import { CreateNotiDto } from './dto/notification.dto';
 
 @Injectable()
 export class ReactionService {
@@ -97,12 +98,17 @@ export class ReactionService {
           deletedAt: null,
         },
       });
-      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.REACTION, {
-        from: createReactionDto.userId,
-        to: post?.userId,
-        postId: createReactionDto.postId,
-        type: 'reaction',
-      });
+      if (!post) {
+        throw new RpcNotFoundException('Không tồn tại post');
+      }
+      const notiPayload: CreateNotiDto = {
+        content: `Tài khoản ${createReactionDto.userId} đã bày tỏ cảm xúc về bài viết của bạn`,
+        postId: post?.id,
+        receiverId: post?.userId,
+        senderId: createReactionDto.userId,
+        type: 'Reaction',
+      };
+      this.notiClient.emit(CONSTANTS.MESSAGE_PATTERN.NOTI.CREATE, notiPayload);
 
       return { data: reactionRes };
     }

@@ -8,8 +8,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SocketService } from './socket.service';
-import { CommentEventDto } from 'src/notification/dto/comment.dto';
-import { ReactionDto } from 'src/notification/dto/reaction.dto';
 
 @Injectable()
 @WebSocketGateway({
@@ -35,12 +33,8 @@ export class SocketGateway
     return this.socketService.handleConnection(client);
   }
 
-  commentEvent(data: CommentEventDto) {
-    return this.socketService.commentEvent(this.server, data);
-  }
-
-  reactionEvent(data: ReactionDto) {
-    return this.socketService.reactionEvent(this.server, data);
+  sendTrigger(receiverId: string) {
+    this.socketService.sendTrigger(this.server, receiverId);
   }
 
   handleDisconnect(client: Socket) {

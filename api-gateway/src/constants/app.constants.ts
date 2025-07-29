@@ -82,7 +82,7 @@ export const KAFKA_PATTERNS = {
   // Notification Service Events
   NOTIFICATION: {
     SEND: 'notification.send',
-    LIST: 'notification.list',
+    LIST: 'noti.find-all',
     MARK_READ: 'notification.mark-read',
     MARK_ALL_READ: 'notification.mark-all-read',
     DELETE: 'notification.delete',
