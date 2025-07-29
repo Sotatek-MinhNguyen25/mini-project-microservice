@@ -1,81 +1,32 @@
 export interface BaseNotification {
   id: string;
   userId: string;
-  timestamp: number;
+  createdAt: string;
   isRead: boolean;
   type: NotificationType;
+  content: string;
+  postId: string;
 }
 
-export type NotificationType =
-  | 'like'
-  | 'comment'
-  | 'share'
-  | 'friend_request'
-  | 'friend_accept'
-  | 'mention'
-  | 'message'
-  | 'post_update'
-  | 'birthday'
-  | 'event_reminder';
-
-export interface LikeNotification extends BaseNotification {
-  type: 'like';
-  data: {
-    actorName: string;
-    actorAvatar?: string;
-    postId: string;
-    postTitle: string;
-    likeCount: number;
-  };
-}
+export type NotificationType = 'Comment' | 'Reaction';
 
 export interface CommentNotification extends BaseNotification {
-  type: 'comment';
+  type: 'Comment';
   message: string;
   from: any;
   to: string;
   postId: string;
 }
-
-export interface FriendRequestNotification extends BaseNotification {
-  type: 'friend_request';
-  data: {
-    actorName: string;
-    actorAvatar?: string;
-    actorId: string;
-    mutualFriends: number;
-  };
+export interface ReactionNotification extends BaseNotification {
+  type: 'Reaction';
+  message: string;
+  from: any;
+  to: string;
+  postId: string;
+  reactionType: string;
 }
 
-export interface MessageNotification extends BaseNotification {
-  type: 'message';
-  data: {
-    senderName: string;
-    senderAvatar?: string;
-    senderId: string;
-    conversationId: string;
-    messagePreview: string;
-    unreadCount: number;
-  };
-}
-
-export interface MentionNotification extends BaseNotification {
-  type: 'mention';
-  data: {
-    actorName: string;
-    actorAvatar?: string;
-    postId: string;
-    postTitle: string;
-    mentionText: string;
-  };
-}
-
-export type Notification =
-  | LikeNotification
-  | CommentNotification
-  | FriendRequestNotification
-  | MessageNotification
-  | MentionNotification;
+export type Notification = ReactionNotification | CommentNotification;
 
 export interface NotificationSummary {
   total: number;
