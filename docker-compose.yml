@@ -35,7 +35,7 @@ services:
     build:
       context: ./api-gateway
     ports:
-      - "3000:3000"
+      - "8000:8000"
     env_file:
       - ./api-gateway/.env.docker
     depends_on:
@@ -56,8 +56,6 @@ services:
   post-service:
     build:
       context: ./post-service
-    ports:
-      - "3002:3002"
     env_file:
       - ./post-service/.env.docker
     depends_on:
@@ -79,7 +77,7 @@ services:
     build:
       context: ./upload-service
     ports:
-      - "3004:3004"
+      - "3008:3008"
     env_file:
       - ./upload-service/.env.docker
     depends_on:
@@ -90,7 +88,7 @@ services:
     build:
       context: ./notification-service
     ports:
-      - "3003:3003"
+      - "8080:8080"
     env_file:
       - ./notification-service/.env.docker
     depends_on:
@@ -102,6 +100,8 @@ services:
       context: ./fe
     ports:
       - "80:3000"
+    env_file:
+      - ./fe/.env.docker
     restart: unless-stopped
 
 volumes:
