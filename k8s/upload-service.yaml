@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upload-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: upload-service
+  template:
+    metadata:
+      labels:
+        app: upload-service
+    spec:
+      containers:
+        - name: upload-service
+          image: your-dockerhub-username/upload-service:latest
+          ports:
+            - containerPort: 3008
+          envFrom:
+            - configMapRef:
+                name: upload-service-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upload-service
+spec:
+  selector:
+    app: upload-service
+  ports:
+    - protocol: TCP
+      port: 3008
+      targetPort: 3008
+  type: ClusterIP

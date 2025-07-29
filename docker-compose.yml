@@ -88,7 +88,7 @@ services:
     build:
       context: ./notification-service
     ports:
-      - "8080:8080"
+      - "3002:3002"
     env_file:
       - ./notification-service/.env.docker
     depends_on:

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fe
+  template:
+    metadata:
+      labels:
+        app: fe
+    spec:
+      containers:
+        - name: fe
+          image: your-dockerhub-username/fe:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: fe-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fe
+spec:
+  selector:
+    app: fe
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: NodePort
