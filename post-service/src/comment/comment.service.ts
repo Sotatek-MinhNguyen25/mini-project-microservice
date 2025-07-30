@@ -15,8 +15,9 @@ import {
 } from 'src/common/exception/rpc.exception';
 import * as _ from 'lodash';
 import { GetChildByParentId } from './dto/comment.dto';
-import { paginate } from 'src/common/pagination';
+import { Npaginate } from 'src/common/utils/paginate';
 import { CreateNotiDto } from './dto/notification.dto';
+import { paginate } from 'src/common/pagination';
 
 @Injectable()
 export class CommentService implements OnModuleInit {
@@ -158,8 +159,22 @@ export class CommentService implements OnModuleInit {
     return { data: total };
   }
 
-  async getCommentsByPostId(postId: string): Promise<ConsumerResult<any[]>> {
-    const comments = await this.prismaService.comment.findMany({
+  async getCommentsByPostId(
+    postId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<ConsumerResult<any[]>> {
+    const { data: comments, pagination } = await Npaginate<
+      Comment & { _count: { childComment: number } }
+    >({
+      model: {
+        findMany: this.prismaService.comment.findMany.bind(
+          this.prismaService.comment,
+        ),
+        count: this.prismaService.comment.count.bind(
+          this.prismaService.comment,
+        ),
+      },
       where: {
         postId: postId,
         deletedAt: null,
@@ -174,6 +189,8 @@ export class CommentService implements OnModuleInit {
       orderBy: {
         createdAt: 'desc',
       },
+      page,
+      limit,
     });
 
     // Lay id cac user tu comment
@@ -198,7 +215,7 @@ export class CommentService implements OnModuleInit {
         childComment: comment._count.childComment,
       };
     });
-    return { data: result };
+    return { data: result, meta: pagination };
   }
 
   async getChildComment(

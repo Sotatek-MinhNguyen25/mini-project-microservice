@@ -1,9 +1,9 @@
 interface PaginateOptions<T> {
   model: {
-    findMany: Function;
-    count: Function;
+    findMany: (args: any) => Promise<T[]>;
+    count: (args: any) => Promise<number>;
   };
-  where?: T;
+  where?: any;
   select?: any;
   include?: any;
   orderBy?: any;
@@ -14,14 +14,14 @@ interface PaginateOptions<T> {
 interface PaginateResults<T> {
   data: T[];
   pagination: {
-    total: number;
-    page: number;
+    totalItem: number;
+    currentPage: number;
     limit: number;
     totalPage: number;
   };
 }
 
-export async function paginate<T = any>({
+export async function Npaginate<T = any>({
   model,
   where,
   select,
@@ -45,6 +45,11 @@ export async function paginate<T = any>({
 
   return {
     data,
-    pagination: { total, page, limit, totalPage: Math.ceil(total / limit) },
+    pagination: {
+      totalItem: total,
+      currentPage: page,
+      limit,
+      totalPage: Math.ceil(total / limit),
+    },
   };
 }

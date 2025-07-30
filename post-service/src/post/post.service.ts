@@ -2,11 +2,10 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentService } from 'src/comment/comment.service';
-import { ClientKafka, RpcException } from '@nestjs/microservices';
+import { ClientKafka } from '@nestjs/microservices';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostQueryDto } from './dto/post-query.dto';
 import { paginate } from 'src/common/pagination';
-import { Post, Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import { ReactionService } from 'src/reaction/reaction.service';
 import { CONSTANTS } from 'src/common/constants/app.constants';
@@ -142,6 +141,9 @@ export class PostService implements OnModuleInit {
         include: {
           comments: {
             take: 2,
+            orderBy: {
+              createdAt: 'desc',
+            },
             select: {
               id: true,
               content: true,
@@ -312,7 +314,7 @@ export class PostService implements OnModuleInit {
     });
 
     const [comments, reaction, totalComment] = await Promise.all([
-      this.commentService.getCommentsByPostId(post.id),
+      this.commentService.getCommentsByPostId(post.id, 1, 100),
       this.reactionService.getReactionsSummaryByPostId(post.id),
       this.commentService.countCommentsByPostId(post.id),
     ]);

@@ -1,23 +1,19 @@
 'use client';
 import { PostCard } from '@/components/dashboard/postCard';
 import postService from '@/service/post.service';
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Post } from '@/types/post';
 import { Header } from '@/components/dashboard/header';
+import { useQuery } from '@tanstack/react-query';
 
 const page = () => {
   const params = useParams();
   const id = params.id as string;
 
-  const [post, setPost] = useState<Post>();
-  useEffect(() => {
-    const getPost = async () => {
-      const response = await postService.getPostById(id);
-      setPost(response);
-    };
-    getPost();
-  }, [id]);
+  const { data: post } = useQuery({
+    queryKey: ['post', id],
+    queryFn: () => postService.getPostById(id),
+  });
+
   return (
     <div className="min-h-screen gradient-bg">
       <Header />
