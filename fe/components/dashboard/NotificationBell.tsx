@@ -48,8 +48,6 @@ export function NotificationBell() {
     hasMorePages,
   } = useNotification();
 
-  console.log('NotificationBell notifications:', hasMorePages);
-
   const { isConnected, connectionStatus, getNotificationUrl, socket } =
     useAuthenticatedWebSocket({
       options: {

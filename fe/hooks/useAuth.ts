@@ -285,6 +285,23 @@ export function useVerifyOtp(email: string): UseVerifyOtpReturn {
     }
   };
 
+  const handleResendOtp = useCallback(async () => {
+    try {
+      await authService.sendVerificationEmail(email);
+      toast({
+        title: 'OTP Resent',
+        description: 'A new OTP has been sent to your email.',
+      });
+      setOtp(Array(6).fill(''));
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to resend OTP',
+        variant: 'destructive',
+      });
+    }
+  }, [email, toast]);
+
   const handleOtpSubmit = () => {
     if (otp.every((digit) => digit !== '')) {
       const otpString = otp.join('');
@@ -313,6 +330,7 @@ export function useVerifyOtp(email: string): UseVerifyOtpReturn {
     handleOtpChange,
     handleOtpKeyDown,
     handleOtpSubmit,
+    handleResendOtp,
   };
 }
 

@@ -84,7 +84,6 @@ export class NotificationService {
 
   async updateAll(updateAllDto: UpdateAllDto) {
     try {
-      console.log('updateAllDto', updateAllDto);
       return await this.prisma.notification.updateMany({
         where: {
           receiverId: updateAllDto.userId,

@@ -18,7 +18,6 @@ const page = () => {
     };
     getPost();
   }, [id]);
-  console.log(post);
   return (
     <div className="min-h-screen gradient-bg">
       <Header />

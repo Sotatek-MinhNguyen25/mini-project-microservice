@@ -305,7 +305,6 @@ export const useNotification = () => {
       const response: any = await notificationService.getNotification(
         currentPage,
       );
-      console.log('response full', response);
 
       if (response?.data && response?.meta) {
         if (resetPage) {
@@ -313,7 +312,6 @@ export const useNotification = () => {
           setPage(response.meta.currentPage);
           const isLastPage =
             response.meta.currentPage >= response.meta.totalPage;
-          console.log('Is last page:', isLastPage);
           setHasMorePages(!isLastPage);
         } else {
           setNotifications((prev) => [...prev, ...response.data]);

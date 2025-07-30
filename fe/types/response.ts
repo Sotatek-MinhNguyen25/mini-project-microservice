@@ -19,6 +19,7 @@ export type UseVerifyOtpReturn = {
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => void;
   handleOtpSubmit: () => void;
+  handleResendOtp: () => void;
 };
 
 // POST REACTION

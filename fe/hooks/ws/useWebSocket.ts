@@ -43,15 +43,11 @@ export const useWebSocket = ({
     ServerToClientEvents,
     ClientToServerEvents
   > | null>(null);
-  const autoReadTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const reconnectAttemptsRef = useRef(0);
-  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize Socket.IO connection
   useEffect(() => {
     if (!url) return;
-
-    console.log('Initializing Socket.IO connection to:', url);
 
     // Create socket connection
     const socket = io(url, {
@@ -70,7 +66,7 @@ export const useWebSocket = ({
 
     // Connection event listeners
     socket.on('connect', () => {
-      console.log('Socket.IO connected with ID:', socket.id);
+      // console.log('Socket.IO connected with ID:', socket.id);
       setIsConnected(true);
       setConnectionStatus('Connected');
       const accessToken = localStorage.getItem('accessToken');
@@ -84,7 +80,6 @@ export const useWebSocket = ({
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('Socket.IO disconnected:', reason);
       setIsConnected(false);
       setConnectionStatus('Disconnected');
     });
@@ -104,14 +99,12 @@ export const useWebSocket = ({
     });
 
     socket.on('reconnect', (attemptNumber) => {
-      console.log('Socket.IO reconnected after', attemptNumber, 'attempts');
       setIsConnected(true);
       setConnectionStatus('Connected');
       reconnectAttemptsRef.current = 0;
     });
 
     socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('Socket.IO reconnection attempt:', attemptNumber);
       setConnectionStatus('Reconnecting');
     });
 
@@ -125,7 +118,7 @@ export const useWebSocket = ({
 
     // Cleanup function
     return () => {
-      console.log('Cleaning up Socket.IO connection');
+      // console.log('Cleaning up Socket.IO connection');
       socket.disconnect();
     };
   }, []);
