@@ -18,7 +18,7 @@ const notificationService = {
     return response;
   },
   markAllAsRead: async () => {
-    const response: AxiosResponse = await put(`${NotiPrefix}/all`, {});
+    const response: AxiosResponse = await put(`${NotiPrefix}/mark/all`, {});
     return response;
   },
 };

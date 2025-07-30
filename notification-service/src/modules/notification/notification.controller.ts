@@ -23,7 +23,7 @@ export class NotificationController {
     return this.notificationService.updateOne(updateOneDto);
   }
 
-  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.UPDATE_ONE)
+  @MessagePattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.UPDATE_MANY)
   updateAll(@Payload() updateAllDto: UpdateAllDto) {
     return this.notificationService.updateAll(updateAllDto);
   }

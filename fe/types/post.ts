@@ -56,7 +56,14 @@ export interface PostImage {
   url: string;
 }
 
-// Request type for creating a post
+export interface CreatePostForm {
+  title: string;
+  content: string;
+  postImages?: PostImage[];
+  tagIds?: TagId[];
+  files: File[];
+}
+
 export interface CreatePostRequest {
   title: string;
   content: string;
@@ -74,7 +81,6 @@ export interface PostImageResponse {
   deletedAt: string | null;
   postId: string;
 }
-
 export interface Tag {
   id: string;
   name: string;
@@ -97,6 +103,7 @@ export interface CreatePostResponseData {
   title: string;
   content: string;
   userId: string;
+  isHidden: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -153,8 +160,8 @@ export interface PostCardProps {
 }
 
 export interface CompactPostViewProps {
-  user: any;
-  // fullName: string;
+  user: User;
+
   setIsExpanded: (value: boolean) => void;
 }
 
@@ -198,6 +205,7 @@ export interface PostCardProps {
 }
 
 export interface Tag {
+  tagId: string;
   id: string;
   name: string;
   createdAt: string;

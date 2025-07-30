@@ -2,35 +2,39 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LoginCredentials } from '@/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { jwtDecode } from 'jwt-decode';
+
 import authService from '@/service/auth.service';
 import {
+  LoginCredentials,
   DecodedToken,
   RegisterData,
   RegisterResponse,
   ResetPasswordData,
   ResetPasswordResponse,
 } from '@/types/auth';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { toast, useToast } from './useToast';
+import { useToast } from './useToast';
+import { UseVerifyOtpReturn } from '@/types/response';
+
+const storage = {
+  get: (key: string) =>
+    typeof window !== 'undefined' ? localStorage.getItem(key) : null,
+  set: (key: string, value: string) => localStorage.setItem(key, value),
+  remove: (key: string) => localStorage.removeItem(key),
+};
 
 export function useAccessToken() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const getToken = () => localStorage.getItem('accessToken');
+    const getToken = () => storage.get('accessToken');
     setAccessToken(getToken());
 
-    const handleStorageChange = () => {
-      setAccessToken(getToken());
-    };
-
+    const handleStorageChange = () => setAccessToken(getToken());
     window.addEventListener('storage', handleStorageChange);
 
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   return accessToken;
@@ -41,59 +45,47 @@ export function useLogin() {
   const { toast } = useToast();
 
   const mutation = useMutation({
-    mutationFn: async ({ email, password }: LoginCredentials) => {
-      return await authService.login(email, password);
-    },
-
+    mutationFn: async ({ email, password }: LoginCredentials) =>
+      authService.login(email, password),
     onSuccess: async (response) => {
-      if (response.statusCode === 200 || response.statusCode === 201) {
+      const isValidResponse =
+        response &&
+        (response.statusCode === 200 || response.statusCode === 201);
+      if (isValidResponse) {
         const { accessToken, refreshToken } = response.data!;
-
-        // Lưu tokens
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        storage.set('accessToken', accessToken);
+        storage.set('refreshToken', refreshToken);
 
         try {
-          const decodedUser: any = jwtDecode(accessToken);
+          const decodedUser: DecodedToken = jwtDecode(accessToken);
           const role = decodedUser.roles?.[0]?.trim();
-
-          localStorage.setItem('userRole', role);
+          storage.set('userRole', role ?? '');
 
           if (role === 'ADMIN') {
             router.push('/admin');
           } else if (role === 'USER') {
             const userProfile = await authService.me();
-
-            if (
-              !userProfile ||
-              !userProfile.roles ||
-              userProfile.roles.length === 0
-            ) {
+            if (!userProfile?.roles?.length) {
               throw new Error(
                 'User profile is incomplete or roles are missing',
               );
             }
-
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-
+            storage.set('userProfile', JSON.stringify(userProfile));
             window.dispatchEvent(
               new StorageEvent('storage', {
                 key: 'userProfile',
                 newValue: JSON.stringify(userProfile),
               }),
             );
-
             window.dispatchEvent(
               new StorageEvent('storage', {
                 key: 'accessToken',
                 newValue: accessToken,
               }),
             );
-
             router.push('/');
           }
-        } catch (error) {
-          console.error('Failed to decode JWT:', error);
+        } catch {
           toast({
             title: 'Warning',
             description:
@@ -105,12 +97,11 @@ export function useLogin() {
         throw new Error(response.message || 'Login failed');
       }
     },
-
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error',
         description:
-          error.message || 'An error occurred. Please try again later.',
+          error?.message || 'An error occurred. Please try again later.',
         variant: 'destructive',
       });
     },
@@ -129,26 +120,21 @@ export function useVerifyEmail() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async (email: string) => {
-      const response = await authService.sendVerificationEmail(email);
-      return response;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['user', data.id] });
+    mutationFn: async (email: string) =>
+      authService.sendVerificationEmail(email),
+    onSuccess: ({ id, email }) => {
+      queryClient.invalidateQueries({ queryKey: ['user', id] });
       toast({
         title: 'Success!',
-        description:
-          'Verification email sent successfully. Please check your inbox.',
+        description: 'Verification email sent. Please check your inbox.',
       });
-      router.push(
-        `/auth/register/verify?email=${encodeURIComponent(data.email)}`,
-      );
+      router.push(`/auth/register/verify?email=${encodeURIComponent(email)}`);
     },
     onError: (error: any) => {
       toast({
         title: 'Error',
         description:
-          error.message ||
+          error?.message ||
           'Failed to send verification email. Please try again.',
         variant: 'destructive',
       });
@@ -162,30 +148,23 @@ export function useRegister() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async (data: RegisterData): Promise<RegisterResponse> => {
-      const response = await authService.register(data);
-      console.log('Register response:', response);
-      return response;
-    },
-    onSuccess: (data: RegisterResponse) => {
-      console.log('Registration successful:', data);
+    mutationFn: async (data: RegisterData): Promise<RegisterResponse> =>
+      authService.register(data),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
-
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-
+      storage.set('accessToken', data.accessToken);
+      storage.set('refreshToken', data.refreshToken);
       toast({
         title: 'Success!',
         description:
-          'Your account has been created successfully! Please login to your account.',
+          'Your account has been created successfully! Please login.',
       });
-
       router.push('/auth/login');
     },
     onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to register. Please try again.',
+        description: error?.message || 'Failed to register. Please try again.',
         variant: 'destructive',
       });
     },
@@ -196,23 +175,20 @@ export function useResetPassword() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: ResetPasswordData) => {
-      const response = await authService.resetPassword(data.email);
-      return response as ResetPasswordResponse;
-    },
+    mutationFn: async ({
+      email,
+    }: ResetPasswordData): Promise<ResetPasswordResponse> =>
+      authService.resetPassword(email),
     onSuccess: (data) => {
       toast({
-        title: 'Success! ',
-        description:
-          data.message || 'A password reset link has been sent to your email.',
+        title: 'Success!',
+        description: data.message || 'Password reset link sent.',
       });
     },
     onError: (error: any) => {
       toast({
         title: 'Error',
-        description:
-          error.message ||
-          'Failed to send password reset link. Please try again.',
+        description: error?.message || 'Failed to send password reset link.',
         variant: 'destructive',
       });
     },
@@ -226,15 +202,12 @@ export function useVerifyOtpResetPassword() {
     mutationFn: ({ email, otp }: { email: string; otp: string }) =>
       authService.verifyResetPasswordOTP(email, otp),
     onSuccess: () => {
-      toast({
-        title: 'Success',
-        description: 'Please login to your account.',
-      });
+      toast({ title: 'Success', description: 'Please login to your account.' });
     },
     onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Invalid OTP',
+        description: error?.response?.data?.message || 'Invalid OTP',
         variant: 'destructive',
       });
     },
@@ -255,42 +228,36 @@ export function useSendResetPassword() {
       password: string;
     }) => authService.sendNewPassword(email, password, otp),
     onSuccess: () => {
-      toast({
-        title: 'Success',
-        description: 'Please login to your account.',
-      });
+      toast({ title: 'Success', description: 'Please login to your account.' });
     },
     onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Invalid password',
+        description: error?.response?.data?.message || 'Invalid password',
         variant: 'destructive',
       });
     },
   });
 }
 
-export function useVerifyOtp(email: string) {
+export function useVerifyOtp(email: string): UseVerifyOtpReturn {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [errors, setErrors] = useState<{ otp?: string }>({});
   const otpRefs = useRef<(HTMLInputElement | null)[]>(Array(6).fill(null));
   const router = useRouter();
+  const { toast } = useToast();
 
   const verifyMutation = useMutation({
     mutationFn: ({ email, otp }: { email: string; otp: string }) =>
       authService.verifyOTP(email, otp),
-    onSuccess: (data) => {
-      console.log('OTP verification successful:', data);
+    onSuccess: () => {
       setOtp(Array(6).fill(''));
       setErrors({});
-      toast({
-        title: 'Success',
-        description: 'Please login to your account.',
-      });
+      toast({ title: 'Success', description: 'Please login to your account.' });
       router.push(`/auth/login`);
     },
     onError: (error: any) => {
-      setErrors({ otp: error.response?.data?.message || 'Invalid OTP' });
+      setErrors({ otp: error?.response?.data?.message || 'Invalid OTP' });
     },
   });
 
@@ -300,22 +267,11 @@ export function useVerifyOtp(email: string) {
     newOtp[index] = value;
     setOtp(newOtp);
     setErrors({});
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+
+    // Submit if all filled
     if (newOtp.every((digit) => digit !== '') && newOtp.join('').length === 6) {
       const otpString = newOtp.join('');
-      // Mock logic for testing
-      if (otpString === '123456' || email === 'mock@email.com') {
-        setOtp(Array(6).fill(''));
-        setErrors({});
-        toast({
-          title: 'Success',
-          description: 'Please login to your account.',
-        });
-        router.push(`/auth/login`);
-        return;
-      }
       verifyMutation.mutate({ email, otp: otpString });
     }
   };
@@ -332,7 +288,6 @@ export function useVerifyOtp(email: string) {
   const handleOtpSubmit = () => {
     if (otp.every((digit) => digit !== '')) {
       const otpString = otp.join('');
-      // Mock logic for testing
       if (otpString === '123456' || email === 'mock@email.com') {
         setOtp(Array(6).fill(''));
         setErrors({});
@@ -347,10 +302,6 @@ export function useVerifyOtp(email: string) {
     }
   };
 
-  const handleResendOtp = () => {
-    console.log('Resend OTP requested');
-  };
-
   return {
     otp,
     setOtp,
@@ -362,7 +313,6 @@ export function useVerifyOtp(email: string) {
     handleOtpChange,
     handleOtpKeyDown,
     handleOtpSubmit,
-    handleResendOtp,
   };
 }
 
@@ -371,8 +321,8 @@ export function useLogout() {
   const { toast } = useToast();
 
   const logout = useCallback(async () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    storage.remove('accessToken');
+    storage.remove('refreshToken');
     await authService.logout();
     router.push('/auth/login');
     toast({

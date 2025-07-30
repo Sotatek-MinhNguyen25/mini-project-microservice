@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { get, post, put, deleteReq, upload } from '../lib/axiosClient';
 import { getAuthorizationHeader } from '../utils/auth';
-import { ReactionType } from '@/types/post';
+import { CreatePostRequest, ReactionType } from '@/types/post';
 
 const PostPrefix = '/post';
 const UploadPrefix = '/upload';
@@ -14,7 +14,7 @@ const postService = {
     return response.data;
   },
 
-  createPost: async (postData: any) => {
+  createPost: async (postData: CreatePostRequest) => {
     const response: AxiosResponse = await post(`${PostPrefix}`, postData, {
       headers: getAuthorizationHeader(),
     });

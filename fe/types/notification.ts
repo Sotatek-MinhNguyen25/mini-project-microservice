@@ -1,32 +1,18 @@
-export interface BaseNotification {
+export interface Notification {
   id: string;
-  userId: string;
-  createdAt: string;
-  isRead: boolean;
-  type: NotificationType;
-  content: string;
+  receiverId: string;
+  senderId: string;
   postId: string;
+  commentId: string | null;
+  type: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
 export type NotificationType = 'Comment' | 'Reaction';
-
-export interface CommentNotification extends BaseNotification {
-  type: 'Comment';
-  message: string;
-  from: any;
-  to: string;
-  postId: string;
-}
-export interface ReactionNotification extends BaseNotification {
-  type: 'Reaction';
-  message: string;
-  from: any;
-  to: string;
-  postId: string;
-  reactionType: string;
-}
-
-export type Notification = ReactionNotification | CommentNotification;
 
 export interface NotificationSummary {
   total: number;

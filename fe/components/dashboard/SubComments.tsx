@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, ChevronUp, Loader2 } from 'lucide-react';
 import { useSubComments } from '@/hooks/usePosts';
 import { SubCommentItem } from './SubCommentItem';
+import { SubComment } from '@/types/post';
 
 interface SubCommentsProps {
   parentCommentId: string;
@@ -92,7 +93,7 @@ export function SubComments({ parentCommentId, totalCount }: SubCommentsProps) {
               Failed to load replies: {error?.message || 'Please try again.'}
             </div>
           ) : subComments.length > 0 ? (
-            subComments.map((value: any) => (
+            subComments.map((value: SubComment) => (
               <SubCommentItem
                 key={value?.id || `temp-${Math.random()}`}
                 subComment={value}
