@@ -27,12 +27,8 @@ import {
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { DEFAULT_USER } from '@/const/user';
-import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 
 export function Header() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const { logout, isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,7 +37,7 @@ export function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+      // console.log('Searching for:', searchQuery);
     }
   };
 
