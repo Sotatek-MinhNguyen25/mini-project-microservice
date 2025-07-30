@@ -230,12 +230,11 @@ export class PostService implements OnModuleInit {
         ]);
 
         // Lay tag details
-        const tagDetail = post.tags.map((tag) => {
-          return {
-            id: tag.tag.id,
-            name: tag.tag.name,
-          };
-        });
+        const tagDetail = post.tags.map((tag) => ({
+          id: tag.tag.id,
+          name: tag.tag.name,
+        }));
+
         return {
           ..._.omit(post, ['userId', 'tags']),
           tags: tagDetail,

@@ -15,7 +15,7 @@ export function PostFooter({ post }: { post: Post }) {
   const reactionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // State cục bộ để hiển thị ngay
-  console.log('chill');
+  console.log('comment', post.comments);
   const userOwnReaction = post.reactions.find((r) => r.userId === user?.id);
   const [localReaction, setLocalReaction] = useState<ReactionType | null>(
     userOwnReaction?.type ? (userOwnReaction.type as ReactionType) : null,

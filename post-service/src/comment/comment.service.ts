@@ -171,6 +171,9 @@ export class CommentService implements OnModuleInit {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     // Lay id cac user tu comment
@@ -190,8 +193,9 @@ export class CommentService implements OnModuleInit {
         ['id', 'email', 'username'],
       );
       return {
-        ..._.pick(comment, ['id', 'content', '_count', 'createdAt']),
+        ..._.pick(comment, ['id', 'content', 'createdAt']),
         user: user,
+        childComment: comment._count.childComment,
       };
     });
     return { data: result };
