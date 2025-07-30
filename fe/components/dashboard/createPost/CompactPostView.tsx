@@ -1,12 +1,13 @@
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ImageIcon, Video } from 'lucide-react';
+import { CompactPostViewProps } from '@/types/post';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ImageIcon, Video } from "lucide-react";
-import { CompactPostViewProps } from "@/types/post";
-import { DEFAULT_USER } from "@/const/user";
-
-export default function CompactPostView({ user = DEFAULT_USER, setIsExpanded }: CompactPostViewProps) {
+export default function CompactPostView({
+  user,
+  setIsExpanded,
+}: CompactPostViewProps) {
   const initials = `${user.username[0]}${user.username[1]}`;
 
   return (
@@ -24,19 +25,27 @@ export default function CompactPostView({ user = DEFAULT_USER, setIsExpanded }: 
           </Avatar>
           <div className="flex-1 bg-muted/50 rounded-full px-4 py-3 text-muted-foreground hover:bg-muted/70 transition-colors">
             {/* What's on your mind, {user.profile.firstName}? */}
-          </div>  
+          </div>
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+            >
               <ImageIcon className="h-4 w-4 mr-1" />
               Photo
             </Button>
-            <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            >
               <Video className="h-4 w-4 mr-1" />
               Video
             </Button>
           </div>
         </div>
-        </CardContent>
-      </Card>
+      </CardContent>
+    </Card>
   );
 }
