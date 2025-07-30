@@ -64,10 +64,10 @@ export function PostFooter({ post }: { post: Post }) {
 
   return (
     <div
-      className="flex flex-col space-y-4 px-6 pb-6 py-2"
+      className="flex flex-col space-y-4 px-6 pb-6 py-2 cursor-default"
       onClick={(e) => {
         e.stopPropagation();
-        e.preventDefault();
+        // e.preventDefault();
       }}
     >
       <div className="flex items-center justify-between w-full">

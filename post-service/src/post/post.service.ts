@@ -138,7 +138,7 @@ export class PostService implements OnModuleInit {
         },
       ];
     }
-    console.log(searchCondition);
+
     const [posts, totalItem] = await Promise.all([
       this.prisma.post.findMany({
         omit: {

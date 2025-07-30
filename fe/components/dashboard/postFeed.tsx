@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'react';
 import { useGetPosts } from '@/hooks/usePosts';
 import { PostCard } from './postCard';
 import { Loader2, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export function PostFeed() {
+  const router = useRouter();
   const searchParam = useSearchParams();
   const search = searchParam.get('search') || '';
   const {
@@ -18,7 +18,6 @@ export function PostFeed() {
     isLoading,
     error,
   } = useGetPosts({ page: 1, limit: 10, search: search });
-  console.log('search', search);
   const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,14 +85,16 @@ export function PostFeed() {
   return (
     <div className="space-y-8">
       {allPosts.map((post, index) => (
-        <Link
+        <div
+          role="button"
+          tabIndex={0}
           key={post.id}
-          href={`/post/${post.id}`}
+          onClick={() => router.push(`/post/${post.id}`)}
           className="animate-in slide-in-from-bottom-4 duration-500"
           style={{ animationDelay: `${index * 100}ms` }}
         >
           <PostCard post={post} />
-        </Link>
+        </div>
       ))}
       {hasNextPage && (
         <div ref={observerRef} className="flex justify-center py-8">
