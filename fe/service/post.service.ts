@@ -7,9 +7,13 @@ const PostPrefix = '/post';
 const UploadPrefix = '/upload';
 
 const postService = {
-  getPosts: async (page: number = 1, limit: number = 10) => {
+  getPosts: async (
+    page: number = 1,
+    limit: number = 10,
+    search: string = '',
+  ) => {
     const response: AxiosResponse = await get(
-      `${PostPrefix}?page=${page}&limit=${limit}`,
+      `${PostPrefix}?page=${page}&limit=${limit}&search=${search}`,
     );
     return response.data;
   },

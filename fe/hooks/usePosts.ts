@@ -21,11 +21,15 @@ import notificationService from '@/service/notification.service';
 import type { Notification } from '@/types/notification';
 import { ApiResponse } from '@/types/response';
 
-export function useGetPosts({ page = 1, limit = 10 }: UseGetPostsOptions = {}) {
+export function useGetPosts({
+  page = 1,
+  limit = 10,
+  search = '',
+}: UseGetPostsOptions = {}) {
   return useInfiniteQuery({
-    queryKey: ['posts', page, limit],
+    queryKey: ['posts', page, limit, search],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await postService.getPosts(pageParam, limit);
+      const response = await postService.getPosts(pageParam, limit, search);
       const posts = Array.isArray(response) ? response : response.posts || [];
       const total = Array.isArray(response) ? undefined : response.total;
       return { posts, total, page: pageParam };

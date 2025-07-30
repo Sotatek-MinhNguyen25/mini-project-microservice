@@ -19,6 +19,7 @@ import * as _ from 'lodash';
 import { InjectQueue } from '@nestjs/bullmq';
 import { postHideJobName, postHideQueueName } from 'src/jobs/post-hide.job';
 import { Queue } from 'bullmq';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostService implements OnModuleInit {
@@ -117,21 +118,27 @@ export class PostService implements OnModuleInit {
   async findAll(postQueryDto: PostQueryDto) {
     const paginateCondition = paginate(postQueryDto.page, postQueryDto.limit);
 
-    const searchCondition: any = {
+    const searchCondition: Prisma.PostWhereInput = {
       isHidden: false,
       deletedAt: null,
     };
 
     if (postQueryDto.search) {
+      delete searchCondition.isHidden;
       searchCondition.OR = [
         {
           content: {
             contains: postQueryDto.search,
           },
         },
+        {
+          title: {
+            contains: postQueryDto.search,
+          },
+        },
       ];
     }
-
+    console.log(searchCondition);
     const [posts, totalItem] = await Promise.all([
       this.prisma.post.findMany({
         omit: {

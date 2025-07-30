@@ -5,8 +5,11 @@ import { useGetPosts } from '@/hooks/usePosts';
 import { PostCard } from './postCard';
 import { Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export function PostFeed() {
+  const searchParam = useSearchParams();
+  const search = searchParam.get('search') || '';
   const {
     data,
     fetchNextPage,
@@ -14,7 +17,8 @@ export function PostFeed() {
     isFetchingNextPage,
     isLoading,
     error,
-  } = useGetPosts({ page: 1, limit: 10 });
+  } = useGetPosts({ page: 1, limit: 10, search: search });
+  console.log('search', search);
   const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

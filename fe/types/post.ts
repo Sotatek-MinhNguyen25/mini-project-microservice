@@ -257,4 +257,5 @@ export interface ReplyCommentData {
 export interface UseGetPostsOptions {
   limit?: number;
   page?: number;
+  search?: string;
 }

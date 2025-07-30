@@ -7,7 +7,7 @@ import { ClientOnly } from '@/components/ClientOnly';
 import { NotificationBell } from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,8 +27,12 @@ import {
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { DEFAULT_USER } from '@/const/user';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const { logout, isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +41,7 @@ export function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
+      router.push(`/?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
