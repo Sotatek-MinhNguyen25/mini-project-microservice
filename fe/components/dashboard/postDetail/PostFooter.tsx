@@ -27,7 +27,9 @@ export function PostFooter({ post }: { post: Post }) {
     setLocalCount(post.reaction.count);
   }, [post, user]);
 
-  const handleReaction = (type: ReactionType) => {
+  const handleReaction = (type: ReactionType, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (!user) return;
 
     const isSame = localReaction === type;
@@ -61,7 +63,13 @@ export function PostFooter({ post }: { post: Post }) {
   };
 
   return (
-    <div className="flex flex-col space-y-4 px-6 pb-6 py-2">
+    <div
+      className="flex flex-col space-y-4 px-6 pb-6 py-2"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+    >
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-1 relative">
           <div
@@ -70,7 +78,7 @@ export function PostFooter({ post }: { post: Post }) {
             className="relative"
           >
             <Button
-              onClick={() => handleReaction(ReactionType.LIKE)}
+              onClick={(e) => handleReaction(ReactionType.LIKE, e)}
               variant={localReaction ? 'default' : 'ghost'}
               size="sm"
               disabled={reactionMutation.isPending}
@@ -103,7 +111,7 @@ export function PostFooter({ post }: { post: Post }) {
                       key={key}
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleReaction(ReactionType[type])}
+                      onClick={(e) => handleReaction(ReactionType[type], e)}
                       className="text-2xl hover:scale-125 transition-transform"
                     >
                       {emoji}
@@ -117,7 +125,11 @@ export function PostFooter({ post }: { post: Post }) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowComments(!showComments)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShowComments(!showComments);
+            }}
             className="hover:bg-blue-50 hover:text-blue-500 dark:hover:bg-blue-900/20 transition-all"
           >
             <MessageCircle className="h-4 w-4 mr-2" />

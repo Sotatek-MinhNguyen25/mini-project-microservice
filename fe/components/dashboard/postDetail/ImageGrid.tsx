@@ -18,7 +18,9 @@ export function ImageGrid({ images }: ImageGridProps) {
 
   if (images.length === 0) return null;
 
-  const openGallery = (index: number) => {
+  const openGallery = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setSelectedImageIndex(index);
     setIsGalleryOpen(true);
   };
@@ -33,10 +35,10 @@ export function ImageGrid({ images }: ImageGridProps) {
       <>
         <div className="grid gap-3 rounded-xl overflow-hidden">
           {images.map((image, index) => (
-            <div 
-              key={image.id} 
+            <div
+              key={image.id}
               className="relative group cursor-pointer"
-              onClick={() => openGallery(index)}
+              onClick={(e) => openGallery(index, e)}
             >
               <Image
                 src={image.url || '/placeholder.svg'}
@@ -66,9 +68,9 @@ export function ImageGrid({ images }: ImageGridProps) {
     <>
       <div className="grid grid-cols-2 gap-3 rounded-xl overflow-hidden h-96">
         {/* Main image - left side */}
-        <div 
+        <div
           className="relative group cursor-pointer"
-          onClick={() => openGallery(0)}
+          onClick={(e) => openGallery(0, e)}
         >
           <Image
             src={mainImage.url || '/placeholder.svg'}
@@ -82,9 +84,9 @@ export function ImageGrid({ images }: ImageGridProps) {
         {/* Right side */}
         <div className="flex flex-col gap-3">
           {/* Second image - right top */}
-          <div 
+          <div
             className="relative group cursor-pointer flex-1"
-            onClick={() => openGallery(1)}
+            onClick={(e) => openGallery(1, e)}
           >
             <Image
               src={sideImages[0]?.url || '/placeholder.svg'}
@@ -98,7 +100,7 @@ export function ImageGrid({ images }: ImageGridProps) {
           {/* Third image or counter - right bottom */}
           <div className="relative group cursor-pointer flex-1">
             {images.length === 3 ? (
-              <div onClick={() => openGallery(2)}>
+              <div onClick={(e) => openGallery(2, e)}>
                 <Image
                   src={sideImages[1]?.url || '/placeholder.svg'}
                   alt={sideImages[1]?.altText || ''}
@@ -108,10 +110,7 @@ export function ImageGrid({ images }: ImageGridProps) {
                 />
               </div>
             ) : (
-              <div 
-                className="relative"
-                onClick={() => openGallery(2)}
-              >
+              <div className="relative" onClick={(e) => openGallery(2, e)}>
                 <Image
                   src={sideImages[1]?.url || '/placeholder.svg'}
                   alt={sideImages[1]?.altText || ''}
