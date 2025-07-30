@@ -12,7 +12,6 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
 console.log('Using API baseURL:', baseURL);
 
-
 const defaultHeaders = {
   'Content-Type': 'application/json',
 };

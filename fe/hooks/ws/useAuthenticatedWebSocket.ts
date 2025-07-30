@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import type { Notification } from '@/types/notification';
 import { useWebSocket } from './useWebSocket';
+import { User } from '@/types/auth';
 
 interface UseAuthenticatedWebSocketConfig {
   baseUrl?: string;
@@ -19,7 +20,7 @@ export const useAuthenticatedWebSocket = ({
   options = {},
 }: UseAuthenticatedWebSocketConfig = {}): any & {
   isAuthenticated: boolean;
-  authUser: any;
+  authUser: User;
   getNotificationMessage: (notification: Notification) => string;
   getNotificationUrl: (notification: Notification) => string;
 } => {

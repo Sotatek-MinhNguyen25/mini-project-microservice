@@ -45,7 +45,7 @@ export class NotificationGatewayController implements OnModuleInit {
     );
   }
 
-  @Put('all')
+  @Put('mark/all')
   @ApiBearerAuth()
   async updateAll(@AuthUser() user: JwtPayload) {
     return await firstValueFrom(

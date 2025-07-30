@@ -10,7 +10,13 @@ import PostTagsInput from './createPost/PostTagsInput';
 import PostFileUpload from './createPost/PostFileUpload';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Form, Input, Button } from 'antd';
-import { CreatePostRequest, PostImage, TagId, Tag } from '@/types/post';
+import {
+  CreatePostRequest,
+  PostImage,
+  TagId,
+  Tag,
+  CreatePostForm,
+} from '@/types/post';
 import { FilePreview } from '@/types';
 import { useTheme } from 'next-themes';
 
@@ -77,8 +83,8 @@ export function CreatePost() {
       return;
     }
 
-    if (!selectedTagIds.some((tag: any) => tag.tagId === tagId)) {
-      const tag = tags.find((tag: any) => tag.id === tagId);
+    if (!selectedTagIds.some((tag) => tag.tagId === tagId)) {
+      const tag = tags.find((tag: Tag) => tag.id === tagId);
       if (tag) {
         setSelectedTagIds([
           ...selectedTagIds,
@@ -194,38 +200,33 @@ export function CreatePost() {
           preview.altText || `Image ${filePreviews.indexOf(preview) + 1}`,
       }));
 
-    const postData: CreatePostRequest = {
+    const postData: CreatePostForm = {
       title: values.title?.trim() || 'Untitled Post',
       content: values.content.trim(),
       postImages: postImages.length > 0 ? postImages : undefined,
       tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
+      files: filePreviews.map((p) => p.file),
     };
 
-    createPost(
-      {
-        ...postData,
-        files: filePreviews.map((p) => p.file),
+    createPost(postData, {
+      onSuccess: () => {
+        form.resetFields();
+        setSelectedTagIds([]);
+        setFilePreviews([]);
+        setIsExpanded(false);
+        toast({
+          title: 'Success! 🎉',
+          description: 'Your post has been shared with the world!',
+        });
       },
-      {
-        onSuccess: () => {
-          form.resetFields();
-          setSelectedTagIds([]);
-          setFilePreviews([]);
-          setIsExpanded(false);
-          toast({
-            title: 'Success! 🎉',
-            description: 'Your post has been shared with the world!',
-          });
-        },
-        onError: (error: any) => {
-          toast({
-            title: 'Error',
-            description: error.message || 'Failed to create post',
-            variant: 'destructive',
-          });
-        },
+      onError: (error: any) => {
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to create post',
+          variant: 'destructive',
+        });
       },
-    );
+    });
   };
 
   if (!user) return null;

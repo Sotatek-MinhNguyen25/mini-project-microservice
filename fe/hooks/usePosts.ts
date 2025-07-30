@@ -6,15 +6,20 @@ import {
 } from '@tanstack/react-query';
 import postService from '@/service/post.service';
 import {
+  CreatePostForm,
+  CreatePostRequest,
+  CreatePostResponseData,
   GetTagsResponse,
+  PostImageResponse,
   ReactionType,
   UseGetPostsOptions,
   UseSubCommentsParams,
 } from '@/types/post';
 import { useToast } from './useToast';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import notificationService from '@/service/notification.service';
 import type { Notification } from '@/types/notification';
+import { ApiResponse } from '@/types/response';
 
 export function useGetPosts({ page = 1, limit = 10 }: UseGetPostsOptions = {}) {
   return useInfiniteQuery({
@@ -39,17 +44,15 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (postData: any) => {
+    mutationFn: async (postData: CreatePostForm) => {
       const { files, ...rest } = postData;
 
       let postImages = rest.postImages || [];
       if (files.length > 0) {
         try {
           if (files.length === 1) {
-            // Use single file upload endpoint
-            const uploadResponse: any = await postService.uploadSingleFile(
-              files[0],
-            );
+            const uploadResponse: ApiResponse<PostImageResponse> =
+              await postService.uploadSingleFile(files[0]);
             postImages = [
               {
                 id: uploadResponse.data.id,
@@ -58,10 +61,8 @@ export function useCreatePost() {
               },
             ];
           } else {
-            // Use multiple files upload endpoint
-            const uploadResponse: any = await postService.uploadMultipleFiles(
-              files,
-            );
+            const uploadResponse: ApiResponse<PostImageResponse[]> =
+              await postService.uploadMultipleFiles(files);
             postImages = (
               uploadResponse.data as Array<{ id: string; url: string }>
             ).map((file, index) => ({
@@ -76,14 +77,15 @@ export function useCreatePost() {
       }
 
       try {
-        const createPostData: any = {
+        const createPostData: CreatePostRequest = {
           title: rest.title,
           content: rest.content,
           postImages: postImages.length > 0 ? postImages : undefined,
           tagIds:
             rest.tagIds && rest.tagIds.length > 0 ? rest.tagIds : undefined,
         };
-        const postResponse = await postService.createPost(createPostData);
+        const postResponse: ApiResponse<CreatePostResponseData> =
+          await postService.createPost(createPostData);
         return postResponse;
       } catch (error) {
         throw new Error('Failed to create post');
@@ -303,8 +305,9 @@ export const useNotification = () => {
       const response: any = await notificationService.getNotification(
         currentPage,
       );
+      console.log('response full', response);
 
-      if (response?.data && response.meta) {
+      if (response?.data && response?.meta) {
         if (resetPage) {
           setNotifications(response.data);
           setPage(response.meta.currentPage);
@@ -389,12 +392,12 @@ export const useNotification = () => {
   };
 
   const markAllAsRead = async () => {
-    const previousNotifications = notifications;
+    const previousNotifications: Notification[] = notifications;
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
 
     try {
       const response = await notificationService.markAllAsRead();
-      if (response.status !== 200) {
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error('Failed to mark all notifications as read');
       }
 
