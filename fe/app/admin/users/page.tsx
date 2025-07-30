@@ -118,7 +118,7 @@ export default function UsersPage() {
     value: string | number,
   ) => {
     const newFilters = { ...filters, [key]: value, page: 1 };
-    console.log('newFilters', newFilters);
+    // console.log('newFilters', newFilters);
     setFilters(newFilters);
   };
 

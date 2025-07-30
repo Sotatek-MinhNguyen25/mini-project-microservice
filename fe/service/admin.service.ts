@@ -23,7 +23,6 @@ const adminService = {
     } = filter;
     let url = `/users?search=${search}&page=${page}&limit=${limit}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
     if (roles === 'ADMIN' || roles === 'USER') {
-      console.log(roles);
       url += `&roles=${roles}`;
     }
     if (status === 'UNVERIFIED' || status === 'VERIFIED') {

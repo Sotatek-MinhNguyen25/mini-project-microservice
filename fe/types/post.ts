@@ -188,7 +188,7 @@ export interface PostFormFieldsProps {
 }
 export interface PostFormHeaderProps {
   // fullName: string;
-  user: any; // Replace with proper User type from your auth context
+  user: User; // Replace with proper User type from your auth context
   setIsExpanded: (value: boolean) => void;
 }
 

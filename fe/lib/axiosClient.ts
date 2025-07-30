@@ -10,7 +10,6 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
-console.log('Using API baseURL:', baseURL);
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
@@ -71,8 +70,6 @@ axiosClient.interceptors.response.use(
 
     if (error.response) {
       const { status } = error.response;
-
-      console.log('Response error:', error.response);
       // Handle Unauthorized (401) errors
       if (originalRequest && status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;

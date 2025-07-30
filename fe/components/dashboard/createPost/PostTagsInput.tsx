@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { X, Check, ChevronDown } from 'lucide-react'
-import * as Select from '@radix-ui/react-select'
-import { Tag } from '@/types/post'
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { X, Check, ChevronDown } from 'lucide-react';
+import * as Select from '@radix-ui/react-select';
+import { Tag } from '@/types/post';
 
 interface PostTagsInputProps {
   tags: string[];
@@ -21,13 +21,16 @@ export default function PostTagsInput({
   removeTag,
   isLoading,
 }: PostTagsInputProps) {
-  console.log('PostTagsInput', tags, availableTags);
   return (
     <div className="space-y-2">
-      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</Label>
+      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        Tags
+      </Label>
       <Select.Root onValueChange={handleTagSelect} disabled={isLoading}>
         <Select.Trigger className="flex items-center justify-between w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:border-primary/50 focus:ring-primary/20">
-          <Select.Value placeholder={isLoading ? 'Loading tags...' : 'Select a tag...'} />
+          <Select.Value
+            placeholder={isLoading ? 'Loading tags...' : 'Select a tag...'}
+          />
           <Select.Icon>
             <ChevronDown className="h-4 w-4" />
           </Select.Icon>
@@ -52,7 +55,7 @@ export default function PostTagsInput({
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2">
           {tags.map((tagId) => {
-            const tag = availableTags.find((t) => t.id === tagId)
+            const tag = availableTags.find((t) => t.id === tagId);
             return (
               <Badge
                 key={tagId}
@@ -68,11 +71,13 @@ export default function PostTagsInput({
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
-            )
+            );
           })}
         </div>
       )}
-      {isLoading && <p className="text-xs text-muted-foreground">Loading tags...</p>}
+      {isLoading && (
+        <p className="text-xs text-muted-foreground">Loading tags...</p>
+      )}
     </div>
-  )
+  );
 }
