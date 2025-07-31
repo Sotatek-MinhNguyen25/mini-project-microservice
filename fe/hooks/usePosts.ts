@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient,
   useInfiniteQuery,
+  UseQueryResult,
 } from '@tanstack/react-query';
 import postService from '@/service/post.service';
 import {
@@ -10,6 +11,7 @@ import {
   CreatePostRequest,
   CreatePostResponseData,
   GetTagsResponse,
+  Post,
   PostImageResponse,
   ReactionType,
   UseGetPostsOptions,
@@ -41,6 +43,13 @@ export function useGetPosts({
       return lastPage.page + 1;
     },
     initialPageParam: 1,
+  });
+}
+
+export function useGetPost(postId: string): UseQueryResult<Post, Error> {
+  return useQuery({
+    queryKey: ['post', postId],
+    queryFn: () => postService.getPostById(postId),
   });
 }
 
@@ -263,6 +272,7 @@ export const useComment = (postId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post'] });
       setNewComment('');
       toast({
         title: 'Success',
@@ -293,97 +303,32 @@ export const useComment = (postId: string) => {
 };
 
 export const useNotification = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
   const { toast } = useToast();
-  const [hasMorePages, setHasMorePages] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
   const queryClient = useQueryClient();
+  const { data: response, isLoading } = useQuery({
+    queryKey: ['notifications', page],
+    queryFn: async () => {
+      const response = await notificationService.getNotification(page);
+      return response;
+    },
+  });
 
-  const fetchNotifications = async (resetPage = true) => {
-    try {
-      setIsLoadingNotifications(true);
-      const currentPage = resetPage ? 1 : page;
-      const response: any = await notificationService.getNotification(
-        currentPage,
-      );
-
-      if (response?.data && response?.meta) {
-        if (resetPage) {
-          setNotifications(response.data);
-          setPage(response.meta.currentPage);
-          const isLastPage =
-            response.meta.currentPage >= response.meta.totalPage;
-          setHasMorePages(!isLastPage);
-        } else {
-          setNotifications((prev) => [...prev, ...response.data]);
-        }
-        setTotalPages(response.meta.totalPage);
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to fetch notifications',
-      });
-    } finally {
-      setIsLoadingNotifications(false);
-    }
-  };
-
-  const loadMoreNotifications = async () => {
-    if (page >= totalPages || isLoadingMore) return;
-
-    try {
-      setIsLoadingMore(true);
-      const nextPage = page + 1;
-      const response: any = await notificationService.getNotification(nextPage);
-
-      if (response.status !== 200) {
-        throw new Error('Failed to load more notifications');
-      }
-
-      if (response?.data && response.meta) {
-        // Append new notifications to existing list
-        setNotifications((prev) => [...prev, ...response.data]);
-        setPage(response.meta.currentPage);
-        setTotalPages(response.meta.totalPage);
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to load more notifications',
-      });
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
+  const unreadCount = response?.meta.unreadCount;
 
   const markOneAsRead = async (notificationId: string) => {
-    const previousNotifications = notifications;
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
-    );
-
     try {
       const response = await notificationService.markAsReadID(notificationId);
       if (response.status !== 200) {
         throw new Error('Failed to mark notification as read');
       }
-
-      // 3. Success toast (optional)
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast({
         title: 'Success',
         description: 'Notification marked as read',
       });
-
       return response.data;
     } catch (error) {
-      setNotifications(previousNotifications);
-
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -394,15 +339,12 @@ export const useNotification = () => {
   };
 
   const markAllAsRead = async () => {
-    const previousNotifications: Notification[] = notifications;
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-
     try {
       const response = await notificationService.markAllAsRead();
       if (response.status !== 200 && response.status !== 201) {
         throw new Error('Failed to mark all notifications as read');
       }
-
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast({
         title: 'Success',
         description: 'All notifications marked as read',
@@ -410,8 +352,6 @@ export const useNotification = () => {
 
       return response.data;
     } catch (error) {
-      setNotifications(previousNotifications);
-
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -424,19 +364,14 @@ export const useNotification = () => {
   return {
     markOneAsRead,
     markAllAsRead,
-    notifications,
-    isLoadingNotifications,
-    isLoadingMore,
-    setNotifications,
-    setIsLoadingNotifications,
-    fetchNotifications,
-    loadMoreNotifications,
+    unreadCount,
+    notifications: response?.data || [],
+    isLoadingNotifications: isLoading,
+    isLoadingMore: isLoading,
     toast,
     page,
     setPage,
-    totalPages,
-    setTotalPages,
-    queryClient,
-    hasMorePages: hasMorePages,
+    totalPages: response?.meta.totalPage,
+    hasMorePages: response?.meta.currentPage < response?.meta.totalPage,
   };
 };

@@ -3,10 +3,10 @@
 import { useState, useRef, useEffect, useCallback, RefObject } from 'react';
 import { useAuthenticatedWebSocket } from '@/hooks/ws/useAuthenticatedWebSocket';
 import { useNotification } from '@/hooks/usePosts';
-import { WEBSOCKET_EVENTS } from '@/const/websocketEvents';
 import type { Notification } from '@/types/notification';
 import { NotificationButton } from './notification/NotificationButton';
 import { NotificationDropdown } from './notification/NotificationDropdown';
+import { useQueryClient } from '@tanstack/react-query';
 
 function useClickOutside<T extends HTMLElement>(
   ref: RefObject<T>,
@@ -31,23 +31,20 @@ export function NotificationBell() {
   const notificationRef = useRef<HTMLDivElement>(
     null,
   ) as RefObject<HTMLDivElement>;
-
+  const queryClient = useQueryClient();
   const {
     notifications,
-    fetchNotifications,
-    loadMoreNotifications,
-    setNotifications,
+    unreadCount,
     markOneAsRead,
     markAllAsRead,
     isLoadingNotifications,
     isLoadingMore,
     toast,
-    queryClient,
     page,
+    setPage,
     totalPages,
     hasMorePages,
   } = useNotification();
-
   const { isConnected, connectionStatus, getNotificationUrl, socket } =
     useAuthenticatedWebSocket({
       options: {
@@ -60,46 +57,6 @@ export function NotificationBell() {
 
   useClickOutside(notificationRef, () => setShowNotifications(false));
 
-  // Fetch notifications khi component mount
-  useEffect(() => {
-    fetchNotifications(true); // Reset page = true
-  }, []);
-
-  // WebSocket event handler
-  const handleNotificationTrigger = useCallback(
-    (notification: Notification) => {
-      // Thêm notification mới vào đầu list
-      setNotifications((prev) => [notification, ...prev]);
-      toast({
-        title: 'New Notification',
-        description: notification.content,
-      });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    },
-    [setNotifications, toast, queryClient],
-  );
-
-  // WebSocket event listeners
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on(
-      WEBSOCKET_EVENTS.INCOMING.NOTIFICATION_TRIGGER,
-      handleNotificationTrigger,
-    );
-
-    return () => {
-      socket.off(
-        WEBSOCKET_EVENTS.INCOMING.NOTIFICATION_TRIGGER,
-        handleNotificationTrigger,
-      );
-    };
-  }, [socket, handleNotificationTrigger]);
-
-  const unreadCount = notifications.filter(
-    (n: Notification) => !n.isRead,
-  ).length;
-
   // Event handlers
   const handleNotificationClick = useCallback(
     (notification: Notification) => {
@@ -108,35 +65,27 @@ export function NotificationBell() {
         window.location.href = url;
       }
       setShowNotifications(false);
+      markOneAsRead(notification.id);
     },
     [getNotificationUrl],
   );
 
-  const handleMarkOneAsRead = useCallback(
-    async (notificationId: string) => {
-      try {
-        await markOneAsRead(notificationId);
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notificationId ? { ...n, isRead: true } : n,
-          ),
-        );
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to mark notification as read',
-        });
-      }
-    },
-    [markOneAsRead, setNotifications, toast],
-  );
+  const handleMarkOneAsRead = async (notificationId: string) => {
+    try {
+      await markOneAsRead(notificationId);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to mark notification as read',
+      });
+    }
+  };
 
-  const handleMarkAllAsRead = useCallback(async () => {
+  const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       toast({
         title: 'Success',
         description: 'All notifications marked as read',
@@ -149,17 +98,20 @@ export function NotificationBell() {
         description: 'Failed to mark all notifications as read',
       });
     }
-  }, [markAllAsRead, setNotifications, toast]);
+  };
 
-  const handleRefresh = useCallback(() => {
-    fetchNotifications(true); // Reset và fetch lại từ page 1
-  }, [fetchNotifications]);
+  const handleRefresh = () =>
+    queryClient.invalidateQueries({
+      queryKey: ['notifications'],
+    });
 
-  const handleShowMoreNotifications = useCallback(() => {
+  const handleShowMoreNotifications = () => {
     if (hasMorePages && !isLoadingMore) {
-      loadMoreNotifications();
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', setPage(page + 1)],
+      });
     }
-  }, [hasMorePages, isLoadingMore, loadMoreNotifications]);
+  };
 
   return (
     <div className="relative" ref={notificationRef}>

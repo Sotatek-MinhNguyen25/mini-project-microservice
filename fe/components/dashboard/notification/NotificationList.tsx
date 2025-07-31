@@ -27,7 +27,7 @@ export function NotificationList({
   }
 
   return (
-    <div className="max-h-80 overflow-y-auto">
+    <div className="max-h-70 overflow-y-auto">
       {notifications.map((notification) => (
         <NotificationItem
           key={notification.id}

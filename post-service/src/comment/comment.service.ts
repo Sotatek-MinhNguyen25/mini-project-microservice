@@ -66,6 +66,14 @@ export class CommentService implements OnModuleInit {
         throw new RpcNotFoundException('Không tồn tại bài Post');
       }
 
+      const newComment = await this.prismaService.comment.create({
+        data: {
+          content: createCommentDto.content,
+          postId: createCommentDto.postId,
+          userId: createCommentDto.userId,
+        },
+      });
+
       // Notification
       if (createCommentDto.userId !== post.userId) {
         const notiPayload: CreateNotiDto = {
@@ -82,13 +90,7 @@ export class CommentService implements OnModuleInit {
       }
 
       return {
-        data: await this.prismaService.comment.create({
-          data: {
-            content: createCommentDto.content,
-            postId: createCommentDto.postId,
-            userId: createCommentDto.userId,
-          },
-        }),
+        data: newComment,
       };
     }
 

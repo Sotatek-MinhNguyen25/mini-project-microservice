@@ -30,6 +30,6 @@ export class NotificationController {
 
   @EventPattern(CONSTANTS.MESSAGE_PATTERN.NOTIFICATION.CREATE)
   create(@Payload() createDto: CreateDto) {
-    this.notificationService.create(createDto);
+    return this.notificationService.create(createDto);
   }
 }

@@ -1,11 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsNumber,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class FindAllQueryDto {
   @IsUUID()

@@ -19,7 +19,7 @@ export class NotificationService {
   async findAll(findAllQueryDto: FindAllQueryDto) {
     const skip = (findAllQueryDto.page - 1) * findAllQueryDto.limit;
 
-    const [notifications, totalItem] = await Promise.all([
+    const [notifications, totalItem, UnreadCount] = await Promise.all([
       this.prisma.notification.findMany({
         where: {
           receiverId: findAllQueryDto.userId,
@@ -35,13 +35,21 @@ export class NotificationService {
           receiverId: findAllQueryDto.userId,
         },
       }),
+      this.prisma.notification.count({
+        where: {
+          receiverId: findAllQueryDto.userId,
+          isRead: false,
+        },
+      }),
     ]);
+
     return {
       data: notifications,
       meta: {
         currentPage: findAllQueryDto.page,
         totalPage: Math.ceil(totalItem / findAllQueryDto.limit),
         totalItem: totalItem,
+        unreadCount: UnreadCount,
       },
     };
   }
@@ -93,9 +101,9 @@ export class NotificationService {
           isRead: true,
         },
       });
-    } catch (error) {
+    } catch (err) {
       throw new RpcException({
-        error: error,
+        error: err,
         message: 'False to update many notification',
         status: 400,
       });

@@ -19,12 +19,14 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from '@/const/websocketEvents';
 import notificationService from '@/service/notification.service';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useWebSocket = ({
   url,
   options = {},
 }: UseWebSocketConfig): UseWebSocketReturn => {
   // States
+  const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [summary, setSummary] = useState<NotificationSummary>({
     total: 0,
@@ -140,6 +142,7 @@ export const useWebSocket = ({
   const handleNotificationTrigger = useCallback(async () => {
     const response: any = await notificationService.getNotification();
     console.log('New notifications received:', response);
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
     setNotifications(response.data);
     setSummary(response.meta);
   }, []);

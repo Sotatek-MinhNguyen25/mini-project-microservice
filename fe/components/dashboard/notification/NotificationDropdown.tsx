@@ -36,8 +36,9 @@ export function NotificationDropdown({
   onRefresh,
   onShowMore,
 }: NotificationDropdownProps) {
+  console.log('hasMorePages-dropdown', hasMorePages);
   return (
-    <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[60] max-h-96 overflow-hidden">
+    <div className="absolute flex-col right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[60] max-h-96 overflow-y-auto">
       <NotificationHeader
         unreadCount={unreadCount}
         isLoading={isLoading}
@@ -47,7 +48,7 @@ export function NotificationDropdown({
 
       {/* Loading Indicator */}
       {isLoading && (
-        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700 ">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
             <span className="text-xs text-blue-700 dark:text-blue-400">
