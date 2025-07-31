@@ -14,12 +14,28 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: your-dockerhub-username/notification-service:latest
+          image: xinchaoduyanh2/notification-service:latest
           ports:
             - containerPort: 3002
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: notification-service-config
+            - secretRef:
+                name: notification-service-secrets
 ---
 apiVersion: v1
 kind: Service

@@ -12,17 +12,28 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kafka
+  name: kafka-deployment
+  labels:
+    app: kafka-broker-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kafka
+      app: kafka-broker-service
   template:
     metadata:
       labels:
-        app: kafka
+        app: kafka-broker-service
     spec:
+      initContainers:
+        - name: wait-for-zookeeper
+          image: busybox:1.28
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z zookeeper-service 2181; do echo waiting for zookeeper; sleep 2; done;",
+            ]
       containers:
         - name: kafka
           image: confluentinc/cp-kafka:7.4.0
@@ -33,21 +44,42 @@ spec:
             - name: KAFKA_BROKER_ID
               value: "1"
             - name: KAFKA_ZOOKEEPER_CONNECT
-              value: "zookeeper:2181"
-            - name: KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092"
+              value: "zookeeper-service:2181"
             - name: KAFKA_LISTENERS
-              value: "PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092"
+              value: "INTERNAL://:9092,EXTERNAL://:29092"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "INTERNAL://kafka-broker-service:9092,EXTERNAL://localhost:29092"
             - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-              value: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+              value: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
-              value: "PLAINTEXT"
+              value: "INTERNAL"
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
               value: "1"
             - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
               value: "true"
             - name: KAFKA_DELETE_TOPIC_ENABLE
               value: "true"
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
           volumeMounts:
             - name: kafka-data
               mountPath: /var/lib/kafka/data
@@ -59,15 +91,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: kafka
+  name: kafka-broker-service
 spec:
   selector:
-    app: kafka
+    app: kafka-broker-service
   ports:
     - protocol: TCP
       port: 9092
       targetPort: 9092
+      name: internal
     - protocol: TCP
       port: 29092
       targetPort: 29092
-  type: ClusterIP
+      name: external
+  type: NodePort

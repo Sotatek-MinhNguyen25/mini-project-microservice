@@ -21,7 +21,7 @@ async function bootstrap() {
       options: {
         client: {
           clientId: 'auth-service-client',
-          brokers: [process.env.KAFKA_BROKER ?? 'localhost:9092'],
+          brokers: [process.env.KAFKA_BROKER ?? 'kafka-broker-service:9092'],
         },
         consumer: {
           groupId: 'auth-service-consumer-group-v2',
@@ -47,7 +47,7 @@ async function bootstrap() {
   // 4. Bắt đầu lắng nghe Microservice
   await app.listen(); // <-- Không cần .startAllMicroservices() hay .listen(port) riêng nữa
   logger.log(`🚀 Kafka Microservice is running and listening for messages.`);
-  const kafkaBrokers = process.env.KAFKA_BROKER ?? 'localhost:9092';
+  const kafkaBrokers = process.env.KAFKA_BROKER ?? 'kafka-broker-service:9092';
   logger.log(`[AUTH-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
   logger.log(`REDIS_HOST: ${process.env.REDIS_HOST}`);
   logger.log(`REDIS_PORT: ${process.env.REDIS_PORT}`);

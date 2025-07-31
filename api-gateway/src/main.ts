@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 import { ResponseMessageInterceptor } from './common/interceptor/response.interceptor';
 import { config } from './configs/configuration';
-import { HttpExceptionInterceptor } from 'src/common/interceptor/http-exception.interceptor';
+// import { HttpExceptionInterceptor } from 'src/common/interceptor/http-exception.interceptor';
 
 const logger = new Logger('Bootstrap');
 

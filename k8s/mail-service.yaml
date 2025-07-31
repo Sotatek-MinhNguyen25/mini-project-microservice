@@ -14,12 +14,28 @@ spec:
     spec:
       containers:
         - name: mail-service
-          image: your-dockerhub-username/mail-service:latest
+          image: xinchaoduyanh2/mail-service:latest
           ports:
             - containerPort: 3005
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: mail-service-config
+            - secretRef:
+                name: mail-service-secrets
 ---
 apiVersion: v1
 kind: Service

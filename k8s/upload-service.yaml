@@ -14,12 +14,28 @@ spec:
     spec:
       containers:
         - name: upload-service
-          image: your-dockerhub-username/upload-service:latest
+          image: xinchaoduyanh2/upload-service:latest
           ports:
             - containerPort: 3008
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3008
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3008
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: upload-service-config
+            - secretRef:
+                name: upload-service-secrets
 ---
 apiVersion: v1
 kind: Service

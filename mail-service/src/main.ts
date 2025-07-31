@@ -5,7 +5,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const logger = new Logger();
-  const kafkaBrokers = process.env.KAFKA_BROKERS || 'kafka:9092';
+  const kafkaBrokers = process.env.KAFKA_BROKERS || 'kafka-broker-service:9092';
   logger.log(`[MAIL-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.KAFKA,

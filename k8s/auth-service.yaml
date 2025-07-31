@@ -14,12 +14,28 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: your-dockerhub-username/auth-service:latest
+          image: xinchaoduyanh2/auth-service:latest
           ports:
             - containerPort: 3001
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: auth-service-config
+            - secretRef:
+                name: auth-service-secrets
 ---
 apiVersion: v1
 kind: Service

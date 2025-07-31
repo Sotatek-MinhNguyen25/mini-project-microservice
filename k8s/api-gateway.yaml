@@ -14,12 +14,28 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: your-dockerhub-username/api-gateway:latest
+          image: xinchaoduyanh2/api-gateway:latest
           ports:
             - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: api-gateway-config
+            - secretRef:
+                name: api-gateway-secrets
 ---
 apiVersion: v1
 kind: Service

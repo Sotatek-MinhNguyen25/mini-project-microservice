@@ -14,12 +14,28 @@ spec:
     spec:
       containers:
         - name: fe
-          image: your-dockerhub-username/fe:latest
+          image: xinchaoduyanh2/fe:latest
           ports:
             - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
           envFrom:
             - configMapRef:
                 name: fe-config
+            - secretRef:
+                name: fe-secrets
 ---
 apiVersion: v1
 kind: Service

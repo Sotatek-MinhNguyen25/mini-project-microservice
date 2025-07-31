@@ -57,3 +57,12 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# k8s
+k8s/api-gateway-secrets.yaml
+k8s/auth-service-secrets.yaml
+k8s/post-service-secrets.yaml
+k8s/mail-service-secrets.yaml
+k8s/upload-service-secrets.yaml
+k8s/notification-service-secrets.yaml
+k8s/fe-secrets.yaml

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+data:
+  JWT_REFRESH_TOKEN_EXPIRES_IN: "30d"
+  JWT_ACCESS_TOKEN_EXPIRES_IN: "15m"
+  KAFKA_BROKER: "kafka-broker-service:9092"
+  REDIS_HOST: "db-valkey-sgp1-62623-do-user-23826077-0.e.db.ondigitalocean.com"
+  REDIS_PORT: "25061"
+  FORGOT_OTP_TTL: "300"
