@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateReactionDto, UpdateReactionDto } from './reaction.dto';
+import { CreateReactionDto, UpdateReactionDto } from './dto/reaction.dto';
 import { Reaction } from '@prisma/client';
 import { ClientKafka } from '@nestjs/microservices';
 import { CONSTANTS } from 'src/common/constants/app.constants';

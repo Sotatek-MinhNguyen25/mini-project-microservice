@@ -313,12 +313,10 @@ export class PostService implements OnModuleInit {
       )
     ).data;
 
-    const tagDetail = post.tags.map((tag) => {
-      return {
-        id: tag.tag.id,
-        name: tag.tag.name,
-      };
-    });
+    const tagDetail = post.tags.map((tag) => ({
+      id: tag.tag.id,
+      name: tag.tag.name,
+    }));
 
     const [comments, reaction, totalComment] = await Promise.all([
       this.commentService.getCommentsByPostId(post.id, 1, 100),
