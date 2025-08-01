@@ -12,7 +12,7 @@ import { KAFKA_CLIENTS } from 'src/constants/app.constants';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: [config.kafka.brokers] || ['kafka-broker-service:9092'],
+            brokers: [config.kafka.brokers],
             clientId: config.kafka.clientId + '-auth',
           },
           consumer: {

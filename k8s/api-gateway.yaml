@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway
@@ -17,6 +17,13 @@ spec:
           image: xinchaoduyanh2/api-gateway:latest
           ports:
             - containerPort: 8000
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "750m"
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
           livenessProbe:
             httpGet:
               path: /health

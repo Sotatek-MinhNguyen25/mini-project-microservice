@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: upload-service
@@ -17,6 +17,13 @@ spec:
           image: xinchaoduyanh2/upload-service:latest
           ports:
             - containerPort: 3008
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
           livenessProbe:
             httpGet:
               path: /health

@@ -42,7 +42,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseMessageInterceptor(new Reflector()));
   await app.listen(port);
   logger.log(`🚀 App is running on port: ${port}`);
-  logger.log(`KAFKA_BROKER: ${process.env.KAFKA_BROKER}`);
+  logger.log(`KAFKA_BROKERS: ${process.env.KAFKA_BROKERS}`);
   logger.log('Kafka client initialized (check logs for errors if any)');
 }
 bootstrap();

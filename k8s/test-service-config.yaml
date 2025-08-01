@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-service-config
+  labels:
+    app: test-service
+data:
+  NODE_ENV: "production"
+  PORT: "3010"

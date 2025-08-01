@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
@@ -51,6 +52,8 @@ async function bootstrap() {
   logger.log(`[AUTH-SERVICE] KAFKA_BROKER: ${kafkaBrokers}`);
   logger.log(`REDIS_HOST: ${process.env.REDIS_HOST}`);
   logger.log(`REDIS_PORT: ${process.env.REDIS_PORT}`);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  await new Promise(resolve => {});
 }
 
 bootstrap();

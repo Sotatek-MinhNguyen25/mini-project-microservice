@@ -1,22 +1,22 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mail-service
+  name: test-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mail-service
+      app: test-service
   template:
     metadata:
       labels:
-        app: mail-service
+        app: test-service
     spec:
       containers:
-        - name: mail-service
-          image: xinchaoduyanh2/mail-service:latest
+        - name: test-service
+          image: xinchaoduyanh2/test-service:latest
           ports:
-            - containerPort: 3005
+            - containerPort: 3010
           resources:
             limits:
               memory: "512Mi"
@@ -26,33 +26,31 @@ spec:
               cpu: "250m"
           livenessProbe:
             httpGet:
-              path: /health
-              port: 3005
+              path: /api/health
+              port: 3010
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
-              port: 3005
+              path: /api/health
+              port: 3010
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 3
           envFrom:
             - configMapRef:
-                name: mail-service-config
-            - secretRef:
-                name: mail-service-secrets
+                name: test-service-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mail-service
+  name: test-service
 spec:
   selector:
-    app: mail-service
+    app: test-service
   ports:
     - protocol: TCP
-      port: 3005
-      targetPort: 3005
+      port: 3010
+      targetPort: 3010
   type: ClusterIP

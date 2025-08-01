@@ -14,14 +14,20 @@ export class RedisService implements OnModuleDestroy {
     const redisUrl = process.env.REDIS_URL;
 
     if (redisUrl) {
-      this.redisClient = new Redis(redisUrl);
+      this.redisClient = new Redis(redisUrl, {
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
     } else {
       this.redisClient = new Redis({
         host: redisHost,
         port: redisPort,
         username: redisUsername,
         password: redisPassword,
-        tls: {},
+        tls: {
+          rejectUnauthorized: false,
+        },
       });
     }
   }
@@ -141,5 +147,4 @@ export class RedisService implements OnModuleDestroy {
     const exists = await this.redisClient.exists(jti);
     return !!exists;
   }
-
 }

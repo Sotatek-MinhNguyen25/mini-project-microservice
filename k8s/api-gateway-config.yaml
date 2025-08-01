@@ -11,3 +11,4 @@ data:
   REDIS_PORT: "25061"
   AC_TOKEN_EXPIRED: "15m"
   RF_TOKEN_EXPIRED: "7d"
+  UPLOAD_SERVICE_URL: "http://upload-service:3008/resources"

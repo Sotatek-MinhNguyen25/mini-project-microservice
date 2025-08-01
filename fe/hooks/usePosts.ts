@@ -314,7 +314,9 @@ export const useNotification = () => {
     },
   });
 
-  const unreadCount = response?.meta.unreadCount;
+  // const unreadCount = response?.meta.unreadCount;
+  //Commnet doan tren vao 31/7 vi build chet chứ chưa test đc cái nào đúng và thay bằng đoạn dưới
+  const unreadCount = response?.data?.meta?.unreadCount;
 
   const markOneAsRead = async (notificationId: string) => {
     try {
@@ -371,7 +373,8 @@ export const useNotification = () => {
     toast,
     page,
     setPage,
-    totalPages: response?.meta.totalPage,
-    hasMorePages: response?.meta.currentPage < response?.meta.totalPage,
+    totalPages: response?.data?.meta?.totalPage,
+    hasMorePages:
+      response?.data?.meta?.currentPage < response?.data?.meta?.totalPage,
   };
 };

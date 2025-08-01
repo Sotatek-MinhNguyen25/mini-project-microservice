@@ -9,3 +9,4 @@ data:
   REDIS_HOST: "db-valkey-sgp1-62623-do-user-23826077-0.e.db.ondigitalocean.com"
   REDIS_PORT: "25061"
   FORGOT_OTP_TTL: "300"
+  

@@ -27,6 +27,7 @@ kubectl apply -f k8s/post-service-config.yaml
 kubectl apply -f k8s/mail-service-config.yaml
 kubectl apply -f k8s/notification-service-config.yaml
 kubectl apply -f k8s/upload-service-config.yaml
+kubectl apply -f k8s/test-service-config.yaml
 kubectl apply -f k8s/fe-config.yaml
 
 # 4. Deploying Secrets
@@ -37,6 +38,7 @@ kubectl apply -f k8s/post-service-secrets.yaml
 kubectl apply -f k8s/mail-service-secrets.yaml
 kubectl apply -f k8s/notification-service-secrets.yaml
 kubectl apply -f k8s/upload-service-secrets.yaml
+kubectl apply -f k8s/test-service-secrets.yaml
 kubectl apply -f k8s/fe-secrets.yaml
 
 # 5. Deploying Microservices (each .yaml file contains both Deployment and Service)
@@ -46,6 +48,7 @@ kubectl apply -f k8s/post-service.yaml
 kubectl apply -f k8s/mail-service.yaml
 kubectl apply -f k8s/notification-service.yaml
 kubectl apply -f k8s/upload-service.yaml
+kubectl apply -f k8s/test-service.yaml
 kubectl apply -f k8s/api-gateway.yaml
 kubectl apply -f k8s/fe.yaml
 
