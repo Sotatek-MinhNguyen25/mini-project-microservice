@@ -100,9 +100,10 @@ services:
       context: ./test-service
     ports:
       - "3010:3010"
-    environment:
-      - NODE_ENV=production
-      - PORT=3010
+    env_file:
+      - ./test-service/.env.docker
+    depends_on:
+      - kafka
     restart: unless-stopped
 
   fe:

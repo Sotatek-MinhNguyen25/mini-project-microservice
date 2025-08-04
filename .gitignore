@@ -66,3 +66,4 @@ k8s/mail-service-secrets.yaml
 k8s/upload-service-secrets.yaml
 k8s/notification-service-secrets.yaml
 k8s/fe-secrets.yaml
+k8s/test-service-secrets.yaml

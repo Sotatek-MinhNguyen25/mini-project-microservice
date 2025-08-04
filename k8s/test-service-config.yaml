@@ -7,3 +7,6 @@ metadata:
 data:
   NODE_ENV: "production"
   PORT: "3010"
+  KAFKA_BROKERS: "kafka-broker-service:9092"
+  KAFKAJS_NO_PARTITIONER_WARNING: "1"
+  DATABASE_URL: "postgresql://your-username:your-password@your-host:5432/your-database"
