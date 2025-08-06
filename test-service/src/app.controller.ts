@@ -17,32 +17,8 @@ export class AppController {
   }
 
   @Get("health")
-  async getHealth() {
-    let dbStatus = "unknown";
-    let userCount = 0;
-
-    try {
-      // Test database connection
-      await this.prismaService.$connect();
-      userCount = await this.prismaService.user.count();
-      dbStatus = "connected";
-    } catch (error) {
-      dbStatus = "error";
-      console.error("Database health check failed:", error);
-    }
-
-    return {
-      status: "ok",
-      service: "test-service",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || "development",
-      kafka: "connected",
-      database: {
-        status: dbStatus,
-        userCount: userCount,
-      },
-    };
+  getHealth() {
+    return { status: "ok" };
   }
 
   @Get("info")
@@ -59,7 +35,7 @@ export class AppController {
       ],
       kafka: {
         topics: ["test-topic", "health-check", "ping"],
-        broker: process.env.KAFKA_BROKER || "kafka-broker-service:9092",
+        broker: process.env.KAFKA_BROKERS || "kafka-broker-service:9092",
       },
       database: {
         provider: "postgresql",

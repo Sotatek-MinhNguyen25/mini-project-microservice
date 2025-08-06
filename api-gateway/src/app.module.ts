@@ -13,6 +13,7 @@ import { JwtAuthRemoteGuard } from './common/jwt';
 import { RolesGuard } from './common/roles/role.guard';
 import { CommentGatewayModule } from './modules/comment/comment-gateway.module';
 import { JwtRemoteModule } from './common/jwt/jwt-remote.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { JwtRemoteModule } from './common/jwt/jwt-remote.module';
     KafkaModule,
     JwtRemoteModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,

@@ -1,7 +1,16 @@
+import { Controller, Get } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+
+@Controller()
+class HealthController {
+  @Get('health')
+  getHealth() {
+    return { status: 'ok' };
+  }
+}
 
 async function bootstrap() {
   const logger = new Logger();

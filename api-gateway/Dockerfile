@@ -1,4 +1,3 @@
-# Sử dụng image Node.js 18 dựa trên Alpine Linux để có kích thước nhỏ gọn
 FROM node:18-alpine
 
 # Đặt thư mục làm việc bên trong container
