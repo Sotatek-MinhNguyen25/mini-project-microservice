@@ -1,17 +1,19 @@
-import { Body, Controller, Inject, OnModuleInit, Post } from '@nestjs/common';
+import { Body, Controller, Inject, OnModuleInit, Post, Get } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { RegisterDto } from './dto/register.dto';
 import { CompleteRegisterDto } from './dto/complete-register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ForgotPasswordDto, VerifyForgotPasswordDto, UpdatePasswordDto } from '../../common/dto/forgot-password.dto';
 import { Public, Protected } from '../../common/jwt';
 import { KAFKA_CLIENTS, KAFKA_PATTERNS } from '../../constants/app.constants';
-import { ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorator/auth-user.decorator';
 import { JwtPayload } from '../../common/type/jwt-payload.type';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Authentication')
 @Public()
 @Controller('auth')
 export class AuthGatewayController implements OnModuleInit {
@@ -54,64 +56,22 @@ export class AuthGatewayController implements OnModuleInit {
 
   @Post('forgot-password')
   @ApiOperation({ summary: 'Send OTP for forgot password' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          example: 'test@gmail.com',
-        },
-      },
-    },
-  })
-  async forgotPassword(@Body() body: any) {
+  @ApiBody({ type: ForgotPasswordDto })
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
     return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.FORGOT_PASSWORD, { ...body }));
   }
 
   @Post('verify-forgot-password')
   @ApiOperation({ summary: 'Verify OTP for forgot password' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          example: 'test@gmail.com',
-        },
-        otp: {
-          type: 'string',
-          example: '123456',
-        },
-      },
-    },
-  })
-  async verifyForgotPassword(@Body() body: any) {
+  @ApiBody({ type: VerifyForgotPasswordDto })
+  async verifyForgotPassword(@Body() body: VerifyForgotPasswordDto) {
     return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.VERIFY_FORGOT_PASSWORD, { ...body }));
   }
 
   @Post('update-password')
   @ApiOperation({ summary: 'Update password after OTP verification' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          example: 'test@gmail.com',
-        },
-        otp: {
-          type: 'string',
-          example: '123456',
-        },
-        newPassword: {
-          type: 'string',
-          example: 'newPassword123',
-        },
-      },
-    },
-  })
-  async updatePassword(@Body() body: any) {
+  @ApiBody({ type: UpdatePasswordDto })
+  async updatePassword(@Body() body: UpdatePasswordDto) {
     return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.UPDATE_PASSWORD, { ...body }));
   }
 
@@ -121,5 +81,16 @@ export class AuthGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Logout from all sessions' })
   async logout(@AuthUser() user: JwtPayload) {
     return firstValueFrom(this.authClient.send(KAFKA_PATTERNS.AUTH.LOGOUT, { userId: user.sub }));
+  }
+
+  @Get('admin/test')
+  @ApiOperation({ summary: 'Smoke test for auth module' })
+  getSmokeTest() {
+    return {
+      status: 'success',
+      message: 'Auth Gateway module is running',
+      timestamp: new Date().toISOString(),
+      module: 'auth-gateway',
+    };
   }
 }

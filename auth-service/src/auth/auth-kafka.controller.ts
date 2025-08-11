@@ -34,7 +34,6 @@ export class AuthKafkaController {
   @MessagePattern(KAFKA_PATTERNS.LOGIN)
   @ApiResponseOk(RESPONSE_MESSAGE.LOGIN_SUCCESS)
   async login(@Payload() data: LoginDto) {
-    console.log('[KafkaController] LOGIN payload:', data);
     return this.authService.login(data);
   }
 

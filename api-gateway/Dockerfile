@@ -26,7 +26,7 @@ COPY . .
 RUN pnpm run build
 
 # Khai báo cổng mà ứng dụng sẽ lắng nghe.
-EXPOSE 8081
+EXPOSE 8000
 
 # Lệnh mặc định để chạy ứng dụng khi container khởi động.
 # Sử dụng 'start:prod' để chạy phiên bản đã được build.

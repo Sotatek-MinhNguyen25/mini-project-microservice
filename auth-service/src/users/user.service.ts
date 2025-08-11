@@ -11,6 +11,7 @@ import { FindUserByIdsDto } from './dto/find-user-ids.dto';
 import { UserRepository } from './user.repository';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RpcBadRequestException } from 'src/shared/exceptions/rpc.exceptions';
+import { APP_CONSTANTS } from '../common/constants/app.constants';
 
 @Injectable()
 export class UserService {
@@ -33,7 +34,10 @@ export class UserService {
       });
 
     // 2. hash password
-    const hashPassword = await bcrypt.hash(dto.password, 10);
+    const hashPassword = await bcrypt.hash(
+      dto.password,
+      APP_CONSTANTS.SECURITY.BCRYPT_ROUNDS,
+    );
 
     // 3. create user
     const data = {

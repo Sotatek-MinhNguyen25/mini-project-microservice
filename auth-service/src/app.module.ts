@@ -9,6 +9,7 @@ import { ValidationPipe } from './shared/pipes/validation.pipe';
 import configuration from './config/configuration';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from './users/user.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserModule } from './users/user.module';
       isGlobal: true,
       load: [configuration],
     }),
+    CommonModule,
     KafkaModule.register(['auth']),
     PrismaModule,
     AuthModule,

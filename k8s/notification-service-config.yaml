@@ -4,4 +4,4 @@ metadata:
   name: notification-service-config
 data:
   PORT: "3002"
-  KAFKA_BROKERS: "kafka-broker-service:9092"
+  KAFKA_BROKER: "kafka-broker-service:9092"

@@ -8,7 +8,7 @@ export default (): Configuration => ({
     url: process.env.REDIS_URL || 'localhost:6379',
   },
   kafka: {
-    brokers: process.env.KAFKA_BROKERS || 'kafka-broker-service:9092',
+    brokers: process.env.KAFKA_BROKER || 'kafka-broker-service:9092',
   },
   database: {
     url:

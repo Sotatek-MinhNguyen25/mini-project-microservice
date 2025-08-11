@@ -10,6 +10,6 @@ COPY . .
 
 RUN pnpm run build
 
-EXPOSE 3004
+EXPOSE 3008
 
 CMD ["pnpm", "run", "start:prod"]

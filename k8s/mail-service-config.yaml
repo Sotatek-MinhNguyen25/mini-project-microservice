@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: mail-service-config
 data:
-  KAFKA_BROKERS: "kafka-broker-service:9092"
+  KAFKA_BROKER: "kafka-broker-service:9092"
   MAILTRAP_HOST: "smtp.gmail.com"
   MAILTRAP_PORT: "465"
   MAILTRAP_SECURE: "true"

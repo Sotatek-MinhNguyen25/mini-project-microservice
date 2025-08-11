@@ -1,35 +1,34 @@
-import { Controller, Get } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-
-@Controller()
-class HealthController {
-  @Get('health')
-  getHealth() {
-    return { status: 'ok' };
-  }
-}
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const logger = new Logger();
-  const app = await NestFactory.create(AppModule);
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: [process.env.KAFKA_BROKERS ?? 'localhost:29092'],
-      },
-      consumer: {
-        groupId: 'noti-comsumer-group',
-        allowAutoTopicCreation: true,
+  const logger = new Logger('Bootstrap');
+
+  // 1. HTTP app (REST, health check)
+  const httpApp = await NestFactory.create(AppModule);
+  await httpApp.listen(process.env.PORT ?? 8006);
+  logger.log(`🚀 HTTP server is running on port: ${process.env.PORT ?? 8006}`);
+
+  // 2. Kafka microservice
+  const kafkaApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      transport: Transport.KAFKA,
+      options: {
+        client: {
+          clientId: 'notification-service-client',
+          brokers: [process.env.KAFKA_BROKER ?? 'kafka-broker-service:9092'],
+        },
+        consumer: {
+          groupId: 'notification-service-consumer-group',
+        },
       },
     },
-  });
-  app.startAllMicroservices();
-  app.listen(process.env.PORT ?? 8080, () => {
-    logger.log(`Server listen on PORT: ${process.env.PORT}`);
-  });
+  );
+  await kafkaApp.listen();
+  logger.log(`🚀 Kafka Microservice is running and listening for messages.`);
 }
+
 bootstrap();

@@ -7,16 +7,9 @@ import { VerifyRegisterDto } from './dto/verify-register.dto';
 import { VerifyForgotPasswordDto } from './dto/verify-forgot-password.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ERROR_MESSAGE } from '../shared/message/error.message';
-import { CustomJwtService } from '../jwt/custom-jwt.service';
 import { JwtPayload } from '../shared/type/jwt.type';
 import { CompleteRegisterDto } from './dto/complete-register.dto';
-import {
-  USER_STATUS,
-  OTP_STATUS,
-  OTP_PURPOSE,
-  OtpPurpose,
-} from './auth.constant';
-import { RedisService } from '../redis/redis.service';
+import { USER_STATUS, OTP_PURPOSE, OTP_STATUS } from './auth.constant';
 import { AuthRepository } from 'src/auth/auth.repository';
 import {
   RpcBadRequestException,
@@ -25,17 +18,19 @@ import {
 } from 'src/shared/exceptions/rpc.exceptions';
 import { ClientKafka } from '@nestjs/microservices';
 import { KAFKA_PATTERNS } from './kafka.patterns';
-import { ConfigService } from '@nestjs/config';
+import { AppLoggerService } from '../common/services/logger.service';
+import { AuthOtpService } from './services/auth-otp.service';
+import { AuthTokenService } from './services/auth-token.service';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   constructor(
     private readonly authRepository: AuthRepository,
-    private readonly customJwtService: CustomJwtService,
-    private readonly redisService: RedisService,
+    private readonly authOtpService: AuthOtpService,
+    private readonly authTokenService: AuthTokenService,
     @Inject('KAFKA_NOTIFICATION_SERVICE')
     private readonly notificationClient: ClientKafka,
-    private readonly configService: ConfigService,
+    private readonly logger: AppLoggerService,
   ) {}
 
   onModuleInit() {
@@ -45,7 +40,6 @@ export class AuthService implements OnModuleInit {
     this.notificationClient.subscribeToResponseOf(
       KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD,
     );
-    this.notificationClient.subscribeToResponseOf('123');
   }
 
   private async getUserByEmailOrThrow(email: string) {
@@ -54,31 +48,22 @@ export class AuthService implements OnModuleInit {
     return user;
   }
 
-  private async checkOtpOrThrow(
-    email: string,
-    otp: string,
-    otpPurpose: OtpPurpose,
-  ) {
-    const otpObj = await this.redisService.getOtp(email, otpPurpose);
-    if (!otpObj || otpObj.otp !== otp)
-      throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    //Cái logic dưới có vẻ thừa nhg cứ check lại cho chắc
-    if (otpObj.expiresAt < new Date() || otpObj.status !== OTP_STATUS.CREATED)
-      throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
-  }
-
   async sendRegisterOtp(dto: RegisterDto) {
     let user = await this.authRepository.findUserByEmail(dto.email);
+
     if (user) {
       if (user.status !== USER_STATUS.UNVERIFIED) {
-        console.log('{AUTH-SERVICE} User already exists', user);
-        console.error(
-          '[AUTH-SERVICE] Throw RpcBadRequestException:',
-          ERROR_MESSAGE.EMAIL_ALREADY_EXISTS,
+        this.logger.warn(
+          `User already exists with verified status: ${dto.email}`,
+          {
+            method: 'sendRegisterOtp',
+            endpoint: 'auth/register',
+            additionalData: { email: dto.email, status: user.status },
+          },
         );
         throw new RpcBadRequestException(ERROR_MESSAGE.EMAIL_ALREADY_EXISTS);
       }
-      // Nếu user UNVERIFIED thì tiếp tục tạo OTP mới cho user này
+      // If user is UNVERIFIED, continue to create new OTP
     } else {
       user = await this.authRepository.createUser({
         email: dto.email,
@@ -86,25 +71,39 @@ export class AuthService implements OnModuleInit {
         username: dto.email,
       });
     }
-    const otp = await this.redisService.createForgotOtp(
-      dto.email,
-      OTP_PURPOSE.EMAIL_VERIFICATION,
-      this.parseTTL(this.configService.get<string>('OTP_TTL') || '300'),
-    );
-    // Gửi message sang notification-service
-    console.log('[AUTH-SERVICE] Emit notification', {
-      topic: KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
-      payload: { email: dto.email, otp: otp },
+
+    const otp = await this.authOtpService.createEmailVerificationOtp(dto.email);
+
+    // Send message to notification service
+    this.logger.info(`Sending registration OTP notification for ${dto.email}`, {
+      method: 'sendRegisterOtp',
+      endpoint: 'auth/register',
+      additionalData: {
+        email: dto.email,
+        topic: KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
+      },
     });
+
     this.notificationClient
       .emit(KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL, {
         email: dto.email,
         otp: otp,
       })
       .subscribe({
-        next: (res) => console.log('[AUTH-SERVICE] Emit result:', res),
-        error: (err) => console.error('[AUTH-SERVICE] Emit error:', err),
+        next: (res) =>
+          this.logger.logKafkaMessage(
+            KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
+            { email: dto.email, otp },
+            res,
+          ),
+        error: (err) =>
+          this.logger.logKafkaError(
+            KAFKA_PATTERNS.NOTIFICATION_VERIFY_REGISTER_EMAIL,
+            { email: dto.email, otp },
+            err,
+          ),
       });
+
     return {};
   }
 
@@ -115,60 +114,41 @@ export class AuthService implements OnModuleInit {
         ERROR_MESSAGE.USER_NOT_FOUND_OR_NOT_UNVERIFIED,
       );
     }
-    const otp = await this.redisService.getOtp(
-      dto.email,
-      OTP_PURPOSE.EMAIL_VERIFICATION,
-    );
-    await this.checkOtpOrThrow(
+
+    await this.authOtpService.verifyOtp(
       dto.email,
       dto.otp,
       OTP_PURPOSE.EMAIL_VERIFICATION,
     );
+
     const updatedUser = await this.authRepository.updateUser(user.id, {
       username: dto.username,
       password: dto.password,
       status: USER_STATUS.VERIFIED,
     });
-    await this.redisService.deleteOtp(
+
+    await this.authOtpService.deleteOtp(
       dto.email,
       OTP_PURPOSE.EMAIL_VERIFICATION,
-      otp.otp,
+      dto.otp,
     );
+
     const payload: JwtPayload = {
       sub: updatedUser.id,
       email: updatedUser.email,
       roles: updatedUser.roles,
       username: updatedUser.username,
     };
-    const {
-      accessToken,
-      expiresIn: accessTokenExpiresIn,
-      jti: atJti,
-    } = this.customJwtService.createAT(payload);
-    const {
-      refreshToken,
-      expiresIn: refreshTokenExpiresIn,
-      jti: rtJti,
-    } = this.customJwtService.createRT(payload);
-    // Lưu jti vào Redis
-    await this.redisService.setJti(atJti, this.parseTTL(accessTokenExpiresIn));
-    await this.redisService.setJti(rtJti, this.parseTTL(refreshTokenExpiresIn));
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      atJti,
-      this.parseTTL(accessTokenExpiresIn),
-    );
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      rtJti,
-      this.parseTTL(refreshTokenExpiresIn),
-    );
-    return {
-      accessToken,
-      refreshToken,
-      accessTokenExpiresIn,
-      refreshTokenExpiresIn,
-    };
+
+    const tokens = await this.authTokenService.createTokens(payload);
+
+    this.logger.info(`User registration completed successfully: ${dto.email}`, {
+      method: 'completeRegister',
+      endpoint: 'auth/complete-register',
+      userId: updatedUser.id,
+    });
+
+    return tokens;
   }
 
   async login(dto: LoginDto) {
@@ -176,259 +156,227 @@ export class AuthService implements OnModuleInit {
     if (!user) {
       throw new RpcNotFoundException(ERROR_MESSAGE.USER_NOT_FOUND);
     }
+
     if (!user.password || dto.password !== user.password) {
       throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_PASSWORD);
     }
-    if (user.status !== USER_STATUS.VERIFIED)
+
+    if (user.status !== USER_STATUS.VERIFIED) {
       throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
+    }
+
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       roles: user.roles,
       username: user.username,
     };
-    const {
-      accessToken,
-      expiresIn: accessTokenExpiresIn,
-      jti: atJti,
-    } = this.customJwtService.createAT(payload);
-    const {
-      refreshToken,
-      expiresIn: refreshTokenExpiresIn,
-      jti: rtJti,
-    } = this.customJwtService.createRT(payload);
-    // Lưu jti vào Redis
-    await this.redisService.setJti(atJti, this.parseTTL(accessTokenExpiresIn));
-    await this.redisService.setJti(rtJti, this.parseTTL(refreshTokenExpiresIn));
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      atJti,
-      this.parseTTL(accessTokenExpiresIn),
-    );
-    await this.redisService.addJtiToUserSet(
-      user.id,
-      rtJti,
-      this.parseTTL(refreshTokenExpiresIn),
-    );
-    return {
-      accessToken,
-      refreshToken,
-      accessTokenExpiresIn,
-      refreshTokenExpiresIn,
-    };
+
+    const tokens = await this.authTokenService.createTokens(payload);
+
+    this.logger.info(`User login successful: ${dto.email}`, {
+      method: 'login',
+      endpoint: 'auth/login',
+      userId: user.id,
+    });
+
+    return tokens;
   }
 
   async refreshToken(dto: RefreshTokenDto) {
     try {
-      const payload = this.customJwtService.verify<JwtPayload>(
+      const tokens = await this.authTokenService.refreshAccessToken(
         dto.refreshToken,
       );
-      const user = await this.authRepository.findUserById(payload.sub);
-      if (!user) throw new RpcNotFoundException(ERROR_MESSAGE.USER_NOT_FOUND);
-      const newPayload: JwtPayload = {
-        sub: user.id,
-        email: user.email,
-        roles: user.roles,
-        username: user.username,
-      };
-      const {
-        accessToken,
-        expiresIn: accessTokenExpiresIn,
-        jti: atJti,
-      } = this.customJwtService.createAT(newPayload);
-      // Lưu jti của access token mới vào Redis
-      await this.redisService.setJti(
-        atJti,
-        this.parseTTL(accessTokenExpiresIn),
-      );
-      await this.redisService.addJtiToUserSet(
-        user.id,
-        atJti,
-        this.parseTTL(accessTokenExpiresIn),
-      );
+
+      this.logger.info(`Token refreshed successfully`, {
+        method: 'refreshToken',
+        endpoint: 'auth/refresh',
+      });
+
       return {
-        accessToken,
-        refreshToken: dto.refreshToken, // giữ nguyên RT cũ
-        accessTokenExpiresIn,
+        ...tokens,
+        refreshToken: dto.refreshToken, // Keep old refresh token
       };
-    } catch {
+    } catch (error) {
+      this.logger.error('Token refresh failed', {
+        method: 'refreshToken',
+        endpoint: 'auth/refresh',
+        additionalData: { error: error.message },
+      });
       throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_REFRESH_TOKEN);
     }
   }
 
-  /**
-   * Logout phiên hiện tại: nhận accessToken, decode lấy jti và userId, xóa khỏi Redis
-   */
   async logout(accessToken: string) {
     try {
-      const payload = this.customJwtService.verify<JwtPayload>(accessToken);
-      //Đoạn này để debug
-      if (!payload.jti) {
-        throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_MISSING_JTI);
-      }
-      await this.redisService.delJti(payload.jti);
-      await this.redisService.removeJtiFromUserSet(payload.sub, payload.jti);
+      await this.authTokenService.logout(accessToken);
       return {};
-    } catch (e) {
-      return { message: 'Logout failed: ' + (e.message || e) };
+    } catch (error) {
+      this.logger.error('Logout failed', {
+        method: 'logout',
+        endpoint: 'auth/logout',
+        additionalData: { error: error.message },
+      });
+      return { message: 'Logout failed: ' + (error.message || error) };
     }
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
     await this.getUserByEmailOrThrow(dto.email);
-    const ttl = parseInt(
-      this.configService.get<string>('FORGOT_OTP_TTL') || '300',
-      10,
+
+    const otp = await this.authOtpService.createForgotPasswordOtp(dto.email);
+
+    // Send message to notification service
+    this.logger.info(
+      `Sending forgot password OTP notification for ${dto.email}`,
+      {
+        method: 'forgotPassword',
+        endpoint: 'auth/forgot-password',
+        additionalData: {
+          email: dto.email,
+          topic: KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD,
+        },
+      },
     );
-    // Tạo OTP mới, xóa OTP cũ nếu có, đảm bảo không trùng toàn hệ thống
-    const otp = await this.redisService.createForgotOtp(
-      dto.email,
-      OTP_PURPOSE.FORGOT_PASSWORD,
-      ttl,
-    );
-    // Gửi message sang notification-service
+
     this.notificationClient.emit(KAFKA_PATTERNS.NOTIFICATION_FORGOT_PASSWORD, {
       email: dto.email,
       otp,
     });
+
     return {};
   }
 
   async verifyRegister(dto: VerifyRegisterDto) {
     const user = await this.getUserByEmailOrThrow(dto.email);
-    await this.checkOtpOrThrow(
+
+    await this.authOtpService.verifyOtp(
       dto.email,
       dto.otp,
       OTP_PURPOSE.EMAIL_VERIFICATION,
     );
+
     await this.authRepository.updateUser(user.id, {
       status: USER_STATUS.VERIFIED,
     });
+
+    this.logger.info(`User email verified successfully: ${dto.email}`, {
+      method: 'verifyRegister',
+      endpoint: 'auth/verify-register',
+      userId: user.id,
+    });
+
     return {};
   }
 
   async verifyForgotPassword(dto: VerifyForgotPasswordDto) {
-    const otpData = await this.redisService.getOtp(
+    await this.authOtpService.verifyOtp(
       dto.email,
+      dto.otp,
       OTP_PURPOSE.FORGOT_PASSWORD,
     );
-    if (!otpData) throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    if (otpData.otp !== dto.otp)
-      throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    if (otpData.status !== OTP_STATUS.CREATED)
-      throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
-    await this.redisService.updateOtpStatus(
+
+    await this.authOtpService.updateOtpStatus(
       dto.email,
       OTP_PURPOSE.FORGOT_PASSWORD,
       OTP_STATUS.VERIFIED,
     );
+
+    this.logger.info(
+      `Forgot password OTP verified successfully: ${dto.email}`,
+      {
+        method: 'verifyForgotPassword',
+        endpoint: 'auth/verify-forgot-password',
+        additionalData: { email: dto.email },
+      },
+    );
+
     return {};
   }
 
   async updatePassword(dto: UpdatePasswordDto) {
-    const otpData = await this.redisService.getOtp(
+    await this.authOtpService.verifyOtp(
       dto.email,
+      dto.otp,
       OTP_PURPOSE.FORGOT_PASSWORD,
     );
-    if (!otpData) throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    if (otpData.otp !== dto.otp)
-      throw new RpcBadRequestException(ERROR_MESSAGE.INVALID_OTP);
-    if (otpData.status !== OTP_STATUS.VERIFIED)
-      throw new RpcBadRequestException(ERROR_MESSAGE.OTP_EXPIRED);
-    // Đổi mật khẩu
+
     const user = await this.getUserByEmailOrThrow(dto.email);
+
     await this.authRepository.updateUser(user.id, {
       password: dto.newPassword,
     });
-    // Xóa OTP khỏi Redis
-    await this.redisService.deleteOtp(
+
+    await this.authOtpService.deleteOtp(
       dto.email,
       OTP_PURPOSE.FORGOT_PASSWORD,
       dto.otp,
     );
-    // Revoke toàn bộ token cũ
-    await this.redisService.revokeAllUserJtis(user.id);
+
+    // Revoke all old tokens
+    await this.authTokenService.logoutAllByUserId(user.id);
+
+    this.logger.info(`Password updated successfully for user: ${dto.email}`, {
+      method: 'updatePassword',
+      endpoint: 'auth/update-password',
+      userId: user.id,
+    });
+
     return {};
   }
 
   async logoutAllByUserId(userId: string) {
     try {
-      const jtis = await this.redisService.getUserJtis(userId);
-      for (const jti of jtis) {
-        await this.redisService.delJti(jti);
-      }
-      await this.redisService.revokeAllUserJtis(userId);
+      await this.authTokenService.logoutAllByUserId(userId);
       return {};
-    } catch (e) {
-      return { message: 'Logout all failed: ' + (e.message || e) };
+    } catch (error) {
+      this.logger.error('Logout all failed', {
+        method: 'logoutAllByUserId',
+        endpoint: 'auth/logout-all',
+        userId,
+        additionalData: { error: error.message },
+      });
+      return { message: 'Logout all failed: ' + (error.message || error) };
     }
-  }
-
-  // Helper để parse TTL từ chuỗi (15m, 7d, ...) lẽ ra nên xài thư viện ms cơ mà thôi tự viết cho nhanh hehe
-  private parseTTL(str: string): number {
-    if (str.endsWith('m')) return parseInt(str) * 60;
-    if (str.endsWith('h')) return parseInt(str) * 60 * 60;
-    if (str.endsWith('d')) return parseInt(str) * 60 * 60 * 24;
-    return parseInt(str);
   }
 
   /**
-   * Verify token và trả về user payload
-   * Được gọi từ API Gateway để verify token
+   * Verify token and return user payload
+   * Called from API Gateway to verify token
    */
   async verifyToken(token: string) {
-    if (!token || typeof token !== 'string') {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN);
-    }
-
-    let payload: JwtPayload;
-
     try {
-      // Verify token với secret key trước
-      payload = this.customJwtService.verify<JwtPayload>(token);
+      const payload = await this.authTokenService.verifyToken(token);
+
+      // Check if user exists and is active
+      const user = await this.authRepository.findUserById(payload.sub);
+      if (!user) {
+        throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_FOUND);
+      }
+
+      // Check user status
+      if (user.status !== USER_STATUS.VERIFIED) {
+        throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
+      }
+
+      // Return enriched payload with user information
+      return {
+        sub: user.id,
+        email: user.email,
+        username: user.username,
+        roles: user.roles,
+        jti: payload.jti,
+        iat: payload.iat,
+        exp: payload.exp,
+      };
     } catch (error) {
-      console.error('Token verification failed:', error);
+      this.logger.error('Token verification failed', {
+        method: 'verifyToken',
+        endpoint: 'auth/verify-token',
+        additionalData: { error: error.message },
+      });
       throw new RpcUnauthorizedException(ERROR_MESSAGE.INVALID_TOKEN);
     }
-
-    // Kiểm tra payload có hợp lệ không
-    if (
-      !payload ||
-      typeof payload !== 'object' ||
-      !payload.jti ||
-      !payload.sub
-    ) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.TOKEN_MISSING_JTI);
-    }
-
-    // Kiểm tra JTI trong Redis (token có bị revoke không)
-    const isJtiValid = await this.redisService.isJtiValid(payload.jti);
-    if (!isJtiValid) {
-      throw new RpcUnauthorizedException(
-        ERROR_MESSAGE.TOKEN_EXPIRED_OR_REVOKED,
-      );
-    }
-
-    // Kiểm tra user có tồn tại và active không
-    const user = await this.authRepository.findUserById(payload.sub);
-    if (!user) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_FOUND);
-    }
-
-    // Kiểm tra user status
-    if (user.status !== USER_STATUS.VERIFIED) {
-      throw new RpcUnauthorizedException(ERROR_MESSAGE.USER_NOT_VERIFIED);
-    }
-
-    // Trả về payload đã được verify và enriched với thông tin user
-    return {
-      sub: user.id,
-      email: user.email,
-      username: user.username,
-      roles: user.roles,
-      jti: payload.jti,
-      iat: payload.iat,
-      exp: payload.exp,
-    };
   }
 }

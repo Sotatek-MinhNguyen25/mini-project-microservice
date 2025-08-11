@@ -5,6 +5,7 @@ import { KafkaModule } from './common/kafka/kafka.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { PrismaModule } from './common/prisma/prisma.module';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
     SocketModule,
     PrismaModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule {}

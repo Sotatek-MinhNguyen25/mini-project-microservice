@@ -6,18 +6,21 @@ import { UploadGatewayModule } from './modules/upload/upload-gateway.module';
 import { NotificationGatewayModule } from './modules/notification/notification-gateway.module';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { UserGatewayModule } from './modules/user/user-gateway.module';
-
 import { TagGatewayModule } from './modules/tag/tag-gateway.module';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthRemoteGuard } from './common/jwt';
-import { RolesGuard } from './common/roles/role.guard';
 import { CommentGatewayModule } from './modules/comment/comment-gateway.module';
 import { JwtRemoteModule } from './common/jwt/jwt-remote.module';
+import { CommonModule } from './common/common.module';
 import { AppController } from './app.controller';
+import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
+import { JwtAuthRemoteGuard } from './common/jwt';
+import { RolesGuard } from './common/roles/role.guard';
+import { RequestCounterInterceptor } from './common/interceptor/request-counter.interceptor';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 @Module({
   imports: [
     ConfigModule,
+    CommonModule,
     AuthGatewayModule,
     PostGatewayModule,
     TagGatewayModule,
@@ -37,6 +40,14 @@ import { AppController } from './app.controller';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestCounterInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })

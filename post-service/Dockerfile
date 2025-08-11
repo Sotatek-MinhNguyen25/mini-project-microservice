@@ -37,7 +37,7 @@ RUN pnpm run build
 
 # Khai báo cổng mà ứng dụng sẽ lắng nghe.
 # Cổng 8084 được sử dụng trong ví dụ này.
-EXPOSE 8084
+EXPOSE 3002
 
 # Lệnh mặc định để chạy ứng dụng khi container khởi động.
 # Sử dụng 'start:prod' để chạy phiên bản đã được build.

@@ -14,7 +14,7 @@ import { MailController } from './mail.controller';
       envFilePath: [path.resolve(process.cwd(), '.env.kafka'), path.resolve(process.cwd(), '.env')],
       load: [mailConfig, kafkaConfig],
       validationSchema: Joi.object({
-        KAFKA_BROKERS: Joi.string().required(),
+        KAFKA_BROKER: Joi.string().required(),
 
         MAILTRAP_HOST: Joi.string().required(),
         MAILTRAP_PORT: Joi.number().required(),

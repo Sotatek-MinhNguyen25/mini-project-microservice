@@ -23,7 +23,6 @@ export class UserKafkaController {
 
   @MessagePattern(KAFKA_PATTERNS.USER_FIND_IDS)
   async findUsersByIds(@Payload() dto: FindUserByIdsDto) {
-    console.log(dto);
     return await this.userService.findUserByIds(dto);
   }
 
@@ -39,7 +38,6 @@ export class UserKafkaController {
 
   @MessagePattern(KAFKA_PATTERNS.USER_DELETE)
   async deleteUser(@Payload() payload: string) {
-    console.log(payload);
     return await this.userService.deleteUser(payload);
   }
 

@@ -7,6 +7,8 @@ import { CustomJwtModule } from '../jwt/custom-jwt.module';
 import { RedisModule } from '../redis/redis.module';
 import { AuthKafkaController } from './auth-kafka.controller';
 import { KafkaModule } from '../kafka/kafka.module';
+import { AuthOtpService } from './services/auth-otp.service';
+import { AuthTokenService } from './services/auth-token.service';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { KafkaModule } from '../kafka/kafka.module';
     KafkaModule.register(['notification']),
   ],
   controllers: [AuthController, AuthKafkaController],
-  providers: [AuthService, AuthRepository],
-  exports: [AuthService, AuthRepository],
+  providers: [AuthService, AuthRepository, AuthOtpService, AuthTokenService],
+  exports: [AuthService, AuthRepository, AuthOtpService, AuthTokenService],
 })
 export class AuthModule {}

@@ -10,5 +10,5 @@ COPY . .
 RUN npx prisma generate
 RUN pnpm run build
 
-EXPOSE 8082
+EXPOSE 8006
 CMD ["pnpm", "run", "start:prod"] 

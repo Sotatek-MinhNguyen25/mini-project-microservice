@@ -5,7 +5,7 @@ dotenv.config();
 
 export default registerAs('kafka', () => ({
   kafka: {
-    brokers: process.env.KAFKA_BROKERS,
+    brokers: process.env.KAFKA_BROKER,
     clientId: 'mail-service',
     groupId: 'mail-group',
     topic: 'mail-topic',

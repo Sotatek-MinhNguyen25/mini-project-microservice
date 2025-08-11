@@ -14,5 +14,5 @@ COPY . .
 
 RUN pnpm run build
 
-EXPOSE 8082
+EXPOSE 3005
 CMD ["pnpm", "run", "start:prod"]

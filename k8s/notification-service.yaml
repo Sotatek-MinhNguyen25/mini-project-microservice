@@ -16,7 +16,7 @@ spec:
         - name: notification-service
           image: xinchaoduyanh2/notification-service:latest
           ports:
-            - containerPort: 3002
+            - containerPort: 8006
           resources:
             limits:
               memory: "1Gi"
@@ -27,14 +27,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 3002
+              port: 8006
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
-              port: 3002
+              port: 8006
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 3
@@ -53,6 +53,6 @@ spec:
     app: notification-service
   ports:
     - protocol: TCP
-      port: 3002
-      targetPort: 3002
+      port: 8006
+      targetPort: 8006
   type: ClusterIP
