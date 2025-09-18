@@ -48,7 +48,7 @@ export class HealthService {
    */
   private checkMemoryHealth(): boolean {
     const memoryUsage = process.memoryUsage();
-    const memoryThreshold = 1024 * 1024 * 1024; // 1GB threshold
+    const memoryThreshold = 1024 * 1024 * 1024; // 1GB threshold1111111
 
     return memoryUsage.heapUsed < memoryThreshold;
   }
